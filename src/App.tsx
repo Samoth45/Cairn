@@ -11,6 +11,7 @@ import { needsElevation } from './lib/elevation';
 import { selectWeatherPoints } from './lib/weatherPoints';
 import { useWeather } from './hooks/useWeather';
 import { WeatherPanel } from './components/WeatherPanel';
+import { WeatherView } from './components/WeatherView';
 import { resolveHourIndex, type HourSelection } from './lib/forecast';
 import { isNightHour, sunTimes } from './lib/sun';
 import { dinDurationHours } from './lib/din';
@@ -66,6 +67,12 @@ export default function App() {
   }, []);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
+  /** Vue principale : carte ou tableau météo par altitude. */
+  const [mainView, setMainView] = useState<'map' | 'weather'>('map');
+  const openWeatherView = useCallback(() => {
+    setMainView('weather');
+    if (isMobile()) setPanelOpen(false);
+  }, []);
 
   const onElevationError = useCallback(
     (track: Track, message: string) =>
@@ -200,6 +207,8 @@ export default function App() {
   }
 
   const selElevationStatus = selectedTrack ? elevationStatus[selectedTrack.id] : undefined;
+  // Sans tracé sélectionné, l'onglet Météo n'a pas de sens : retour à la carte.
+  const view = selectedTrack ? mainView : 'map';
   const showProfile = Boolean(selectedTrack && analysis && selectedTrack.visible);
 
   return (
@@ -237,6 +246,7 @@ export default function App() {
               durationHours={durationHours}
               hourIndex={hourIndex}
               onSelectHour={setHourSelection}
+              onOpenTable={view === 'weather' ? undefined : () => openWeatherView()}
             />
           )
         }
@@ -255,13 +265,44 @@ export default function App() {
       {panelOpen && <div className="backdrop" onClick={() => setPanelOpen(false)} />}
 
       <main className="map-wrap">
-        <div className="map-area">
-          <button type="button" className="panel-toggle" onClick={() => setPanelOpen(true)} aria-label="Ouvrir la liste des tracés">
-            <CairnLogo size={22} />
-            <span>Cairn</span>
-            <span className="count">{tracks.length}</span>
+        <button type="button" className="panel-toggle" onClick={() => setPanelOpen(true)} aria-label="Ouvrir la liste des tracés">
+          <CairnLogo size={22} />
+          <span>Cairn</span>
+          <span className="count">{tracks.length}</span>
+        </button>
+        <div className="view-tabs" role="tablist" aria-label="Vue">
+          <button type="button" role="tab" aria-selected={view === 'map'} className={view === 'map' ? 'active' : ''} onClick={() => setMainView('map')}>
+            🗺 Carte
           </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={view === 'weather'}
+            className={view === 'weather' ? 'active' : ''}
+            onClick={() => setMainView('weather')}
+            disabled={!selectedTrack}
+            title={selectedTrack ? 'Météo par altitude du tracé sélectionné' : 'Sélectionnez un tracé'}
+          >
+            🌡 Météo
+          </button>
+        </div>
+
+        {view === 'weather' && selectedTrack && (
+          <WeatherView
+            trackName={selectedTrack.name}
+            weather={weather}
+            model={weatherModel}
+            waitingForElevation={selectedNeedsElevation}
+            start={start}
+            hourIndex={hourIndex}
+            onSelectHour={setHourSelection}
+          />
+        )}
+
+        {/* La carte reste montée (état, tuiles) mais est masquée dans l'onglet Météo. */}
+        <div className="map-area" hidden={view !== 'map'}>
           <MapView
+            active={view === 'map'}
             tracks={tracks}
             selectedId={settings.selectedTrackId}
             baseLayer={settings.baseLayer}
@@ -281,7 +322,7 @@ export default function App() {
             </button>
           )}
         </div>
-        {showProfile && settings.showProfile && selectedTrack && analysis && (
+        {view === 'map' && showProfile && settings.showProfile && selectedTrack && analysis && (
           <ElevationProfile
             name={selectedTrack.name}
             color={selectedTrack.color}

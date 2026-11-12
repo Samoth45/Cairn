@@ -37,9 +37,12 @@ statistiques, météo détaillée par altitude pour choisir le meilleur jour / h
   de nuit signalées) et météo du point dans les infobulles des points météo de la carte.
   Corrections ensuite : marqueur « Point culminant » fusionné avec le point météo du sommet,
   marqueurs dans un pane au-dessus des tracés. Validée.
-- [ ] **Étape 4** — tableau heatmap météo par altitude (penser à griser les heures de nuit).
-  ← prochaine étape
-- [ ] Étape 5 — tracé coloré selon la prévision à l'heure de passage.
+- [x] **Étape 4** — onglets Carte / Météo ; vue `WeatherView` : 7 jours (pastille ⚠ si alerte),
+  heatmap points × heures 6 h–21 h (température bleu→rouge centrée sur 0, ressenti, flèche de
+  vent, 💧 > 0,2 mm, ⚡ orage), lignes temps / nébulosité / risque de pluie / isotherme / inversion,
+  badge « Inversion probable », alertes, heures de nuit grisées, clic sur une heure = heure
+  affichée sur la carte. **En attente de validation.**
+- [ ] **Étape 5** — tracé coloré selon la prévision à l'heure de passage. ← prochaine étape
 - [ ] Étape 6 — score « meilleur jour ».
 
 ## Idées pour après la fin des étapes
@@ -116,6 +119,9 @@ src/
                       jour, départ au plus tard = coucher − durée DIN, longerThanDay), isNightHour,
                       parisMinutes
     forecast.ts       HourSelection {key, index}, currentHourIndex, resolveHourIndex, formatForecastHour
+    weatherTable.ts   forecastDays, dayHourIndices (6–21 h), indexForDay, tempColor (+ TEMP_LEGEND),
+                      detectInversion / inversionExplanation, computeAlerts (rafales > 50 au sommet,
+                      orage, ressenti < −5, isotherme < sommet), formatHourRanges, summitIndex
     din.ts            dinDurationHours(distanceKm, D+, D-, speeds)
     settings.ts       normalizeSettings (valeurs par défaut + validation, base et sauvegarde)
     format.ts         formatage FR (km, m, durée « 5 h 15 », coordonnées, « – » si null)
@@ -132,7 +138,8 @@ src/
                       réseau, TTL 1 h ; peekTrackForecast ; deleteTrackForecast (appelé à la suppression)
   components/         MapView (fonds, polylines 3 couches, marqueurs sommet / survol / points météo,
                       AutoResize), FitBounds, Sidebar (zone défilante stats + météo + liste),
-                      TrackItem, TrackStats, WeatherPanel (+ bloc soleil), WeatherPointTooltip,
+                      TrackItem, TrackStats, WeatherPanel (+ bloc soleil, bouton vers le tableau),
+                      WeatherView (onglet Météo, heatmap), WeatherPointTooltip,
                       ElevationProfile (SVG), SettingsDialog, HoverMarker, DropZone, Toasts,
                       ErrorBoundary, CairnLogo
   App.tsx             orchestration : sélection, analyse mémoïsée du tracé sélectionné, zoom
@@ -185,6 +192,17 @@ samples/              GPX fictifs pour tests manuels (trk avec ele, rte sans ele
 - **Marqueur « Point culminant » = point météo « Sommet »** (mêmes coordonnées) : un seul
   marqueur (le noir), dont l'infobulle porte la météo ; le rond blanc du sommet n'est pas dessiné,
   sinon l'un masque l'autre au survol.
+- **Onglets Carte / Météo** (`mainView` dans App, forcé à `map` sans tracé sélectionné) : la
+  carte reste montée mais `hidden` ; `FitBounds` reçoit `active` et diffère le zoom tant que la
+  carte est masquée (sinon Leaflet calcule sur une taille nulle). Le profil n'est affiché qu'en vue Carte.
+- **Jour affiché dans le tableau = jour de l'heure sélectionnée** (une seule source de vérité :
+  `HourSelection`). Changer de jour garde la même heure (ou midi si hors 6–21 h). Pour l'étape 6
+  (« ouvrir la vue météo de ce tracé ce jour-là ») : sélectionner le tracé, `setMainView('weather')`
+  et une `HourSelection` sur ce jour (attention : la clé de prévision doit être celle du tracé).
+- **Inversion** : chaque point est comparé aux températures 850/700 hPa de sa propre maille ;
+  850 hPa seulement pour les points ≤ 1 300 m, 700 hPa pour les points ≤ 2 700 m, plus le cas
+  700 hPa > 850 hPa ; marge 1 °C ; la plus marquée est retenue. Lignes du haut du tableau et
+  alertes rafales/isotherme = point « Sommet ».
 - **Heure météo affichée** : état `HourSelection` dans App, lié à la clé de la prévision ; une
   sélection d'une autre prévision est ignorée → retour à l'heure courante au changement de tracé.
 - La sauvegarde/les paramètres anciens sont complétés par `normalizeSettings` : toujours

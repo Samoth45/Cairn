@@ -29,9 +29,20 @@ interface Props {
   /** Indice de l'heure affichée (null tant que la prévision n'est pas chargée). */
   hourIndex: number | null;
   onSelectHour: (selection: HourSelection | null) => void;
+  /** Ouvre le tableau par altitude (absent si déjà affiché). */
+  onOpenTable?: () => void;
 }
 
-export function WeatherPanel({ weather, model, waitingForElevation, start, durationHours, hourIndex, onSelectHour }: Props) {
+export function WeatherPanel({
+  weather,
+  model,
+  waitingForElevation,
+  start,
+  durationHours,
+  hourIndex,
+  onSelectHour,
+  onOpenTable,
+}: Props) {
   const { forecast, loading, error, refresh } = weather;
   const data = forecast?.data;
   const index = data && hourIndex !== null ? hourIndex : null;
@@ -62,6 +73,12 @@ export function WeatherPanel({ weather, model, waitingForElevation, start, durat
       </p>
 
       {sun && <SunBlock sun={sun} durationHours={durationHours} />}
+
+      {onOpenTable && !waitingForElevation && (
+        <button type="button" className="btn weather-open-table" onClick={onOpenTable}>
+          🌡 Tableau météo par altitude
+        </button>
+      )}
 
       {waitingForElevation ? (
         <p className="weather-info">En attente des altitudes du tracé…</p>

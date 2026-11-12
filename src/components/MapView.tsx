@@ -84,6 +84,8 @@ interface Props {
   forecast: CachedForecast | null;
   hourIndex: number | null;
   nightHour: boolean;
+  /** false quand la carte est masquée (onglet Météo). */
+  active: boolean;
   onSelect: (id: string) => void;
   onBaseLayerChange: (id: BaseLayerId) => void;
 }
@@ -103,6 +105,7 @@ export function MapView({
   forecast,
   hourIndex,
   nightHour,
+  active,
   onSelect,
   onBaseLayerChange,
 }: Props) {
@@ -163,7 +166,7 @@ export function MapView({
       <ZoomControl position="bottomright" />
       <ScaleControl position="bottomleft" imperial={false} />
       <BaseLayerWatcher onChange={onBaseLayerChange} />
-      <FitBounds request={fitRequest} />
+      <FitBounds request={fitRequest} active={active} />
       <AutoResize />
 
       {ordered.map((t) => {
