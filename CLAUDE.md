@@ -35,11 +35,27 @@ statistiques, météo détaillée par altitude pour choisir le meilleur jour / h
 - [x] **Étape 3bis** (ajoutée à la demande de l'utilisateur) — lever/coucher du soleil au départ
   (durée du jour, départ conseillé au plus tard, alerte si rando plus longue que le jour, heures
   de nuit signalées) et météo du point dans les infobulles des points météo de la carte.
-  **En attente de validation.**
+  Corrections ensuite : marqueur « Point culminant » fusionné avec le point météo du sommet,
+  marqueurs dans un pane au-dessus des tracés. Validée.
 - [ ] **Étape 4** — tableau heatmap météo par altitude (penser à griser les heures de nuit).
   ← prochaine étape
 - [ ] Étape 5 — tracé coloré selon la prévision à l'heure de passage.
 - [ ] Étape 6 — score « meilleur jour ».
+
+## Idées pour après la fin des étapes
+
+À ne pas implémenter avant que les étapes 1 à 6 soient terminées (décision de l'utilisateur).
+
+- **Simplification des tracés très denses à l'import** (traces Strava, montres GPS : ~1 point/s,
+  ex. 30 000 points pour 23 km). Supprimer les points quasi alignés (type Douglas-Peucker,
+  tolérance de quelques mètres, en tenant compte de l'altitude) → typiquement 2 000–3 000 points
+  sans différence visible. But : alléger IndexedDB, la sauvegarde JSON et le dessin de la carte
+  (le temps de calcul n'est pas un problème : ~60 ms pour 30 000 points).
+  Garde-fou : calculer l'empreinte (`id`) sur le fichier d'origine **avant** simplification,
+  pour que le dédoublonnage continue de fonctionner.
+  Contexte : le cas d'usage principal est la préparation de randos à partir de GPX légers de
+  sites de randonnée ; les traces Strava (rando déjà faite, partagée par quelqu'un) sont secondaires.
+  Leur profil paraît plus lisse (altitude barométrique/corrigée par Strava, points denses) : normal.
 
 ## Commandes
 
