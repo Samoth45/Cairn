@@ -1,6 +1,6 @@
 import Dexie, { type EntityTable } from 'dexie';
 import type { Settings, Track } from '../types';
-import { DEFAULT_SETTINGS } from '../types';
+import { normalizeSettings } from '../lib/settings';
 
 interface SettingsRow extends Settings {
   key: 'app';
@@ -17,13 +17,10 @@ db.version(1).stores({
 });
 
 export async function getSettings(): Promise<Settings> {
-  const row = await db.settings.get('app');
-  if (!row) return { ...DEFAULT_SETTINGS };
-  const { baseLayer, selectedTrackId } = row;
-  return { ...DEFAULT_SETTINGS, baseLayer, selectedTrackId };
+  return normalizeSettings(await db.settings.get('app'));
 }
 
 export async function updateSettings(patch: Partial<Settings>): Promise<void> {
   const current = await getSettings();
-  await db.settings.put({ ...current, ...patch, key: 'app' });
+  await db.settings.put({ ...normalizeSettings({ ...current, ...patch }), key: 'app' });
 }

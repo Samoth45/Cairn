@@ -1,5 +1,5 @@
 import type { BackupFile, Point, Settings, Track } from '../types';
-import { DEFAULT_SETTINGS } from '../types';
+import { normalizeSettings } from './settings';
 
 export function buildBackup(tracks: Track[], settings: Settings, now = new Date()): BackupFile {
   return { app: 'cairn', version: 1, exportedAt: now.toISOString(), tracks, settings };
@@ -62,10 +62,10 @@ export function parseBackup(text: string): BackupFile {
     fileName: typeof t.fileName === 'string' ? t.fileName : '',
     createdAt: typeof t.createdAt === 'number' ? t.createdAt : now + i,
     segments: t.segments.map((s) => s.map((p): Point => [p[0], p[1], p[2] ?? null])),
+    ...(t.elevationSource === 'gpx' || t.elevationSource === 'dem' ? { elevationSource: t.elevationSource } : {}),
   }));
 
-  const settings: Settings = { ...DEFAULT_SETTINGS, ...(d.settings ?? {}) };
-  if (settings.baseLayer !== 'ign' && settings.baseLayer !== 'otm') settings.baseLayer = 'ign';
+  const settings: Settings = normalizeSettings(d.settings);
 
   return { app: 'cairn', version: 1, exportedAt: String(d.exportedAt ?? ''), tracks, settings };
 }

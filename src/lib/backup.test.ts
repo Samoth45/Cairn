@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { BackupError, backupFileName, buildBackup, mergeTracks, parseBackup } from './backup';
-import type { Track } from '../types';
+import { DEFAULT_SETTINGS, type Track } from '../types';
 
 const track = (id: string, name = id): Track => ({
   id,
@@ -19,10 +19,16 @@ const track = (id: string, name = id): Track => ({
 
 describe('sauvegarde', () => {
   it('fait un aller-retour export → import', () => {
-    const backup = buildBackup([track('a'), track('b')], { baseLayer: 'otm', selectedTrackId: 'b' });
+    const settings = { ...DEFAULT_SETTINGS, baseLayer: 'otm' as const, selectedTrackId: 'b', din: { flatKmh: 5, ascentMh: 400, descentMh: 600 } };
+    const backup = buildBackup([track('a'), { ...track('b'), elevationSource: 'dem' }], settings);
     const parsed = parseBackup(JSON.stringify(backup));
     expect(parsed.tracks).toEqual(backup.tracks);
-    expect(parsed.settings).toEqual({ baseLayer: 'otm', selectedTrackId: 'b' });
+    expect(parsed.settings).toEqual(settings);
+  });
+
+  it('complète les paramètres absents d’une ancienne sauvegarde', () => {
+    const parsed = parseBackup(JSON.stringify({ app: 'cairn', tracks: [], settings: { baseLayer: 'otm' } }));
+    expect(parsed.settings).toEqual({ ...DEFAULT_SETTINGS, baseLayer: 'otm' });
   });
 
   it('rejette un fichier qui n’est pas une sauvegarde Cairn', () => {

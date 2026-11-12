@@ -1,7 +1,12 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTracks } from './hooks/useTracks';
+import { useElevationFetcher } from './hooks/useElevationFetcher';
 import { MapView } from './components/MapView';
 import { Sidebar } from './components/Sidebar';
+import { TrackStats } from './components/TrackStats';
+import { ElevationProfile } from './components/ElevationProfile';
+import { SettingsDialog } from './components/SettingsDialog';
+import { analyzeTrack } from './lib/stats';
 import { DropZone } from './components/DropZone';
 import { Toasts, type Toast } from './components/Toasts';
 import { CairnLogo } from './components/CairnLogo';
@@ -50,6 +55,18 @@ export default function App() {
   const fitTo = useCallback((bounds: Bounds | null) => {
     if (bounds) setFitRequest({ bounds, nonce: Date.now() });
   }, []);
+
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  const onElevationError = useCallback(
+    (track: Track, message: string) =>
+      pushToast({ kind: 'error', title: `Altitudes non récupérées pour « ${track.name} »`, details: [message] }),
+    [pushToast],
+  );
+  const { elevationStatus, retryElevation } = useElevationFetcher(tracks, onElevationError);
+
+  const selectedTrack = tracks?.find((t) => t.id === settings?.selectedTrackId);
+  const analysis = useMemo(() => (selectedTrack ? analyzeTrack(selectedTrack.segments) : null), [selectedTrack]);
 
   const selectTrack = useCallback(
     (id: string) => {
@@ -144,12 +161,33 @@ export default function App() {
     initialBounds.current = selected ? trackBounds(selected.segments) : boundsOf(tracks.filter((t) => t.visible));
   }
 
+  const selElevationStatus = selectedTrack ? elevationStatus[selectedTrack.id] : undefined;
+  const showProfile = Boolean(selectedTrack && analysis && selectedTrack.visible);
+
   return (
     <div className="app">
       <Sidebar
         open={panelOpen}
         tracks={tracks}
         selectedId={settings.selectedTrackId}
+        statsPanel={
+          selectedTrack &&
+          analysis && (
+            <TrackStats
+              track={selectedTrack}
+              stats={analysis.stats}
+              din={settings.din}
+              elevationStatus={selElevationStatus}
+              onRetryElevation={() => retryElevation(selectedTrack.id)}
+              onShowSummit={() => {
+                const s = analysis.stats.summit;
+                if (s) fitTo([[s.lat, s.lon], [s.lat, s.lon]]);
+                if (isMobile()) setPanelOpen(false);
+              }}
+            />
+          )
+        }
+        onOpenSettings={() => setSettingsOpen(true)}
         onClose={() => setPanelOpen(false)}
         onImportGpx={handleImportGpx}
         onExportBackup={handleExport}
@@ -163,21 +201,52 @@ export default function App() {
       {panelOpen && <div className="backdrop" onClick={() => setPanelOpen(false)} />}
 
       <main className="map-wrap">
-        <button type="button" className="panel-toggle" onClick={() => setPanelOpen(true)} aria-label="Ouvrir la liste des tracés">
-          <CairnLogo size={22} />
-          <span>Cairn</span>
-          <span className="count">{tracks.length}</span>
-        </button>
-        <MapView
-          tracks={tracks}
-          selectedId={settings.selectedTrackId}
-          baseLayer={settings.baseLayer}
-          initialBounds={initialBounds.current}
-          fitRequest={fitRequest}
-          onSelect={selectTrack}
-          onBaseLayerChange={(id) => void setSettings({ baseLayer: id })}
-        />
+        <div className="map-area">
+          <button type="button" className="panel-toggle" onClick={() => setPanelOpen(true)} aria-label="Ouvrir la liste des tracés">
+            <CairnLogo size={22} />
+            <span>Cairn</span>
+            <span className="count">{tracks.length}</span>
+          </button>
+          <MapView
+            tracks={tracks}
+            selectedId={settings.selectedTrackId}
+            baseLayer={settings.baseLayer}
+            initialBounds={initialBounds.current}
+            fitRequest={fitRequest}
+            summit={analysis?.stats.summit ?? null}
+            onSelect={selectTrack}
+            onBaseLayerChange={(id) => void setSettings({ baseLayer: id })}
+          />
+          {showProfile && !settings.showProfile && (
+            <button type="button" className="profile-open" onClick={() => void setSettings({ showProfile: true })}>
+              ⛰ Profil
+            </button>
+          )}
+        </div>
+        {showProfile && settings.showProfile && selectedTrack && analysis && (
+          <ElevationProfile
+            name={selectedTrack.name}
+            color={selectedTrack.color}
+            profile={analysis.profile}
+            placeholder={
+              selElevationStatus === 'loading'
+                ? 'Récupération des altitudes…'
+                : selElevationStatus === 'error'
+                  ? 'Altitudes indisponibles'
+                  : undefined
+            }
+            onClose={() => void setSettings({ showProfile: false })}
+          />
+        )}
       </main>
+
+      {settingsOpen && (
+        <SettingsDialog
+          din={settings.din}
+          onSave={(din) => void setSettings({ din })}
+          onClose={() => setSettingsOpen(false)}
+        />
+      )}
 
       <DropZone onFiles={handleImportGpx} />
       <Toasts toasts={toasts} onDismiss={dismissToast} />

@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, type ReactNode } from 'react';
 import type { Track } from '../types';
 import { TrackItem } from './TrackItem';
 import { CairnLogo } from './CairnLogo';
@@ -7,7 +7,10 @@ interface Props {
   open: boolean;
   tracks: Track[];
   selectedId?: string;
+  /** Statistiques du tracé sélectionné. */
+  statsPanel?: ReactNode;
   onClose: () => void;
+  onOpenSettings: () => void;
   onImportGpx: (files: File[]) => void;
   onExportBackup: () => void;
   onImportBackup: (file: File) => void;
@@ -27,6 +30,9 @@ export function Sidebar(p: Props) {
       <header className="sidebar-header">
         <CairnLogo />
         <h1>Cairn</h1>
+        <button type="button" className="icon-btn" onClick={p.onOpenSettings} aria-label="Paramètres" title="Paramètres">
+          ⚙
+        </button>
         <button type="button" className="icon-btn close-panel" onClick={p.onClose} aria-label="Fermer le panneau">
           ✕
         </button>
@@ -49,6 +55,8 @@ export function Sidebar(p: Props) {
           }}
         />
       </div>
+
+      {p.statsPanel}
 
       <div className="track-list-header">
         <span>Tracés</span>

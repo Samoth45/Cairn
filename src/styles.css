@@ -40,9 +40,16 @@ button {
 }
 
 .map-wrap {
-  position: relative;
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.map-area {
+  position: relative;
+  flex: 1;
+  min-height: 0;
 }
 
 .map {
@@ -302,7 +309,7 @@ button {
 .toasts {
   position: fixed;
   right: 12px;
-  bottom: 24px;
+  top: 64px;
   z-index: 2500;
   display: flex;
   flex-direction: column;
@@ -404,7 +411,289 @@ button {
   .toasts {
     left: 12px;
     right: 12px;
-    bottom: 12px;
+    top: 60px;
     max-width: none;
+  }
+}
+
+/* ---------- Statistiques du tracé sélectionné ---------- */
+.stats {
+  margin: 0 12px 10px;
+  padding: 10px 12px 8px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+}
+
+.stats-title {
+  margin: 0 0 8px;
+  padding-left: 8px;
+  border-left: 4px solid;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px 12px;
+  margin: 0;
+}
+
+.stats-grid dt,
+.stats-label {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stats-grid dd {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.stats-summit {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 8px;
+  font-size: 0.85rem;
+}
+
+.stats-source {
+  margin: 8px 0 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--accent);
+  text-align: left;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  font-variant-numeric: tabular-nums;
+}
+
+.link-btn:hover {
+  text-decoration-color: currentColor;
+}
+
+.spinner-text::before {
+  content: '';
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 6px;
+  border: 2px solid var(--muted);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  vertical-align: -1px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- Profil altimétrique ---------- */
+.profile {
+  height: 190px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border-top: 1px solid var(--border);
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px 0 14px;
+  font-size: 0.85rem;
+  min-height: 30px;
+}
+
+.profile-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.profile-name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-readout {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.profile-chart {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+.profile-chart svg {
+  display: block;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.profile-chart .grid {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.profile-chart .axis {
+  fill: var(--muted);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.profile-chart .cursor {
+  stroke: var(--text);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.profile-chart .summit-mark {
+  fill: var(--text);
+  stroke: #fff;
+  stroke-width: 1.5;
+}
+
+.profile-placeholder {
+  margin: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.profile-open {
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  z-index: 1000;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 999px;
+  background: var(--panel);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
+  font-weight: 600;
+}
+
+/* ---------- Fenêtre de paramètres ---------- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 4000;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modal {
+  width: min(440px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  background: var(--panel);
+  border-radius: 12px;
+  padding: 18px 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.modal h2 {
+  margin: 0 0 12px;
+  font-size: 1.15rem;
+}
+
+.modal fieldset {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px 4px;
+  margin: 0;
+}
+
+.modal legend {
+  font-size: 0.85rem;
+  color: var(--muted);
+  padding: 0 4px;
+}
+
+.field {
+  display: grid;
+  grid-template-columns: 1fr 90px 40px;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  font-size: 0.9rem;
+}
+
+.field input {
+  font: inherit;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  text-align: right;
+  width: 100%;
+}
+
+.field .unit {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.hint {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin: 6px 0;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.modal-actions .spacer {
+  flex: 1;
+}
+
+@media (max-width: 767px) {
+  .profile {
+    height: 150px;
+  }
+
+  .profile-readout {
+    font-size: 0.8rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }

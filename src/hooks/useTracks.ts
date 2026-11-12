@@ -4,6 +4,7 @@ import { db, getSettings, updateSettings } from '../db/db';
 import { parseGpx, GpxError } from '../lib/gpx';
 import { trackFingerprint } from '../lib/hash';
 import { pickColor } from '../lib/colors';
+import { needsElevation } from '../lib/elevation';
 import { buildBackup, mergeTracks, parseBackup } from '../lib/backup';
 import type { Settings, Track } from '../types';
 
@@ -60,6 +61,8 @@ export function useTracks() {
           fileName: file.name,
           createdAt: Date.now() + i,
           segments: parsed.segments,
+          // Sinon, les altitudes seront récupérées via Open-Meteo (useElevationFetcher).
+          ...(needsElevation(parsed) ? {} : { elevationSource: 'gpx' as const }),
         };
         await db.tracks.add(track);
         added.push(track);

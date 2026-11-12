@@ -6,7 +6,7 @@ statistiques, météo détaillée par altitude pour choisir le meilleur jour / h
 
 ## Règles de travail (demandées par l'utilisateur)
 
-- **Développement étape par étape** dans l'ordre de `pormpt.md`. À la fin de chaque étape :
+- **Développement étape par étape** dans l'ordre de `prompt.md`. À la fin de chaque étape :
   s'arrêter, expliquer comment tester, **attendre la validation** avant l'étape suivante.
 - **Tout passe par Docker**, jamais npm/node sur l'hôte (multi-postes Windows/macOS/Linux) :
   `docker compose run --rm dev <commande>`.
@@ -22,10 +22,11 @@ statistiques, météo détaillée par altitude pour choisir le meilleur jour / h
   IndexedDB, panneau des tracés, sélection/zoom, erreurs, export/import de sauvegarde JSON.
   Validée par l'utilisateur. Ajustement ensuite : tracés dessinés en 3 couches
   (ombre noire + liseré blanc + couleur) pour le contraste.
-- [ ] **Étape 2** — statistiques (distance, D+/D- avec hystérésis ~5 m, min/max, point culminant),
-  altitudes via Open-Meteo Elevation si manquantes, durée DIN 33466, profil altimétrique
-  avec marqueur synchronisé sur la carte. ← **prochaine étape**
-- [ ] Étape 3 — service météo Open-Meteo (`services/weather.ts`), points d'échantillonnage, cache 1 h.
+- [x] **Étape 2** — statistiques (distance, D+/D- avec hystérésis 5 m, min/max, point culminant),
+  altitudes via Open-Meteo Elevation si manquantes, durée DIN 33466 (vitesses réglables),
+  profil altimétrique SVG avec marqueur synchronisé sur la carte. **En attente de validation.**
+- [ ] **Étape 3** — service météo Open-Meteo (`services/weather.ts`), points d'échantillonnage, cache 1 h.
+  ← prochaine étape
 - [ ] Étape 4 — tableau heatmap météo par altitude.
 - [ ] Étape 5 — tracé coloré selon la prévision à l'heure de passage.
 - [ ] Étape 6 — score « meilleur jour ».
@@ -48,28 +49,46 @@ heredocs longs contenant des apostrophes : préférer l'outil Write pour créer 
 ## Stack
 
 Vite 6 + React 19 + TypeScript strict, Leaflet 1.9 + react-leaflet 5, `@tmcw/togeojson`,
-Dexie 4 + `dexie-react-hooks`, Vitest + jsdom + fake-indexeddb. Graphiques (étape 2+) :
-recharts ou SVG maison, au choix (le cahier des charges autorise les deux).
+Dexie 4 + `dexie-react-hooks`, Vitest + jsdom + fake-indexeddb. Graphiques : **SVG maison**
+(pas de recharts), cf. `ElevationProfile.tsx` ; garder ce choix pour les étapes suivantes.
 
 ## Architecture
 
 ```
 src/
-  types.ts            Point = [lat, lon, ele|null], Track, Settings, BackupFile, DEFAULT_SETTINGS
+  types.ts            Point = [lat, lon, ele|null], Track (elevationSource?), Settings
+                      (baseLayer, selectedTrackId, showProfile, din), DEFAULT_SETTINGS
   db/db.ts            Dexie 'cairn' v1 : tables tracks (id, createdAt) et settings (key='app')
-                      ; getSettings / updateSettings. Nouvelles tables → db.version(2)
-  hooks/useTracks.ts  useLiveQuery (l'UI suit la base) + actions : import GPX, renommer,
-                      couleur, visibilité, suppression, export/import de sauvegarde
+                      ; getSettings / updateSettings (via normalizeSettings). Nouvelles tables → db.version(2)
+  hooks/
+    useTracks.ts            useLiveQuery (l'UI suit la base) + actions : import GPX, renommer,
+                            couleur, visibilité, suppression, export/import de sauvegarde
+    useElevationFetcher.ts  récupère en arrière-plan (1 tracé à la fois) les altitudes manquantes,
+                            statut par tracé (loading/error/done) + retry
+    useHoverPoint.ts        mini-store (useSyncExternalStore) de la position survolée sur le profil,
+                            pour ne pas re-rendre l'app à chaque mouvement de souris
   lib/                fonctions pures + tests (*.test.ts)
     gpx.ts            parseGpx(text, fileName) → { name, segments } ou GpxError (message FR)
     hash.ts           trackFingerprint(segments) : FNV-1a double (64 bits) des coords arrondies
-    geo.ts            trackBounds ; accueillera haversine / dénivelé (étape 2)
+    geo.ts            haversine, cumulativeDistances, trackBounds
+    elevation.ts      couverture, needsElevation (< 80 % de points avec altitude), interpolation
+                      des trous, densify, planElevationQueries / applyElevations
+    stats.ts          elevationGain (hystérésis 5 m), analyzeTrack → { stats, profile },
+                      nearestProfileIndex
+    din.ts            dinDurationHours(distanceKm, D+, D-, speeds)
+    settings.ts       normalizeSettings (valeurs par défaut + validation, base et sauvegarde)
+    format.ts         formatage FR (km, m, durée « 5 h 15 », coordonnées, « – » si null)
+    ticks.ts          graduations rondes pour les graphiques
     backup.ts         buildBackup, parseBackup (validation), mergeTracks (fusion par id)
     colors.ts         palette cyclique des tracés
-  services/           appels API externes (vide pour l'instant : elevation, weather à venir)
-  components/         MapView (fonds, polylines, rendu canvas), FitBounds, Sidebar, TrackItem,
-                      DropZone, Toasts, ErrorBoundary, CairnLogo
-  App.tsx             orchestration : sélection, zoom (fitRequest avec nonce), toasts, tiroir mobile
+  services/
+    elevation.ts      Open-Meteo Elevation : lots de 100, ElevationError (message FR),
+                      fetchTrackElevations(segments) → segments densifiés avec altitudes
+  components/         MapView (fonds, polylines 3 couches, marqueurs sommet / survol, AutoResize),
+                      FitBounds, Sidebar, TrackItem, TrackStats, ElevationProfile (SVG),
+                      SettingsDialog, HoverMarker, DropZone, Toasts, ErrorBoundary, CairnLogo
+  App.tsx             orchestration : sélection, analyse mémoïsée du tracé sélectionné, zoom
+                      (fitRequest avec nonce), toasts, tiroir mobile, profil, paramètres
 docker/nginx.conf     fallback SPA + cache long sur /assets
 samples/              GPX fictifs pour tests manuels (trk avec ele, rte sans ele, invalide)
 ```
@@ -81,8 +100,17 @@ samples/              GPX fictifs pour tests manuels (trk avec ele, rte sans ele
   localhost (test depuis le téléphone via l'IP du PC).
 - **Un fichier GPX = un tracé**, chaque `trkseg` / `rte` devient un segment de `segments`.
   Les `wpt` sont ignorés. Nom : `metadata/name` → nom du 1er trk/rte → nom de fichier.
-- Altitude absente = `null` dans `Point` (prévu pour le complément Open-Meteo Elevation à
-  l'étape 2 ; sauvegarder les altitudes récupérées dans le tracé pour ne pas rappeler l'API).
+- **Altitudes** : absente = `null`. Si < 80 % des points en ont, on interroge Open-Meteo
+  Elevation (MNT ~90 m) : segments densifiés si les points sont trop espacés (routes),
+  ≤ 1500 points interrogés (espacement ≥ 50 m), le reste interpolé ; **toutes** les
+  altitudes sont remplacées (cohérence) et le tracé stocké avec `elevationSource: 'dem'`
+  → jamais de nouvel appel. Au-delà de 80 %, les trous sont seulement interpolés.
+  L'id du tracé reste l'empreinte des coordonnées d'origine (dédoublonnage inchangé).
+- **Statistiques calculées à la volée** (non stockées) : dépendent des segments ; la durée
+  DIN dépend aussi des paramètres. Les sauts entre segments ne comptent pas en distance ;
+  le D+/D- est calculé par segment.
+- La sauvegarde/les paramètres anciens sont complétés par `normalizeSettings` : toujours
+  ajouter un nouveau réglage là et dans `DEFAULT_SETTINGS`.
 - Les paramètres (`Settings`) sont persistés en base et inclus dans la sauvegarde JSON :
   y ajouter les futurs réglages (vitesses DIN, modèle météo, poids du score).
 - Carte : renderer canvas (`tolerance: 8` pour le clic au doigt), le tracé sélectionné est

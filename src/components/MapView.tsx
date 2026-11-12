@@ -1,17 +1,34 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import L from 'leaflet';
 import {
+  CircleMarker,
   LayersControl,
   MapContainer,
   Polyline,
   TileLayer,
+  Tooltip,
   ZoomControl,
   ScaleControl,
+  useMap,
   useMapEvents,
 } from 'react-leaflet';
 import type { BaseLayerId, Track } from '../types';
 import type { Bounds } from '../lib/geo';
+import type { TrackStats } from '../lib/stats';
+import { formatMeters } from '../lib/format';
 import { FitBounds, type FitRequest } from './FitBounds';
+import { HoverMarker } from './HoverMarker';
+
+/** Recalcule la taille de la carte quand son conteneur change (profil affiché / masqué). */
+function AutoResize() {
+  const map = useMap();
+  useEffect(() => {
+    const ro = new ResizeObserver(() => map.invalidateSize());
+    ro.observe(map.getContainer());
+    return () => ro.disconnect();
+  }, [map]);
+  return null;
+}
 
 const BASE_LAYERS: Record<BaseLayerId, { name: string; url: string; attribution: string; maxZoom: number; maxNativeZoom: number; subdomains?: string }> = {
   ign: {
@@ -52,15 +69,26 @@ interface Props {
   baseLayer: BaseLayerId;
   initialBounds: Bounds | null;
   fitRequest: FitRequest | null;
+  /** Point culminant du tracé sélectionné. */
+  summit: TrackStats['summit'];
   onSelect: (id: string) => void;
   onBaseLayerChange: (id: BaseLayerId) => void;
 }
 
+type LatLngs = Array<Array<[number, number]>>;
+
 const FRANCE_CENTER: [number, number] = [46.6, 2.5];
 
-export function MapView({ tracks, selectedId, baseLayer, initialBounds, fitRequest, onSelect, onBaseLayerChange }: Props) {
+export function MapView({ tracks, selectedId, baseLayer, initialBounds, fitRequest, summit, onSelect, onBaseLayerChange }: Props) {
   // Rendu canvas : performant avec de nombreux tracés, tolérance pour cliquer facilement au doigt.
   const renderer = useMemo(() => L.canvas({ tolerance: 8 }), []);
+  // Coordonnées converties une fois par version de tracé (évite de redessiner pour rien).
+  const latLngs = useMemo(() => {
+    const m = new Map<string, LatLngs>();
+    for (const t of tracks) m.set(t.id, t.segments.map((seg) => seg.map(([lat, lon]) => [lat, lon] as [number, number])));
+    return m;
+  }, [tracks]);
+  const selectedColor = tracks.find((t) => t.id === selectedId)?.color ?? '#e6194b';
 
   const visible = tracks.filter((t) => t.visible);
   // Le tracé sélectionné est dessiné en dernier pour passer au premier plan.
@@ -97,10 +125,11 @@ export function MapView({ tracks, selectedId, baseLayer, initialBounds, fitReque
       <ScaleControl position="bottomleft" imperial={false} />
       <BaseLayerWatcher onChange={onBaseLayerChange} />
       <FitBounds request={fitRequest} />
+      <AutoResize />
 
       {ordered.map((t) => {
         const selected = t.id === selectedId;
-        const positions = t.segments.map((seg) => seg.map(([lat, lon]) => [lat, lon] as [number, number]));
+        const positions = latLngs.get(t.id) ?? [];
         // Chaque tracé est entouré d'un liseré (sombre puis blanc) pour ressortir
         // sur n'importe quel fond, quelle que soit sa couleur.
         return [
@@ -127,6 +156,19 @@ export function MapView({ tracks, selectedId, baseLayer, initialBounds, fitReque
           />,
         ];
       })}
+
+      {summit && selectedId && visible.some((t) => t.id === selectedId) && (
+        <CircleMarker
+          center={[summit.lat, summit.lon]}
+          radius={6}
+          pathOptions={{ color: '#ffffff', weight: 2.5, fillColor: '#22292f', fillOpacity: 1 }}
+        >
+          <Tooltip direction="top" offset={[0, -6]}>
+            Point culminant · {formatMeters(summit.ele)}
+          </Tooltip>
+        </CircleMarker>
+      )}
+      <HoverMarker color={selectedColor} />
     </MapContainer>
   );
 }
