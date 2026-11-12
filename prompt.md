@@ -83,6 +83,18 @@ arrête-toi, explique-moi comment tester, et attends ma validation avant de cont
 - Profil altimétrique (altitude en fonction de la distance) sous la carte.
   Survoler le profil affiche un marqueur à la position correspondante sur la carte.
 
+## Étape 2bis : améliorations des statistiques et du profil
+- Pourcentages de pente :
+  - au survol du profil altimétrique, afficher la pente (en %) au point survolé,
+    à côté de la distance et de l'altitude ; calculée sur une fenêtre glissante
+    (~100 m) pour ne pas être faussée par le bruit des altitudes ;
+  - colorer le remplissage du profil par classes de pente (douce → très raide),
+    avec une petite légende ;
+  - ajouter aux statistiques la pente maximale en montée et en descente.
+- Retéléchargement des GPX : un bouton par tracé exporte un fichier GPX 1.1
+  (nom, segments, altitudes). Pour un tracé dont les altitudes ont été récupérées
+  via Open-Meteo, le fichier contient la version « corrigée » (avec altitudes).
+
 ## Étape 3 : récupération de la météo
 - Service `services/weather.ts` utilisant l'API Open-Meteo Forecast :
   `https://api.open-meteo.com/v1/forecast`

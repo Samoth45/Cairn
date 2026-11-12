@@ -7,6 +7,8 @@ import { TrackStats } from './components/TrackStats';
 import { ElevationProfile } from './components/ElevationProfile';
 import { SettingsDialog } from './components/SettingsDialog';
 import { analyzeTrack } from './lib/stats';
+import { buildGpx, gpxFileName } from './lib/gpxExport';
+import { downloadText } from './lib/download';
 import { DropZone } from './components/DropZone';
 import { Toasts, type Toast } from './components/Toasts';
 import { CairnLogo } from './components/CairnLogo';
@@ -111,21 +113,25 @@ export default function App() {
   const handleExport = useCallback(async () => {
     try {
       const backup = await exportBackup();
-      const blob = new Blob([JSON.stringify(backup)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = backupFileName();
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      downloadText(JSON.stringify(backup), backupFileName(), 'application/json');
       pushToast({ kind: 'success', title: `Sauvegarde exportée (${backup.tracks.length} tracés)` });
     } catch (e) {
       console.error(e);
       pushToast({ kind: 'error', title: "Échec de l'export de la sauvegarde" });
     }
   }, [exportBackup, pushToast]);
+
+  const handleDownloadGpx = useCallback(
+    (track: Track) => {
+      try {
+        downloadText(buildGpx(track), gpxFileName(track.name), 'application/gpx+xml');
+      } catch (e) {
+        console.error(e);
+        pushToast({ kind: 'error', title: `Échec du téléchargement de « ${track.name} »` });
+      }
+    },
+    [pushToast],
+  );
 
   const handleImportBackup = useCallback(
     async (file: File) => {
@@ -179,6 +185,7 @@ export default function App() {
               din={settings.din}
               elevationStatus={selElevationStatus}
               onRetryElevation={() => retryElevation(selectedTrack.id)}
+              onDownload={() => handleDownloadGpx(selectedTrack)}
               onShowSummit={() => {
                 const s = analysis.stats.summit;
                 if (s) fitTo([[s.lat, s.lon], [s.lat, s.lon]]);
@@ -197,6 +204,7 @@ export default function App() {
         onColor={(id, c) => void setTrackColor(id, c)}
         onToggle={(id, v) => void setTrackVisible(id, v)}
         onDelete={(id) => void deleteTrack(id)}
+        onDownload={handleDownloadGpx}
       />
       {panelOpen && <div className="backdrop" onClick={() => setPanelOpen(false)} />}
 

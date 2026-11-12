@@ -471,6 +471,41 @@ button {
   color: var(--muted);
 }
 
+.stats-download {
+  width: 100%;
+  margin-top: 8px;
+  font-size: 0.85rem;
+}
+
+/* ---------- Pentes ---------- */
+.slope-legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.slope-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.slope-chip i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  opacity: 0.75;
+}
+
+.slope-value {
+  border-bottom: 3px solid;
+  padding-bottom: 1px;
+}
+
 .link-btn {
   background: none;
   border: none;
@@ -691,6 +726,21 @@ button {
 
   .profile-readout {
     font-size: 0.8rem;
+  }
+
+  /* Sur mobile, la légende laisse la place à la lecture du survol. */
+  .profile-header.hovering .slope-legend,
+  .profile-header.hovering .profile-name {
+    display: none;
+  }
+
+  .profile-header.hovering .profile-readout {
+    flex: 1;
+  }
+
+  .slope-legend {
+    gap: 4px;
+    font-size: 0.65rem;
   }
 
   .stats-grid {

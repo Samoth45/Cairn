@@ -2,7 +2,7 @@ import type { DinSpeeds, Track } from '../types';
 import type { TrackStats as Stats } from '../lib/stats';
 import type { ElevationStatus } from '../hooks/useElevationFetcher';
 import { dinDurationHours } from '../lib/din';
-import { DASH, formatCoords, formatDuration, formatKm, formatMeters } from '../lib/format';
+import { DASH, formatCoords, formatDuration, formatKm, formatMeters, formatSlope } from '../lib/format';
 
 interface Props {
   track: Track;
@@ -11,9 +11,10 @@ interface Props {
   elevationStatus?: ElevationStatus;
   onRetryElevation: () => void;
   onShowSummit: () => void;
+  onDownload: () => void;
 }
 
-export function TrackStats({ track, stats, din, elevationStatus, onRetryElevation, onShowSummit }: Props) {
+export function TrackStats({ track, stats, din, elevationStatus, onRetryElevation, onShowSummit, onDownload }: Props) {
   const hasEle = stats.ascentM !== null;
   const duration = hasEle ? dinDurationHours(stats.distanceM / 1000, stats.ascentM ?? 0, stats.descentM ?? 0, din) : NaN;
 
@@ -47,6 +48,14 @@ export function TrackStats({ track, stats, din, elevationStatus, onRetryElevatio
           <dt>Altitude max</dt>
           <dd>{formatMeters(stats.maxEle)}</dd>
         </div>
+        <div>
+          <dt title="Pente maximale sur 100 m">Pente max ↗</dt>
+          <dd>{formatSlope(stats.maxSlopeUpPct, false)}</dd>
+        </div>
+        <div>
+          <dt title="Pente maximale sur 100 m">Pente max ↘</dt>
+          <dd>{formatSlope(stats.maxSlopeDownPct, false)}</dd>
+        </div>
       </dl>
 
       <div className="stats-summit">
@@ -76,6 +85,10 @@ export function TrackStats({ track, stats, din, elevationStatus, onRetryElevatio
           'Altitudes : fichier GPX'
         )}
       </p>
+
+      <button type="button" className="btn stats-download" onClick={onDownload} disabled={elevationStatus === 'loading'}>
+        ⬇ Télécharger le GPX{track.elevationSource === 'dem' ? ' (altitudes corrigées)' : ''}
+      </button>
     </section>
   );
 }

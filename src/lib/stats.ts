@@ -1,6 +1,7 @@
 import type { Point } from '../types';
 import { haversine } from './geo';
 import { fillMissingElevations } from './elevation';
+import { maxSlopes, type ElePoint } from './slope';
 
 /** Seuil d'hystérésis (m) : une variation n'est comptée que si elle le dépasse. */
 export const ELEVATION_THRESHOLD_M = 5;
@@ -13,6 +14,9 @@ export interface TrackStats {
   minEle: number | null;
   maxEle: number | null;
   summit: { lat: number; lon: number; ele: number } | null;
+  /** Pentes maximales (%, valeurs positives) sur une fenêtre de 100 m. */
+  maxSlopeUpPct: number | null;
+  maxSlopeDownPct: number | null;
 }
 
 export interface ProfilePoint {
@@ -69,16 +73,23 @@ export function analyzeTrack(segments: Point[][]): TrackAnalysis {
   let minEle = Infinity;
   let maxEle = -Infinity;
   let summit: TrackStats['summit'] = null;
+  let slopeUp = 0;
+  let slopeDown = 0;
 
   for (const seg of filled) {
     const eles: number[] = [];
+    // Pentes calculées par segment : un saut entre segments n'est pas une pente.
+    const segPoints: ElePoint[] = [];
+    let segStart = distanceM;
     for (let i = 0; i < seg.length; i++) {
       const [lat, lon, ele] = seg[i];
       if (i > 0) distanceM += haversine(seg[i - 1][0], seg[i - 1][1], lat, lon);
+      else segStart = distanceM;
       profile.push({ d: distanceM, lat, lon, ele });
       if (ele === null) continue;
       hasEle = true;
       eles.push(ele);
+      segPoints.push({ d: distanceM - segStart, ele });
       if (ele < minEle) minEle = ele;
       if (ele > maxEle) {
         maxEle = ele;
@@ -88,6 +99,9 @@ export function analyzeTrack(segments: Point[][]): TrackAnalysis {
     const gain = elevationGain(eles);
     ascent += gain.ascent;
     descent += gain.descent;
+    const slopes = maxSlopes(segPoints);
+    slopeUp = Math.max(slopeUp, slopes.up);
+    slopeDown = Math.max(slopeDown, slopes.down);
   }
 
   return {
@@ -98,6 +112,8 @@ export function analyzeTrack(segments: Point[][]): TrackAnalysis {
       minEle: hasEle ? minEle : null,
       maxEle: hasEle ? maxEle : null,
       summit,
+      maxSlopeUpPct: hasEle ? slopeUp : null,
+      maxSlopeDownPct: hasEle ? slopeDown : null,
     },
     profile,
   };

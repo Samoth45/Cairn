@@ -19,6 +19,7 @@ interface Props {
   onColor: (id: string, color: string) => void;
   onToggle: (id: string, visible: boolean) => void;
   onDelete: (id: string) => void;
+  onDownload: (track: Track) => void;
 }
 
 export function Sidebar(p: Props) {
@@ -81,6 +82,7 @@ export function Sidebar(p: Props) {
               onColor={(c) => p.onColor(t.id, c)}
               onToggle={(v) => p.onToggle(t.id, v)}
               onDelete={() => p.onDelete(t.id)}
+              onDownload={() => p.onDownload(t)}
             />
           ))}
         </ul>

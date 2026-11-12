@@ -26,6 +26,14 @@ export function formatCoords(lat: number, lon: number): string {
   return `${nf4.format(Math.abs(lat))}° ${lat >= 0 ? 'N' : 'S'}, ${nf4.format(Math.abs(lon))}° ${lon >= 0 ? 'E' : 'O'}`;
 }
 
+/** Pente en % avec le sens : « ↗ 12 % », « ↘ 8 % », « → 0 % ». */
+export function formatSlope(pct: number | null | undefined, withArrow = true): string {
+  if (pct === null || pct === undefined || !Number.isFinite(pct)) return DASH;
+  const r = Math.round(pct);
+  const arrow = !withArrow ? '' : r > 0 ? '↗ ' : r < 0 ? '↘ ' : '→ ';
+  return `${arrow}${nf0.format(Math.abs(r))} %`;
+}
+
 export function formatNumber(n: number, digits = 0): string {
   return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: digits }).format(n);
 }

@@ -9,9 +9,10 @@ interface Props {
   onColor: (color: string) => void;
   onToggle: (visible: boolean) => void;
   onDelete: () => void;
+  onDownload: () => void;
 }
 
-export function TrackItem({ track, selected, onSelect, onRename, onColor, onToggle, onDelete }: Props) {
+export function TrackItem({ track, selected, onSelect, onRename, onColor, onToggle, onDelete, onDownload }: Props) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(track.name);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -75,6 +76,15 @@ export function TrackItem({ track, selected, onSelect, onRename, onColor, onTogg
 
       <button type="button" className="icon-btn" onClick={startEdit} title="Renommer" aria-label={`Renommer ${track.name}`}>
         ✎
+      </button>
+      <button
+        type="button"
+        className="icon-btn"
+        onClick={onDownload}
+        title={track.elevationSource === 'dem' ? 'Télécharger le GPX (altitudes corrigées)' : 'Télécharger le GPX'}
+        aria-label={`Télécharger ${track.name} en GPX`}
+      >
+        ⬇
       </button>
       <button
         type="button"

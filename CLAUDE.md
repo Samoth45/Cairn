@@ -24,7 +24,11 @@ statistiques, météo détaillée par altitude pour choisir le meilleur jour / h
   (ombre noire + liseré blanc + couleur) pour le contraste.
 - [x] **Étape 2** — statistiques (distance, D+/D- avec hystérésis 5 m, min/max, point culminant),
   altitudes via Open-Meteo Elevation si manquantes, durée DIN 33466 (vitesses réglables),
-  profil altimétrique SVG avec marqueur synchronisé sur la carte. **En attente de validation.**
+  profil altimétrique SVG avec marqueur synchronisé sur la carte. Validée.
+- [x] **Étape 2bis** (ajoutée à la demande de l'utilisateur) — pentes en % (survol du profil,
+  remplissage coloré par classe de pente + légende, pentes max montée/descente dans les stats)
+  et retéléchargement de chaque tracé en GPX (altitudes corrigées incluses).
+  **En attente de validation.**
 - [ ] **Étape 3** — service météo Open-Meteo (`services/weather.ts`), points d'échantillonnage, cache 1 h.
   ← prochaine étape
 - [ ] Étape 4 — tableau heatmap météo par altitude.
@@ -73,8 +77,12 @@ src/
     geo.ts            haversine, cumulativeDistances, trackBounds
     elevation.ts      couverture, needsElevation (< 80 % de points avec altitude), interpolation
                       des trous, densify, planElevationQueries / applyElevations
-    stats.ts          elevationGain (hystérésis 5 m), analyzeTrack → { stats, profile },
-                      nearestProfileIndex
+    stats.ts          elevationGain (hystérésis 5 m), analyzeTrack → { stats (dont pentes max),
+                      profile }, nearestProfileIndex
+    slope.ts          eleAt, slopeAt (fenêtre 100 m), maxSlopes, SLOPE_CLASSES (< 5, 5–10,
+                      10–15, 15–25, > 25 %), slopeRuns (tronçons colorés du profil)
+    gpxExport.ts      buildGpx(track) → GPX 1.1 (1 trk, 1 trkseg par segment), gpxFileName
+    download.ts       downloadText(contenu, nom, mime) (GPX, sauvegarde JSON)
     din.ts            dinDurationHours(distanceKm, D+, D-, speeds)
     settings.ts       normalizeSettings (valeurs par défaut + validation, base et sauvegarde)
     format.ts         formatage FR (km, m, durée « 5 h 15 », coordonnées, « – » si null)
@@ -109,6 +117,10 @@ samples/              GPX fictifs pour tests manuels (trk avec ele, rte sans ele
 - **Statistiques calculées à la volée** (non stockées) : dépendent des segments ; la durée
   DIN dépend aussi des paramètres. Les sauts entre segments ne comptent pas en distance ;
   le D+/D- est calculé par segment.
+- **Pentes** : toujours calculées sur une fenêtre de 100 m (jamais point à point, trop bruité),
+  par segment pour les pentes max. Classe de couleur selon la valeur absolue.
+- **GPX exporté** : contient les segments stockés (densifiés si altitudes Open-Meteo). Le
+  réimporter crée donc un nouveau tracé (empreinte différente), c'est attendu.
 - La sauvegarde/les paramètres anciens sont complétés par `normalizeSettings` : toujours
   ajouter un nouveau réglage là et dans `DEFAULT_SETTINGS`.
 - Les paramètres (`Settings`) sont persistés en base et inclus dans la sauvegarde JSON :
