@@ -6,7 +6,7 @@ services:
     ports:
       - "5173:5173"
     volumes:
-      - .:/app
+      - .:/app:z
       # node_modules reste dans le conteneur (volume anonyme), jamais mélangé avec l'hôte
       - /app/node_modules
     environment:
