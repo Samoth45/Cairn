@@ -5,6 +5,7 @@ import { parseGpx, GpxError } from '../lib/gpx';
 import { trackFingerprint } from '../lib/hash';
 import { pickColor } from '../lib/colors';
 import { needsElevation } from '../lib/elevation';
+import { deleteTrackForecast } from '../services/weatherCache';
 import { buildBackup, mergeTracks, parseBackup } from '../lib/backup';
 import type { Settings, Track } from '../types';
 
@@ -94,6 +95,7 @@ export function useTracks() {
       const s = await getSettings();
       if (s.selectedTrackId === id) await updateSettings({ selectedTrackId: undefined });
     });
+    await deleteTrackForecast(id);
   }, []);
 
   const setSettings = useCallback((patch: Partial<Settings>) => updateSettings(patch), []);

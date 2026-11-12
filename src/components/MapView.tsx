@@ -16,6 +16,7 @@ import type { BaseLayerId, Track } from '../types';
 import type { Bounds } from '../lib/geo';
 import type { TrackStats } from '../lib/stats';
 import { formatMeters } from '../lib/format';
+import { rolesLabel, type WeatherPoint } from '../lib/weatherPoints';
 import { FitBounds, type FitRequest } from './FitBounds';
 import { HoverMarker } from './HoverMarker';
 
@@ -71,6 +72,8 @@ interface Props {
   fitRequest: FitRequest | null;
   /** Point culminant du tracé sélectionné. */
   summit: TrackStats['summit'];
+  /** Points de prévision météo du tracé sélectionné. */
+  weatherPoints: WeatherPoint[];
   onSelect: (id: string) => void;
   onBaseLayerChange: (id: BaseLayerId) => void;
 }
@@ -79,7 +82,17 @@ type LatLngs = Array<Array<[number, number]>>;
 
 const FRANCE_CENTER: [number, number] = [46.6, 2.5];
 
-export function MapView({ tracks, selectedId, baseLayer, initialBounds, fitRequest, summit, onSelect, onBaseLayerChange }: Props) {
+export function MapView({
+  tracks,
+  selectedId,
+  baseLayer,
+  initialBounds,
+  fitRequest,
+  summit,
+  weatherPoints,
+  onSelect,
+  onBaseLayerChange,
+}: Props) {
   // Rendu canvas : performant avec de nombreux tracés, tolérance pour cliquer facilement au doigt.
   const renderer = useMemo(() => L.canvas({ tolerance: 8 }), []);
   // Coordonnées converties une fois par version de tracé (évite de redessiner pour rien).
@@ -156,6 +169,22 @@ export function MapView({ tracks, selectedId, baseLayer, initialBounds, fitReque
           />,
         ];
       })}
+
+      {selectedId &&
+        visible.some((t) => t.id === selectedId) &&
+        weatherPoints.map((p) => (
+          <CircleMarker
+            key={`wx-${p.lat}-${p.lon}`}
+            center={[p.lat, p.lon]}
+            radius={4.5}
+            pathOptions={{ color: '#22292f', weight: 2, fillColor: '#ffffff', fillOpacity: 1 }}
+          >
+            <Tooltip direction="top" offset={[0, -4]}>
+              Point météo · {formatMeters(p.ele)}
+              {p.roles.length > 0 && ` · ${rolesLabel(p.roles)}`}
+            </Tooltip>
+          </CircleMarker>
+        ))}
 
       {summit && selectedId && visible.some((t) => t.id === selectedId) && (
         <CircleMarker

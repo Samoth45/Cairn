@@ -15,6 +15,10 @@ export function normalizeSettings(raw: unknown): Settings {
     baseLayer: o.baseLayer === 'otm' || o.baseLayer === 'ign' ? o.baseLayer : DEFAULT_SETTINGS.baseLayer,
     selectedTrackId: typeof o.selectedTrackId === 'string' ? o.selectedTrackId : undefined,
     showProfile: typeof o.showProfile === 'boolean' ? o.showProfile : DEFAULT_SETTINGS.showProfile,
+    weatherModel:
+      o.weatherModel === 'best_match' || o.weatherModel === 'meteofrance_seamless'
+        ? o.weatherModel
+        : DEFAULT_SETTINGS.weatherModel,
     din: {
       flatKmh: positive(din.flatKmh, DEFAULT_DIN.flatKmh),
       ascentMh: positive(din.ascentMh, DEFAULT_DIN.ascentMh),

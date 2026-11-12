@@ -9,6 +9,8 @@ interface Props {
   selectedId?: string;
   /** Statistiques du tracé sélectionné. */
   statsPanel?: ReactNode;
+  /** Météo du tracé sélectionné. */
+  weatherPanel?: ReactNode;
   onClose: () => void;
   onOpenSettings: () => void;
   onImportGpx: (files: File[]) => void;
@@ -57,7 +59,9 @@ export function Sidebar(p: Props) {
         />
       </div>
 
+      <div className="sidebar-scroll">
       {p.statsPanel}
+      {p.weatherPanel}
 
       <div className="track-list-header">
         <span>Tracés</span>
@@ -87,6 +91,7 @@ export function Sidebar(p: Props) {
           ))}
         </ul>
       )}
+      </div>
 
       <footer className="sidebar-footer">
         <span className="footer-label">Sauvegarde</span>

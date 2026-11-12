@@ -63,7 +63,7 @@ src/
   hooks/        accès aux données (useTracks)
   lib/          calculs purs : parsing GPX, empreinte, emprise, sauvegarde (+ tests)
   db/           base IndexedDB (Dexie)
-  services/     appels aux API externes (altitudes Open-Meteo ; météo à venir)
+  services/     appels aux API externes Open-Meteo (altitudes, prévisions météo + cache)
 docker/         configuration nginx
 ```
 

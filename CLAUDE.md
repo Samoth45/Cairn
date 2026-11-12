@@ -27,11 +27,12 @@ statistiques, météo détaillée par altitude pour choisir le meilleur jour / h
   profil altimétrique SVG avec marqueur synchronisé sur la carte. Validée.
 - [x] **Étape 2bis** (ajoutée à la demande de l'utilisateur) — pentes en % (survol du profil,
   remplissage coloré par classe de pente + légende, pentes max montée/descente dans les stats)
-  et retéléchargement de chaque tracé en GPX (altitudes corrigées incluses).
-  **En attente de validation.**
-- [ ] **Étape 3** — service météo Open-Meteo (`services/weather.ts`), points d'échantillonnage, cache 1 h.
-  ← prochaine étape
-- [ ] Étape 4 — tableau heatmap météo par altitude.
+  et retéléchargement de chaque tracé en GPX (altitudes corrigées incluses). Validée.
+- [x] **Étape 3** — service météo Open-Meteo (`services/weather.ts`), points d'échantillonnage
+  (≤ 8, fusion < 200 m), cache mémoire + IndexedDB 1 h, bouton « Actualiser », choix du modèle
+  dans les paramètres. Vue compacte provisoire (`WeatherPanel`, navigation heure par heure)
+  + points météo sur la carte. **En attente de validation.**
+- [ ] **Étape 4** — tableau heatmap météo par altitude. ← prochaine étape
 - [ ] Étape 5 — tracé coloré selon la prévision à l'heure de passage.
 - [ ] Étape 6 — score « meilleur jour ».
 
@@ -61,14 +62,17 @@ Dexie 4 + `dexie-react-hooks`, Vitest + jsdom + fake-indexeddb. Graphiques : **S
 ```
 src/
   types.ts            Point = [lat, lon, ele|null], Track (elevationSource?), Settings
-                      (baseLayer, selectedTrackId, showProfile, din), DEFAULT_SETTINGS
-  db/db.ts            Dexie 'cairn' v1 : tables tracks (id, createdAt) et settings (key='app')
-                      ; getSettings / updateSettings (via normalizeSettings). Nouvelles tables → db.version(2)
+                      (baseLayer, selectedTrackId, showProfile, din, weatherModel), DEFAULT_SETTINGS
+  db/db.ts            Dexie 'cairn' : v1 tables tracks (id, createdAt) et settings (key='app') ;
+                      v2 table weather (trackId) = CachedForecast. getSettings / updateSettings
+                      (via normalizeSettings). Nouvelle table → db.version(3)
   hooks/
     useTracks.ts            useLiveQuery (l'UI suit la base) + actions : import GPX, renommer,
                             couleur, visibilité, suppression, export/import de sauvegarde
     useElevationFetcher.ts  récupère en arrière-plan (1 tracé à la fois) les altitudes manquantes,
                             statut par tracé (loading/error/done) + retry
+    useWeather.ts           prévision du tracé sélectionné via weatherCache ; { forecast, loading,
+                            error, refresh } ; AbortController si le tracé change
     useHoverPoint.ts        mini-store (useSyncExternalStore) de la position survolée sur le profil,
                             pour ne pas re-rendre l'app à chaque mouvement de souris
   lib/                fonctions pures + tests (*.test.ts)
@@ -83,6 +87,10 @@ src/
                       10–15, 15–25, > 25 %), slopeRuns (tronçons colorés du profil)
     gpxExport.ts      buildGpx(track) → GPX 1.1 (1 trk, 1 trkseg par segment), gpxFileName
     download.ts       downloadText(contenu, nom, mime) (GPX, sauvegarde JSON)
+    weatherPoints.ts  selectWeatherPoints(profile) → WeatherPoint[] (lat, lon, ele, d, roles
+                      summit/start/lowest), triés du plus haut au plus bas ; rolesLabel ; weatherPointsKey
+    time.ts           parisHourKey (heure de Paris au format des séries Open-Meteo), formatClock, formatAgo
+    wmo.ts            codes WMO → libellé FR + pictogramme, isThunderstorm
     din.ts            dinDurationHours(distanceKm, D+, D-, speeds)
     settings.ts       normalizeSettings (valeurs par défaut + validation, base et sauvegarde)
     format.ts         formatage FR (km, m, durée « 5 h 15 », coordonnées, « – » si null)
@@ -92,9 +100,15 @@ src/
   services/
     elevation.ts      Open-Meteo Elevation : lots de 100, ElevationError (message FR),
                       fetchTrackElevations(segments) → segments densifiés avec altitudes
-  components/         MapView (fonds, polylines 3 couches, marqueurs sommet / survol, AutoResize),
-                      FitBounds, Sidebar, TrackItem, TrackStats, ElevationProfile (SVG),
-                      SettingsDialog, HoverMarker, DropZone, Toasts, ErrorBoundary, CairnLogo
+    weather.ts        Open-Meteo Forecast : HOURLY_VARS, buildForecastUrl, parseForecastResponse,
+                      fetchForecast → ForecastData { times, points: PointSeries[], primary[] },
+                      WeatherError, MODEL_LABELS
+    weatherCache.ts   getTrackForecast(trackId, points, model, {force}) : mémoire → IndexedDB →
+                      réseau, TTL 1 h ; peekTrackForecast ; deleteTrackForecast (appelé à la suppression)
+  components/         MapView (fonds, polylines 3 couches, marqueurs sommet / survol / points météo,
+                      AutoResize), FitBounds, Sidebar (zone défilante stats + météo + liste),
+                      TrackItem, TrackStats, WeatherPanel, ElevationProfile (SVG), SettingsDialog,
+                      HoverMarker, DropZone, Toasts, ErrorBoundary, CairnLogo
   App.tsx             orchestration : sélection, analyse mémoïsée du tracé sélectionné, zoom
                       (fitRequest avec nonce), toasts, tiroir mobile, profil, paramètres
 docker/nginx.conf     fallback SPA + cache long sur /assets
@@ -121,6 +135,17 @@ samples/              GPX fictifs pour tests manuels (trk avec ele, rte sans ele
   par segment pour les pentes max. Classe de couleur selon la valeur absolue.
 - **GPX exporté** : contient les segments stockés (densifiés si altitudes Open-Meteo). Le
   réimporter crée donc un nouveau tracé (empreinte différente), c'est attendu.
+- **Météo, modèle Météo-France** : `meteofrance_seamless` ne fournit jamais
+  `precipitation_probability` ni `freezing_level_height` et s'arrête vers J+4 (vérifié sur l'API
+  réelle). On envoie donc `models=meteofrance_seamless,best_match` dans **la même requête**
+  (variables suffixées `_<modèle>`) et chaque valeur = Météo-France ?? best_match.
+  `ForecastData.primary[h]` indique si l'heure vient d'AROME/ARPEGE. Avec `best_match` seul,
+  les nulls éventuels restent null → afficher « – » (formatTemp/formatWind/… le font).
+- **Points météo** calculés seulement quand les altitudes sont définitives (pas pendant la
+  récupération Open-Meteo Elevation), sinon double requête. Le cache est invalidé si le
+  modèle ou les points changent (clé `modèle|points`). Le cache n'est pas dans la sauvegarde JSON.
+- Les séries horaires sont en heure locale de Paris (`timezone=Europe/Paris`) : comparer avec
+  `parisHourKey()`, ne pas convertir avec le fuseau du navigateur.
 - La sauvegarde/les paramètres anciens sont complétés par `normalizeSettings` : toujours
   ajouter un nouveau réglage là et dans `DEFAULT_SETTINGS`.
 - Les paramètres (`Settings`) sont persistés en base et inclus dans la sauvegarde JSON :

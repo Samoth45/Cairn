@@ -7,6 +7,10 @@ import { TrackStats } from './components/TrackStats';
 import { ElevationProfile } from './components/ElevationProfile';
 import { SettingsDialog } from './components/SettingsDialog';
 import { analyzeTrack } from './lib/stats';
+import { needsElevation } from './lib/elevation';
+import { selectWeatherPoints } from './lib/weatherPoints';
+import { useWeather } from './hooks/useWeather';
+import { WeatherPanel } from './components/WeatherPanel';
 import { buildGpx, gpxFileName } from './lib/gpxExport';
 import { downloadText } from './lib/download';
 import { DropZone } from './components/DropZone';
@@ -69,6 +73,15 @@ export default function App() {
 
   const selectedTrack = tracks?.find((t) => t.id === settings?.selectedTrackId);
   const analysis = useMemo(() => (selectedTrack ? analyzeTrack(selectedTrack.segments) : null), [selectedTrack]);
+
+  // Points de prévision : seulement une fois les altitudes définitives connues.
+  const selectedNeedsElevation = selectedTrack ? needsElevation(selectedTrack) : false;
+  const weatherPoints = useMemo(
+    () => (analysis && !selectedNeedsElevation ? selectWeatherPoints(analysis.profile) : []),
+    [analysis, selectedNeedsElevation],
+  );
+  const weatherModel = settings?.weatherModel ?? 'meteofrance_seamless';
+  const weather = useWeather(selectedTrack?.id, weatherPoints, weatherModel);
 
   const selectTrack = useCallback(
     (id: string) => {
@@ -194,6 +207,16 @@ export default function App() {
             />
           )
         }
+        weatherPanel={
+          selectedTrack && (
+            <WeatherPanel
+              key={selectedTrack.id}
+              weather={weather}
+              model={weatherModel}
+              waitingForElevation={selectedNeedsElevation}
+            />
+          )
+        }
         onOpenSettings={() => setSettingsOpen(true)}
         onClose={() => setPanelOpen(false)}
         onImportGpx={handleImportGpx}
@@ -222,6 +245,7 @@ export default function App() {
             initialBounds={initialBounds.current}
             fitRequest={fitRequest}
             summit={analysis?.stats.summit ?? null}
+            weatherPoints={weatherPoints}
             onSelect={selectTrack}
             onBaseLayerChange={(id) => void setSettings({ baseLayer: id })}
           />
@@ -251,7 +275,8 @@ export default function App() {
       {settingsOpen && (
         <SettingsDialog
           din={settings.din}
-          onSave={(din) => void setSettings({ din })}
+          weatherModel={settings.weatherModel}
+          onSave={(patch) => void setSettings(patch)}
           onClose={() => setSettingsOpen(false)}
         />
       )}

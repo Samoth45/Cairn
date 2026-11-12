@@ -34,6 +34,28 @@ export function formatSlope(pct: number | null | undefined, withArrow = true): s
   return `${arrow}${nf0.format(Math.abs(r))} %`;
 }
 
+const isNum = (v: number | null | undefined): v is number => typeof v === 'number' && Number.isFinite(v);
+
+/** « 12 °C », « –3 °C » ; « – » si la valeur manque. */
+export function formatTemp(v: number | null | undefined): string {
+  return isNum(v) ? `${nf0.format(Math.round(v)).replace('-', '−')} °C` : DASH;
+}
+
+/** « 12 km/h » ; « – » si la valeur manque. */
+export function formatWind(v: number | null | undefined): string {
+  return isNum(v) ? `${nf0.format(Math.round(v))} km/h` : DASH;
+}
+
+/** « 0,4 mm » ; « – » si la valeur manque. */
+export function formatPrecip(v: number | null | undefined): string {
+  return isNum(v) ? `${nf1.format(v)} mm` : DASH;
+}
+
+/** « 45 % » ; « – » si la valeur manque. */
+export function formatPercent(v: number | null | undefined): string {
+  return isNum(v) ? `${nf0.format(Math.round(v))} %` : DASH;
+}
+
 export function formatNumber(n: number, digits = 0): string {
   return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: digits }).format(n);
 }

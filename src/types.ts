@@ -30,11 +30,15 @@ export interface DinSpeeds {
   descentMh: number;
 }
 
+/** Modèle météo Open-Meteo. */
+export type WeatherModel = 'meteofrance_seamless' | 'best_match';
+
 export interface Settings {
   baseLayer: BaseLayerId;
   selectedTrackId?: string;
   showProfile: boolean;
   din: DinSpeeds;
+  weatherModel: WeatherModel;
 }
 
 export const DEFAULT_DIN: DinSpeeds = { flatKmh: 4, ascentMh: 300, descentMh: 500 };
@@ -43,6 +47,7 @@ export const DEFAULT_SETTINGS: Settings = {
   baseLayer: 'ign',
   showProfile: true,
   din: DEFAULT_DIN,
+  weatherModel: 'meteofrance_seamless',
 };
 
 export interface BackupFile {
