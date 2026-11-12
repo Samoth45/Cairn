@@ -1,37 +1,47 @@
-import { useState } from 'react';
 import type { WeatherModel } from '../types';
 import type { WeatherState } from '../hooks/useWeather';
 import { MODEL_LABELS } from '../services/weather';
 import { rolesLabel } from '../lib/weatherPoints';
 import { formatClock, formatAgo, parisHourKey } from '../lib/time';
-import { formatMeters, formatPercent, formatPrecip, formatTemp, formatWind, DASH } from '../lib/format';
+import { currentHourIndex, formatForecastHour, type HourSelection } from '../lib/forecast';
+import { daylightInfo, isNightHour, sunTimes } from '../lib/sun';
+import {
+  DASH,
+  formatDuration,
+  formatHoursMinutes,
+  formatMeters,
+  formatPercent,
+  formatPrecip,
+  formatTemp,
+  formatWind,
+  formatWindDir,
+} from '../lib/format';
 import { wmoIcon, wmoLabel } from '../lib/wmo';
-
-const DIRS = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'];
-const windFrom = (deg: number | null) => (deg == null ? '' : DIRS[Math.round(deg / 45) % 8]);
-
-const dayFmt = new Intl.DateTimeFormat('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
-/** « jeu. 12 nov. · 14 h » à partir de « 2026-11-12T14:00 » (heure locale déjà fournie par l'API). */
-function hourLabel(time: string): string {
-  const [date, hm] = time.split('T');
-  return `${dayFmt.format(new Date(`${date}T00:00Z`))} · ${Number(hm.slice(0, 2))} h`;
-}
 
 interface Props {
   weather: WeatherState;
   model: WeatherModel;
   waitingForElevation: boolean;
+  /** Point de départ du tracé (pour le lever / coucher du soleil). */
+  start: { lat: number; lon: number } | null;
+  /** Durée estimée de la rando (DIN 33466), en heures. */
+  durationHours: number | null;
+  /** Indice de l'heure affichée (null tant que la prévision n'est pas chargée). */
+  hourIndex: number | null;
+  onSelectHour: (selection: HourSelection | null) => void;
 }
 
-export function WeatherPanel({ weather, model, waitingForElevation }: Props) {
+export function WeatherPanel({ weather, model, waitingForElevation, start, durationHours, hourIndex, onSelectHour }: Props) {
   const { forecast, loading, error, refresh } = weather;
-  // Heure affichée : null = heure courante.
-  const [offset, setOffset] = useState<{ key: string; index: number } | null>(null);
-
   const data = forecast?.data;
-  const nowIndex = data ? Math.max(0, data.times.indexOf(parisHourKey())) : 0;
-  const index = data && offset?.key === forecast?.key ? Math.min(Math.max(offset.index, 0), data.times.length - 1) : nowIndex;
-  const go = (i: number) => forecast && setOffset({ key: forecast.key, index: i });
+  const index = data && hourIndex !== null ? hourIndex : null;
+  const nowIndex = data ? currentHourIndex(data.times) : 0;
+  const go = (i: number) => forecast && onSelectHour({ key: forecast.key, index: i });
+
+  // Jour affiché : celui de l'heure sélectionnée, sinon aujourd'hui.
+  const day = data && index !== null ? data.times[index].slice(0, 10) : parisHourKey().slice(0, 10);
+  const sun = start ? daylightInfo(day, start.lat, start.lon, durationHours) : null;
+  const night = data && index !== null && start ? isNightHour(data.times[index], sunTimes(day, start.lat, start.lon)) : false;
 
   return (
     <section className="weather" aria-label="Météo">
@@ -51,6 +61,8 @@ export function WeatherPanel({ weather, model, waitingForElevation }: Props) {
         )}
       </p>
 
+      {sun && <SunBlock sun={sun} durationHours={durationHours} />}
+
       {waitingForElevation ? (
         <p className="weather-info">En attente des altitudes du tracé…</p>
       ) : error ? (
@@ -60,7 +72,7 @@ export function WeatherPanel({ weather, model, waitingForElevation }: Props) {
             Réessayer
           </button>
         </p>
-      ) : !data ? (
+      ) : !data || index === null ? (
         loading && <p className="weather-info spinner-text">Récupération de la prévision…</p>
       ) : (
         <>
@@ -68,7 +80,10 @@ export function WeatherPanel({ weather, model, waitingForElevation }: Props) {
             <button type="button" className="icon-btn" onClick={() => go(index - 1)} disabled={index <= 0} aria-label="Heure précédente">
               ‹
             </button>
-            <span className="weather-hour">{hourLabel(data.times[index])}</span>
+            <span className={`weather-hour${night ? ' night' : ''}`}>
+              {formatForecastHour(data.times[index])}
+              {night && <span className="night-tag"> · 🌙 nuit</span>}
+            </span>
             <button
               type="button"
               className="icon-btn"
@@ -79,7 +94,7 @@ export function WeatherPanel({ weather, model, waitingForElevation }: Props) {
               ›
             </button>
             {index !== nowIndex && (
-              <button type="button" className="link-btn" onClick={() => setOffset(null)}>
+              <button type="button" className="link-btn" onClick={() => onSelectHour(null)}>
                 maintenant
               </button>
             )}
@@ -131,7 +146,7 @@ export function WeatherPanel({ weather, model, waitingForElevation }: Props) {
                       <span className="weather-sub">ress. {formatTemp(s.apparent_temperature[index])}</span>
                     </td>
                     <td>
-                      {formatWind(s.wind_speed_10m[index])} {windFrom(s.wind_direction_10m[index])}
+                      {formatWind(s.wind_speed_10m[index])} {formatWindDir(s.wind_direction_10m[index])}
                       <span className="weather-sub">raf. {formatWind(s.wind_gusts_10m[index])}</span>
                     </td>
                     <td>{formatPrecip(s.precipitation[index])}</td>
@@ -142,13 +157,43 @@ export function WeatherPanel({ weather, model, waitingForElevation }: Props) {
           </table>
 
           {model !== 'best_match' && !data.primary[index] && (
-            <p className="weather-info">
-              Au-delà de l’échéance d’AROME/ARPEGE : valeurs complétées par le modèle Open-Meteo.
-            </p>
+            <p className="weather-info">Au-delà de l’échéance d’AROME/ARPEGE : valeurs complétées par le modèle Open-Meteo.</p>
           )}
           {data.points[0].temperature_2m[index] === null && <p className="weather-info">{DASH} : donnée non fournie par le modèle.</p>}
         </>
       )}
     </section>
+  );
+}
+
+function SunBlock({ sun, durationHours }: { sun: ReturnType<typeof daylightInfo>; durationHours: number | null }) {
+  if (!sun.sunrise || !sun.sunset) {
+    return <p className="sun">Pas de lever ni de coucher du soleil ce jour-là.</p>;
+  }
+  return (
+    <div className="sun" title="Calculé au point de départ, sur un horizon dégagé : le relief peut cacher le soleil plus tôt.">
+      <p className="sun-times">
+        <span>
+          🌅 Lever <strong>{formatClock(sun.sunrise.getTime())}</strong>
+        </span>
+        <span>
+          🌇 Coucher <strong>{formatClock(sun.sunset.getTime())}</strong>
+        </span>
+        <span className="sun-length">jour {formatHoursMinutes(sun.daylightHours)}</span>
+      </p>
+      {durationHours !== null &&
+        (sun.longerThanDay ? (
+          <p className="sun-warning">
+            ⚠ Durée estimée ({formatDuration(durationHours)}) plus longue que la journée : prévoir une frontale.
+          </p>
+        ) : (
+          sun.latestStart && (
+            <p className="sun-advice">
+              Départ au plus tard à <strong>{formatClock(sun.latestStart.getTime())}</strong> pour finir avant la nuit (durée
+              estimée {formatDuration(durationHours)}).
+            </p>
+          )
+        ))}
+    </div>
   );
 }

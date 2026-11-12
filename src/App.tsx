@@ -11,6 +11,9 @@ import { needsElevation } from './lib/elevation';
 import { selectWeatherPoints } from './lib/weatherPoints';
 import { useWeather } from './hooks/useWeather';
 import { WeatherPanel } from './components/WeatherPanel';
+import { resolveHourIndex, type HourSelection } from './lib/forecast';
+import { isNightHour, sunTimes } from './lib/sun';
+import { dinDurationHours } from './lib/din';
 import { buildGpx, gpxFileName } from './lib/gpxExport';
 import { downloadText } from './lib/download';
 import { DropZone } from './components/DropZone';
@@ -82,6 +85,22 @@ export default function App() {
   );
   const weatherModel = settings?.weatherModel ?? 'meteofrance_seamless';
   const weather = useWeather(selectedTrack?.id, weatherPoints, weatherModel);
+
+  // Heure affichée dans le panneau météo, partagée avec les infobulles de la carte.
+  const [hourSelection, setHourSelection] = useState<HourSelection | null>(null);
+  const forecast = weather.forecast;
+  const hourIndex = forecast ? resolveHourIndex(forecast.data.times, forecast.key, hourSelection) : null;
+
+  const start = analysis?.profile[0] ?? null;
+  const durationHours =
+    analysis && settings && analysis.stats.ascentM !== null
+      ? dinDurationHours(analysis.stats.distanceM / 1000, analysis.stats.ascentM, analysis.stats.descentM ?? 0, settings.din)
+      : null;
+  const nightHour = useMemo(() => {
+    if (!forecast || hourIndex === null || !start) return false;
+    const time = forecast.data.times[hourIndex];
+    return isNightHour(time, sunTimes(time.slice(0, 10), start.lat, start.lon));
+  }, [forecast, hourIndex, start]);
 
   const selectTrack = useCallback(
     (id: string) => {
@@ -214,6 +233,10 @@ export default function App() {
               weather={weather}
               model={weatherModel}
               waitingForElevation={selectedNeedsElevation}
+              start={start}
+              durationHours={durationHours}
+              hourIndex={hourIndex}
+              onSelectHour={setHourSelection}
             />
           )
         }
@@ -246,6 +269,9 @@ export default function App() {
             fitRequest={fitRequest}
             summit={analysis?.stats.summit ?? null}
             weatherPoints={weatherPoints}
+            forecast={forecast}
+            hourIndex={hourIndex}
+            nightHour={nightHour}
             onSelect={selectTrack}
             onBaseLayerChange={(id) => void setSettings({ baseLayer: id })}
           />

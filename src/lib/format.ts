@@ -56,6 +56,18 @@ export function formatPercent(v: number | null | undefined): string {
   return isNum(v) ? `${nf0.format(Math.round(v))} %` : DASH;
 }
 
+const WIND_DIRS = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'];
+
+/** Direction d'où vient le vent : 315° → « NO » ; chaîne vide si inconnue. */
+export function formatWindDir(deg: number | null | undefined): string {
+  return isNum(deg) ? WIND_DIRS[Math.round((((deg % 360) + 360) % 360) / 45) % 8] : '';
+}
+
+/** « 9 h 27 » pour une durée de jour, « – » si inconnue. */
+export function formatHoursMinutes(hours: number | null | undefined): string {
+  return isNum(hours) ? formatDuration(hours) : DASH;
+}
+
 export function formatNumber(n: number, digits = 0): string {
   return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: digits }).format(n);
 }

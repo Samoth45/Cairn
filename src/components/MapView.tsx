@@ -4,6 +4,7 @@ import {
   CircleMarker,
   LayersControl,
   MapContainer,
+  Pane,
   Polyline,
   TileLayer,
   Tooltip,
@@ -16,9 +17,14 @@ import type { BaseLayerId, Track } from '../types';
 import type { Bounds } from '../lib/geo';
 import type { TrackStats } from '../lib/stats';
 import { formatMeters } from '../lib/format';
-import { rolesLabel, type WeatherPoint } from '../lib/weatherPoints';
+import type { WeatherPoint } from '../lib/weatherPoints';
+import type { CachedForecast } from '../db/db';
+import { WeatherPointTooltip } from './WeatherPointTooltip';
 import { FitBounds, type FitRequest } from './FitBounds';
 import { HoverMarker } from './HoverMarker';
+
+/** Calque des marqueurs (sommet, points météo, survol du profil), au-dessus des tracés. */
+const MARKERS_PANE = 'cairn-markers';
 
 /** Recalcule la taille de la carte quand son conteneur change (profil affiché / masqué). */
 function AutoResize() {
@@ -74,6 +80,10 @@ interface Props {
   summit: TrackStats['summit'];
   /** Points de prévision météo du tracé sélectionné. */
   weatherPoints: WeatherPoint[];
+  /** Prévision chargée et heure affichée dans le panneau météo (pour les infobulles). */
+  forecast: CachedForecast | null;
+  hourIndex: number | null;
+  nightHour: boolean;
   onSelect: (id: string) => void;
   onBaseLayerChange: (id: BaseLayerId) => void;
 }
@@ -90,6 +100,9 @@ export function MapView({
   fitRequest,
   summit,
   weatherPoints,
+  forecast,
+  hourIndex,
+  nightHour,
   onSelect,
   onBaseLayerChange,
 }: Props) {
@@ -103,7 +116,20 @@ export function MapView({
   }, [tracks]);
   const selectedColor = tracks.find((t) => t.id === selectedId)?.color ?? '#e6194b';
 
+  /** Point météo situé exactement au point culminant (rôle « Sommet »), s'il existe. */
+  const summitWeatherPoint = summit
+    ? weatherPoints.find((p) => p.roles.includes('summit') && p.lat === summit.lat && p.lon === summit.lon)
+    : undefined;
+
+  /** Météo d'un point à l'heure affichée, si la prévision chargée correspond aux points actuels. */
+  const weatherAt = (p: WeatherPoint) => {
+    const i = forecast ? forecast.points.findIndex((fp) => fp.lat === p.lat && fp.lon === p.lon && fp.ele === p.ele) : -1;
+    if (!forecast || i < 0 || hourIndex === null) return {};
+    return { series: forecast.data.points[i], time: forecast.data.times[hourIndex], index: hourIndex };
+  };
+
   const visible = tracks.filter((t) => t.visible);
+  const showSelected = !!selectedId && visible.some((t) => t.id === selectedId);
   // Le tracé sélectionné est dessiné en dernier pour passer au premier plan.
   const ordered = [...visible.filter((t) => t.id !== selectedId), ...visible.filter((t) => t.id === selectedId)];
 
@@ -170,34 +196,50 @@ export function MapView({
         ];
       })}
 
-      {selectedId &&
-        visible.some((t) => t.id === selectedId) &&
-        weatherPoints.map((p) => (
-          <CircleMarker
-            key={`wx-${p.lat}-${p.lon}`}
-            center={[p.lat, p.lon]}
-            radius={4.5}
-            pathOptions={{ color: '#22292f', weight: 2, fillColor: '#ffffff', fillOpacity: 1 }}
-          >
-            <Tooltip direction="top" offset={[0, -4]}>
-              Point météo · {formatMeters(p.ele)}
-              {p.roles.length > 0 && ` · ${rolesLabel(p.roles)}`}
-            </Tooltip>
-          </CircleMarker>
-        ))}
+      {/* Calque dédié au-dessus des tracés : sinon un tracé ajouté après un marqueur
+          (import, réaffichage) le recouvre. */}
+      <Pane name={MARKERS_PANE} style={{ zIndex: 450 }}>
+      {showSelected &&
+        weatherPoints.map((p) => {
+          // Le point météo du sommet est fusionné avec le marqueur « Point culminant » (même position) :
+          // sinon ce dernier, dessiné par-dessus, masquerait son infobulle.
+          if (p === summitWeatherPoint) return null;
+          return (
+            <CircleMarker
+              key={`wx-${p.lat}-${p.lon}`}
+              center={[p.lat, p.lon]}
+              radius={5}
+              pathOptions={{ color: '#22292f', weight: 2, fillColor: '#ffffff', fillOpacity: 1 }}
+            >
+              <Tooltip direction="top" offset={[0, -5]} className="wx-tooltip-wrap">
+                <WeatherPointTooltip point={p} {...weatherAt(p)} night={nightHour} />
+              </Tooltip>
+            </CircleMarker>
+          );
+        })}
 
-      {summit && selectedId && visible.some((t) => t.id === selectedId) && (
+      {summit && showSelected && (
         <CircleMarker
           center={[summit.lat, summit.lon]}
           radius={6}
           pathOptions={{ color: '#ffffff', weight: 2.5, fillColor: '#22292f', fillOpacity: 1 }}
         >
-          <Tooltip direction="top" offset={[0, -6]}>
-            Point culminant · {formatMeters(summit.ele)}
+          <Tooltip direction="top" offset={[0, -6]} className="wx-tooltip-wrap">
+            {summitWeatherPoint ? (
+              <WeatherPointTooltip
+                point={summitWeatherPoint}
+                title="Point culminant"
+                {...weatherAt(summitWeatherPoint)}
+                night={nightHour}
+              />
+            ) : (
+              <>Point culminant · {formatMeters(summit.ele)}</>
+            )}
           </Tooltip>
         </CircleMarker>
       )}
       <HoverMarker color={selectedColor} />
+      </Pane>
     </MapContainer>
   );
 }

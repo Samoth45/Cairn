@@ -115,6 +115,18 @@ arrête-toi, explique-moi comment tester, et attends ma validation avant de cont
 - Cache en mémoire et dans IndexedDB : ne pas refaire un appel pour le même tracé
   avant 1 heure. Bouton « Actualiser » pour forcer.
 
+## Étape 3bis : soleil et météo sur la carte
+- Heures de lever et de coucher du soleil (information essentielle, surtout à
+  l'approche de l'hiver) :
+  - calculées au point de départ du tracé pour le jour affiché, avec la durée du jour ;
+  - heure de départ conseillée au plus tard (coucher du soleil − durée estimée DIN),
+    avec un avertissement si la durée estimée dépasse la durée du jour ;
+  - signaler les heures de nuit dans la navigation horaire (et plus tard dans le
+    tableau de l'étape 4).
+- Infobulles des points météo (ronds blancs sur la carte) : en plus de l'altitude et
+  du rôle, afficher la météo du point à l'heure affichée dans le panneau météo
+  (pictogramme, température et ressenti, vent et rafales, pluie et probabilité).
+
 ## Étape 4 : tableau météo par altitude (vue principale)
 - Pour le tracé sélectionné, sélecteur de jour (les 7 jours à venir).
 - Tableau en heatmap : une ligne par point d'échantillonnage (libellé : altitude

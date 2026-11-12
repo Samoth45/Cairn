@@ -31,8 +31,13 @@ statistiques, météo détaillée par altitude pour choisir le meilleur jour / h
 - [x] **Étape 3** — service météo Open-Meteo (`services/weather.ts`), points d'échantillonnage
   (≤ 8, fusion < 200 m), cache mémoire + IndexedDB 1 h, bouton « Actualiser », choix du modèle
   dans les paramètres. Vue compacte provisoire (`WeatherPanel`, navigation heure par heure)
-  + points météo sur la carte. **En attente de validation.**
-- [ ] **Étape 4** — tableau heatmap météo par altitude. ← prochaine étape
+  + points météo sur la carte. Validée.
+- [x] **Étape 3bis** (ajoutée à la demande de l'utilisateur) — lever/coucher du soleil au départ
+  (durée du jour, départ conseillé au plus tard, alerte si rando plus longue que le jour, heures
+  de nuit signalées) et météo du point dans les infobulles des points météo de la carte.
+  **En attente de validation.**
+- [ ] **Étape 4** — tableau heatmap météo par altitude (penser à griser les heures de nuit).
+  ← prochaine étape
 - [ ] Étape 5 — tracé coloré selon la prévision à l'heure de passage.
 - [ ] Étape 6 — score « meilleur jour ».
 
@@ -91,6 +96,10 @@ src/
                       summit/start/lowest), triés du plus haut au plus bas ; rolesLabel ; weatherPointsKey
     time.ts           parisHourKey (heure de Paris au format des séries Open-Meteo), formatClock, formatAgo
     wmo.ts            codes WMO → libellé FR + pictogramme, isThunderstorm
+    sun.ts            sunTimes(jour, lat, lon) (calcul astronomique local), daylightInfo (durée du
+                      jour, départ au plus tard = coucher − durée DIN, longerThanDay), isNightHour,
+                      parisMinutes
+    forecast.ts       HourSelection {key, index}, currentHourIndex, resolveHourIndex, formatForecastHour
     din.ts            dinDurationHours(distanceKm, D+, D-, speeds)
     settings.ts       normalizeSettings (valeurs par défaut + validation, base et sauvegarde)
     format.ts         formatage FR (km, m, durée « 5 h 15 », coordonnées, « – » si null)
@@ -107,10 +116,12 @@ src/
                       réseau, TTL 1 h ; peekTrackForecast ; deleteTrackForecast (appelé à la suppression)
   components/         MapView (fonds, polylines 3 couches, marqueurs sommet / survol / points météo,
                       AutoResize), FitBounds, Sidebar (zone défilante stats + météo + liste),
-                      TrackItem, TrackStats, WeatherPanel, ElevationProfile (SVG), SettingsDialog,
-                      HoverMarker, DropZone, Toasts, ErrorBoundary, CairnLogo
+                      TrackItem, TrackStats, WeatherPanel (+ bloc soleil), WeatherPointTooltip,
+                      ElevationProfile (SVG), SettingsDialog, HoverMarker, DropZone, Toasts,
+                      ErrorBoundary, CairnLogo
   App.tsx             orchestration : sélection, analyse mémoïsée du tracé sélectionné, zoom
-                      (fitRequest avec nonce), toasts, tiroir mobile, profil, paramètres
+                      (fitRequest avec nonce), toasts, tiroir mobile, profil, paramètres, durée DIN,
+                      heure météo affichée (hourSelection) partagée panneau ↔ infobulles carte
 docker/nginx.conf     fallback SPA + cache long sur /assets
 samples/              GPX fictifs pour tests manuels (trk avec ele, rte sans ele, invalide)
 ```
@@ -146,6 +157,20 @@ samples/              GPX fictifs pour tests manuels (trk avec ele, rte sans ele
   modèle ou les points changent (clé `modèle|points`). Le cache n'est pas dans la sauvegarde JSON.
 - Les séries horaires sont en heure locale de Paris (`timezone=Europe/Paris`) : comparer avec
   `parisHourKey()`, ne pas convertir avec le fuseau du navigateur.
+- **Soleil calculé localement** (pas via l'API : marche pour tout jour, sans réseau, avant
+  l'arrivée de la météo), au point de départ, horizon astronomique (−0,833°) sans relief ni
+  altitude ; écart ≤ 2 min avec Open-Meteo `daily=sunrise,sunset` (testé). Une heure est « de
+  nuit » si son milieu est avant le lever ou après le coucher.
+- **Tous les marqueurs** (sommet, points météo, survol du profil) sont dans le pane Leaflet
+  `cairn-markers` (z-index 450, rendu SVG) : sur le canvas des tracés, l'ordre de dessin = ordre
+  d'ajout, et un tracé importé/réaffiché après un marqueur le recouvrait.
+- Tests : le DOMParser de jsdom est très lent sur les gros GPX (~1 min pour 30 000 points,
+  contre quelques centaines de ms dans le navigateur) → ne pas parser de gros fichiers dans les tests.
+- **Marqueur « Point culminant » = point météo « Sommet »** (mêmes coordonnées) : un seul
+  marqueur (le noir), dont l'infobulle porte la météo ; le rond blanc du sommet n'est pas dessiné,
+  sinon l'un masque l'autre au survol.
+- **Heure météo affichée** : état `HourSelection` dans App, lié à la clé de la prévision ; une
+  sélection d'une autre prévision est ignorée → retour à l'heure courante au changement de tracé.
 - La sauvegarde/les paramètres anciens sont complétés par `normalizeSettings` : toujours
   ajouter un nouveau réglage là et dans `DEFAULT_SETTINGS`.
 - Les paramètres (`Settings`) sont persistés en base et inclus dans la sauvegarde JSON :
