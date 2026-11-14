@@ -79,6 +79,13 @@ indiquer le résultat des trois commandes.
   Contexte : le cas d'usage principal est la préparation de randos à partir de GPX légers de
   sites de randonnée ; les traces Strava (rando déjà faite, partagée par quelqu'un) sont secondaires.
   Leur profil paraît plus lisse (altitude barométrique/corrigée par Strava, points denses) : normal.
+- **Dépendances dépréciées** (signalées par `npm ci` sous Node 26 / npm 11, fonctionnent encore) :
+  - `eslint@9` : « no longer supported ». Passer à ESLint 10 ; vérifier la compatibilité de
+    `typescript-eslint`, `eslint-plugin-react-hooks`, `eslint-plugin-react-refresh` et adapter
+    `eslint.config.js` si besoin.
+  - `whatwg-encoding@3.1.1` (« Use @exodus/bytes instead ») : dépendance transitive de `jsdom`
+    (environnement des tests) ; se règle en mettant `jsdom` à jour, pas directement.
+  Après mise à jour : `npm install` dans le conteneur, routine complète (tests, lint, build).
 
 ## Commandes
 
@@ -110,8 +117,10 @@ validée. Mis en place (détail dans `prompt.md`) :
   `outputDirectory: dist`, `installCommand: npm ci`, rewrite `/(.*)` → `/index.html` (SPA,
   équivalent de `docker/nginx.conf`), `Cache-Control: public, max-age=31536000, immutable`
   sur `/assets/(.*)`.
-- Node 22 partout : `"engines": { "node": "22.x" }` dans `package.json` + `.nvmrc` (`22`),
-  aligné sur l'image `node:22-alpine`.
+- Node 26 (LTS) partout : `"engines": { "node": "26.x" }` dans `package.json` + `.nvmrc` (`26`),
+  aligné sur l'image `node:26-alpine` (npm 11). Passage de 22 à 26 demandé par l'utilisateur le
+  14/11/2026 ; Vercel prend en charge 26.x (version par défaut depuis le 29/10/2026), 24.x et 22.x.
+  Toujours changer ces trois endroits ensemble (Dockerfile, engines, .nvmrc).
 - `package-lock.json` versionné et à jour (requis par `npm ci`).
 - Contraintes à respecter dans tout le code, dès maintenant :
   - pas de `base` dans `vite.config.ts` (app servie à la racine du domaine) ;
@@ -129,6 +138,12 @@ validée. Mis en place (détail dans `prompt.md`) :
   Alpine, contient bien les binaires natifs Linux glibc (`@rollup/rollup-linux-x64-gnu`,
   `@esbuild/linux-x64`) dont Vercel a besoin.
 - `.vercel/` (dossier local de la CLI Vercel) est dans `.gitignore`.
+- npm 11 affiche `npm warn install-scripts … esbuild@0.25.12 (postinstall: node install.js)`
+  « not yet covered by allowScripts » : simple avertissement (le script s'exécute encore),
+  esbuild fonctionne (vérifié). Si une future version de npm bloque ces scripts, approuver
+  avec `npm install-scripts approve esbuild` (non fait : pas demandé).
+- Dépréciations connues, sans lien avec Node 26 : `eslint@9` et `whatwg-encoding` (via jsdom) —
+  à traiter en fin de projet, voir « Idées pour après la fin des étapes ».
 - Seule URL en `http://` du code : le namespace XML GPX `http://www.topografix.com/GPX/1/1`
   (identifiant obligatoire, jamais appelé) — ce n'est pas du mixed content.
 - README : section « Déploiement sur Vercel » (build depuis les sources via `vercel.json`, push
@@ -139,7 +154,7 @@ validée. Mis en place (détail dans `prompt.md`) :
 
 ## Stack
 
-Vite 6 + React 19 + TypeScript strict, Leaflet 1.9 + react-leaflet 5, `@tmcw/togeojson`,
+Node 26 / npm 11 (image `node:26-alpine`), Vite 6 + React 19 + TypeScript strict, Leaflet 1.9 + react-leaflet 5, `@tmcw/togeojson`,
 Dexie 4 + `dexie-react-hooks`, Vitest + jsdom + fake-indexeddb. Graphiques : **SVG maison**
 (pas de recharts), cf. `ElevationProfile.tsx` ; garder ce choix pour les étapes suivantes.
 

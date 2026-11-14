@@ -80,7 +80,8 @@ données IndexedDB étant propres à chaque navigateur.
 Le projet est relié à Vercel depuis le dépôt Git.
 
 - **Vercel construit depuis les sources, pas avec Docker.** Il exécute `npm ci` puis
-  `npm run build` avec Node 22 et publie le dossier `dist/`. Cette configuration est
+  `npm run build` avec Node 26 (LTS, même version que l'image Docker `node:26-alpine`) et
+  publie le dossier `dist/`. Cette configuration est
   versionnée dans [`vercel.json`](vercel.json) (avec la redirection de toutes les routes vers
   `index.html` et le cache longue durée des fichiers `/assets/`), la version de Node dans
   `package.json` (`engines`) et `.nvmrc`. Docker reste l'environnement de développement et de
