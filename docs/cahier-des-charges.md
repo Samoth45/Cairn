@@ -1,3 +1,8 @@
+> **Document de référence figé.** Étapes 1 à 6 réalisées et validées (détail :
+> `docs/historique.md`). Ne plus modifier ce fichier : les évolutions passent par
+> `docs/specs/`. La préparation du déploiement Vercel, demandée après coup, est documentée
+> dans `docs/deploiement.md`.
+
 # Projet : Cairn, application de planification de randonnées (météo montagne)
 
 ## Contexte
@@ -40,10 +45,6 @@ doit tourner dans Docker. Je ne veux rien installer en local à part Docker.
   sur l'hôte.
 - `README.md` expliquant comment lancer le projet en dev et en prod sur un
   nouveau poste en une ou deux commandes.
-
-## Méthode de travail
-Développe étape par étape, dans l'ordre ci-dessous. À la fin de chaque étape,
-arrête-toi, explique-moi comment tester, et attends ma validation avant de continuer.
 
 ---
 
@@ -167,70 +168,3 @@ arrête-toi, explique-moi comment tester, et attends ma validation avant de cont
 - Mention claire que la fiabilité baisse fortement au-delà de 3 à 5 jours
   (atténuer visuellement les jours lointains).
 
----
-
-## Pour commencer
-Initialise le projet, installe les dépendances et réalise l'étape 1.
-Puis arrête-toi et explique-moi comment lancer et tester l'application.
-
----
-
-## Préparation du déploiement sur Vercel
-
-Je veux déployer Cairn sur Vercel (projet déjà importé depuis mon dépôt Git).
-Vercel construit l'application à partir du code source : il ne lance pas
-le conteneur Docker. La configuration Docker existante doit rester intacte
-et continuer à fonctionner pour le développement et la prod locale.
-
-Comme toujours, exécute toutes les commandes via
-`docker compose run --rm dev ...`, jamais directement sur l'hôte.
-
-### À faire
-
-1. **`vercel.json` à la racine du projet** (là où se trouve `package.json`) :
-   - Rewrite de toutes les routes vers `/index.html` (équivalent de la config
-     nginx pour la SPA) :
-     `{ "source": "/(.*)", "destination": "/index.html" }`
-   - En-têtes de cache : `Cache-Control: public, max-age=31536000, immutable`
-     pour `/assets/(.*)` (fichiers avec hash générés par Vite).
-   - Indique explicitement `"framework": "vite"`, `"buildCommand": "npm run build"`,
-     `"outputDirectory": "dist"` et `"installCommand": "npm ci"`, pour que la
-     config soit versionnée dans le dépôt plutôt que dépendre de l'interface Vercel.
-
-2. **Version de Node alignée avec Docker (Node 26)** :
-   - Ajoute `"engines": { "node": "26.x" }` dans `package.json`.
-   - Ajoute un fichier `.nvmrc` contenant `26`.
-
-3. **Lockfile** : vérifie que `package-lock.json` existe, qu'il est à jour et
-   qu'il n'est pas exclu par `.gitignore` (`npm ci` en a besoin).
-
-4. **Vérifications de compatibilité** :
-   - Pas de `base` personnalisée dans `vite.config.ts` qui casserait les chemins
-     (l'app est servie à la racine du domaine).
-   - Les options propres au développement Docker (`server.host`,
-     `server.watch.usePolling`) ne concernent que le serveur de dev et ne gênent
-     pas le build : vérifie-le simplement.
-   - Aucun appel à `localhost` ou à une URL locale codée en dur dans le code.
-   - Les tuiles de carte et les API (IGN, OpenTopoMap, Open-Meteo) sont appelées
-     en HTTPS (sinon blocage « mixed content » en production).
-   - Aucune variable d'environnement n'est nécessaire. Si tu en trouves une,
-     signale-la-moi.
-
-5. **Test du build de production** :
-   - Lance `npm run build` dans le conteneur et corrige toute erreur
-     TypeScript ou de build (Vercel échouera sur les mêmes erreurs).
-   - Lance `npm run preview` (avec `--host 0.0.0.0` et le port exposé) pour que
-     je puisse tester le build dans mon navigateur avant de pousser.
-
-6. **README** : ajoute une section « Déploiement sur Vercel » qui explique :
-   - que Vercel construit depuis les sources (pas Docker) et que la config est
-     dans `vercel.json` ;
-   - qu'un push sur la branche principale déclenche un déploiement, et que les
-     autres branches génèrent des previews ;
-   - que les données sont stockées dans le navigateur : la version déployée
-     démarre vide, il faut y importer la sauvegarde JSON.
-
-### Fin de l'étape
-Ne pousse rien sur Git toi-même. Montre-moi la liste des fichiers créés ou
-modifiés, explique-moi comment tester le build avec `npm run preview`, puis
-arrête-toi.

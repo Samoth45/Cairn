@@ -1,0 +1,78 @@
+# src/components — UI et carte Leaflet
+
+Ces règles valent aussi pour `src/App.tsx` (état partagé, onglets, sélection d'heure).
+
+## Composants
+
+MapView (fonds, polylines 3 couches, marqueurs sommet / survol / points météo, AutoResize),
+FitBounds, Sidebar (zone défilante stats + météo + liste), TrackItem, TrackStats, WeatherPanel
+(+ bloc soleil, bouton vers le tableau), WeatherView (onglet Météo, heatmap), WeatherPointTooltip,
+ForecastControl (panneau de coloration, en bas à gauche de la carte), PassageTooltip,
+SummaryView (onglet « Meilleur jour »), ElevationProfile (SVG), SettingsDialog, HoverMarker,
+DropZone, Toasts, ErrorBoundary, CairnLogo.
+
+## Carte Leaflet
+
+- **Renderer canvas** (`tolerance: 8` pour le clic au doigt), le tracé sélectionné est dessiné
+  en dernier. Tracés en 3 couches (ombre noire + liseré blanc + couleur) pour le contraste.
+  Fond IGN : maxNativeZoom 19 ; OpenTopoMap : maxNativeZoom 17.
+- **Tous les marqueurs** (sommet, points météo, survol du profil) sont dans le pane Leaflet
+  `cairn-markers` (z-index 450, rendu SVG) : sur le canvas des tracés, l'ordre de dessin = ordre
+  d'ajout, et un tracé importé/réaffiché après un marqueur le recouvrait.
+- **react-leaflet : `interactive={false}` en prop, jamais dans `pathOptions`.** `pathOptions` est
+  appliqué par `setStyle` *après* l'ajout à la carte ; or Leaflet lit `interactive` à
+  l'insertion (classe `leaflet-interactive` des chemins SVG). Dans `pathOptions`, la forme reste
+  cliquable **en production seulement** (en dev, le StrictMode retire puis réinsère chaque couche,
+  ce qui masque le bug). Bug réel corrigé : le marqueur de survol passait sous la souris et volait
+  le survol du tracé coloré (infobulle qui clignote, curseur « main ouverte »).
+- **Marqueur « Point culminant » = point météo « Sommet »** (mêmes coordonnées) : un seul
+  marqueur (le noir), dont l'infobulle porte la météo ; le rond blanc du sommet n'est pas dessiné,
+  sinon l'un masque l'autre au survol.
+- **Mode coloré** : le liseré du tracé sélectionné devient **sombre** (sinon 0 °C, quasi blanc,
+  disparaît sur le liseré blanc). Calcul des lignes colorées : voir `src/lib/CLAUDE.md`.
+- **OpenTopoMap refuse les referrers `localhost` / `127.0.0.1`** : il renvoie des tuiles (HTTP 200)
+  barrées de « Generic referrer detected. Please contact us: otm@top-o-map.com ». Vérifié : sans
+  referrer, avec l'adresse Vercel ou une IP du réseau local, les tuiles sont normales. D'où
+  `otmReferrerPolicy` (`lib/referrer.ts`) : `referrerPolicy: 'no-referrer'` sur la couche OTM
+  **uniquement** quand la page est servie en boucle locale ; en ligne, referrer par défaut du
+  navigateur (identifie honnêtement le site, comme l'attend OpenTopoMap). L'IGN accepte localhost.
+- **Contrôles** : échelle et zoom en bas à droite, panneau de prévision en bas à gauche,
+  bouton « ⛰ Profil » en haut à gauche (sous le bouton Cairn sur mobile).
+
+## Dev ≠ prod (StrictMode)
+
+Tout comportement de carte (survol, clics, couches) doit être vérifié aussi sur le build
+(`npm run preview`).
+
+Pour mesurer sans navigateur à l'écran : un conteneur jetable `node:26-alpine` +
+`apk add chromium` + `puppeteer-core`, sur le réseau `cairn_default`, en visant l'IP des
+conteneurs (Vite refuse les noms d'hôte inconnus) ; la carte Leaflet se retrouve via l'arbre
+React (`memoizedProps.value.map`), les pixels du tracé via `getImageData` du canvas.
+**Ne rien installer dans le projet pour ça.**
+
+## Navigation et état partagé (App.tsx)
+
+- **Onglets** : Carte / Météo (tracé sélectionné requis) / Meilleur jour (au moins un tracé).
+  Sur mobile, icônes seules (`.tab-text` masqué, libellés en `aria-label`).
+- **Onglets Carte / Météo** (`mainView` dans App, forcé à `map` sans tracé sélectionné) : la
+  carte reste montée mais `hidden` ; `FitBounds` reçoit `active` et diffère le zoom tant que la
+  carte est masquée (sinon Leaflet calcule sur une taille nulle). Le profil n'est affiché qu'en
+  vue Carte.
+- **Heure météo affichée** : état `HourSelection` dans App, lié à la clé de la prévision ; une
+  sélection d'une autre prévision est ignorée → retour à l'heure courante au changement de tracé.
+- **Jour affiché dans le tableau = jour de l'heure sélectionnée** (une seule source de vérité :
+  `HourSelection`). Changer de jour garde la même heure (ou midi si hors 6–21 h).
+- **Clic sur une case du « Meilleur jour »** (`openTrackDay` dans App) : `selectTrack`,
+  `HourSelection` sur ce jour à l'heure de départ (bornée à 6–21 h) avec la clé de la prévision
+  du tracé (identique à celle de `useWeather` : mêmes points, même modèle), jour de départ de
+  l'étape 5 = ce jour, onglet Météo.
+- **Jour de départ** : choix explicite (état App, non persisté) s'il est couvert par la
+  prévision, sinon le jour affiché dans le panneau/tableau météo. Heure de départ et variable :
+  persistées dans `Settings`.
+- **Survol** : le store `useHoverPoint` porte `d` (distance) ; profil et tracé coloré l'alimentent,
+  `HoverMarker` affiche l'infobulle de passage (`renderInfo`) seulement en mode coloré. Clic sur le
+  tracé coloré = infobulle (pas de nouveau zoom) ; clic sur le fond de carte = fermeture.
+
+## Responsive
+
+Panneau latéral fixe ≥ 768 px, tiroir + bouton flottant en dessous.
