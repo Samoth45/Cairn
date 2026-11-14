@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Tracé d'exemple fictif (pour tester l'import), dans le massif du Mont-Blanc -->
+<gpx version="1.1" creator="Cairn" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata><name>Exemple – montée au lac</name></metadata>
+  <trk>
+    <name>Montée au lac</name>
+    <trkseg>
+      <trkpt lat="45.9437" lon="6.8854"><ele>1460</ele></trkpt>
+      <trkpt lat="45.9465" lon="6.8838"><ele>1540</ele></trkpt>
+      <trkpt lat="45.9498" lon="6.8822"><ele>1630</ele></trkpt>
+      <trkpt lat="45.9531" lon="6.8811"><ele>1745</ele></trkpt>
+      <trkpt lat="45.9560" lon="6.8795"><ele>1850</ele></trkpt>
+      <trkpt lat="45.9589" lon="6.8776"><ele>1960</ele></trkpt>
+      <trkpt lat="45.9617" lon="6.8761"><ele>2070</ele></trkpt>
+      <trkpt lat="45.9644" lon="6.8749"><ele>2160</ele></trkpt>
+      <trkpt lat="45.9670" lon="6.8736"><ele>2250</ele></trkpt>
+      <trkpt lat="45.9696" lon="6.8722"><ele>2330</ele></trkpt>
+      <trkpt lat="45.9722" lon="6.8712"><ele>2352</ele></trkpt>
+    </trkseg>
+  </trk>
+</gpx>

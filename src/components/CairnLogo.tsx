@@ -1,0 +1,11 @@
+export function CairnLogo({ size = 28 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden="true">
+      <ellipse cx="32" cy="54" rx="24" ry="7" fill="#52616b" />
+      <ellipse cx="31" cy="41" rx="18" ry="7" fill="#6b7b85" />
+      <ellipse cx="33" cy="29" rx="13" ry="6" fill="#84949e" />
+      <ellipse cx="31" cy="18.5" rx="8.5" ry="4.8" fill="#a0aeb6" />
+      <ellipse cx="32" cy="10" rx="4.5" ry="3" fill="#c0cbd1" />
+    </svg>
+  );
+}
