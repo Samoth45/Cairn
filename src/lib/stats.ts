@@ -25,6 +25,8 @@ export interface ProfilePoint {
   lat: number;
   lon: number;
   ele: number | null;
+  /** Indice du segment GPX (trkseg / rte) auquel appartient le point. */
+  seg?: number;
 }
 
 export interface TrackAnalysis {
@@ -76,7 +78,7 @@ export function analyzeTrack(segments: Point[][]): TrackAnalysis {
   let slopeUp = 0;
   let slopeDown = 0;
 
-  for (const seg of filled) {
+  for (const [segIndex, seg] of filled.entries()) {
     const eles: number[] = [];
     // Pentes calculées par segment : un saut entre segments n'est pas une pente.
     const segPoints: ElePoint[] = [];
@@ -85,7 +87,7 @@ export function analyzeTrack(segments: Point[][]): TrackAnalysis {
       const [lat, lon, ele] = seg[i];
       if (i > 0) distanceM += haversine(seg[i - 1][0], seg[i - 1][1], lat, lon);
       else segStart = distanceM;
-      profile.push({ d: distanceM, lat, lon, ele });
+      profile.push({ d: distanceM, lat, lon, ele, seg: segIndex });
       if (ele === null) continue;
       hasEle = true;
       eles.push(ele);

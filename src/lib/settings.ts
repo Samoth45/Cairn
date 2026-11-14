@@ -19,6 +19,13 @@ export function normalizeSettings(raw: unknown): Settings {
       o.weatherModel === 'best_match' || o.weatherModel === 'meteofrance_seamless'
         ? o.weatherModel
         : DEFAULT_SETTINGS.weatherModel,
+    trackColoring: (['none', 'temperature', 'gusts', 'precipitation'] as const).includes(o.trackColoring as never)
+      ? (o.trackColoring as Settings['trackColoring'])
+      : DEFAULT_SETTINGS.trackColoring,
+    departureTime:
+      typeof o.departureTime === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(o.departureTime)
+        ? o.departureTime
+        : DEFAULT_SETTINGS.departureTime,
     din: {
       flatKmh: positive(din.flatKmh, DEFAULT_DIN.flatKmh),
       ascentMh: positive(din.ascentMh, DEFAULT_DIN.ascentMh),

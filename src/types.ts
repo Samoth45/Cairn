@@ -39,6 +39,10 @@ export interface Settings {
   showProfile: boolean;
   din: DinSpeeds;
   weatherModel: WeatherModel;
+  /** Variable de coloration du tracé selon la prévision (étape 5). */
+  trackColoring: 'none' | 'temperature' | 'gusts' | 'precipitation';
+  /** Heure de départ habituelle, « HH:MM » (heure de Paris). */
+  departureTime: string;
 }
 
 export const DEFAULT_DIN: DinSpeeds = { flatKmh: 4, ascentMh: 300, descentMh: 500 };
@@ -48,6 +52,8 @@ export const DEFAULT_SETTINGS: Settings = {
   showProfile: true,
   din: DEFAULT_DIN,
   weatherModel: 'meteofrance_seamless',
+  trackColoring: 'none',
+  departureTime: '08:00',
 };
 
 export interface BackupFile {

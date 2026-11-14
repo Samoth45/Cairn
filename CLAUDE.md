@@ -59,8 +59,12 @@ indiquer le résultat des trois commandes.
   vent, 💧 > 0,2 mm, ⚡ orage), lignes temps / nébulosité / risque de pluie / isotherme / inversion,
   badge « Inversion probable », alertes, heures de nuit grisées, clic sur une heure = heure
   affichée sur la carte. Validée.
-- [ ] **Étape 5** — tracé coloré selon la prévision à l'heure de passage. ← prochaine étape
-- [ ] Étape 6 — score « meilleur jour ».
+- [x] **Étape 5** — panneau « Colorer le tracé » sur la carte (Aucune / Température / Rafales /
+  Pluie, jour, heure de départ, légende, arrivée estimée, alerte arrivée après le coucher) ;
+  heures de passage DIN par tronçons de 100 m recalées sur la durée totale ; tracé sélectionné
+  découpé en lignes colorées (météo interpolée en altitude et dans le temps) ; infobulle de
+  passage au survol du tracé ou du profil (appui au doigt). Validée.
+- [ ] **Étape 6** — score « meilleur jour ». ← prochaine étape
 - [x] **Préparation du déploiement Vercel** (section en fin de `prompt.md`, faite avant
   l'étape 5 à la demande de l'utilisateur, pour qu'il pousse et vérifie le déploiement à
   chaque étape) — `vercel.json`, `.nvmrc`, `engines`, script `preview`, README. Validée.
@@ -163,7 +167,8 @@ Dexie 4 + `dexie-react-hooks`, Vitest + jsdom + fake-indexeddb. Graphiques : **S
 ```
 src/
   types.ts            Point = [lat, lon, ele|null], Track (elevationSource?), Settings
-                      (baseLayer, selectedTrackId, showProfile, din, weatherModel), DEFAULT_SETTINGS
+                      (baseLayer, selectedTrackId, showProfile, din, weatherModel, trackColoring,
+                      departureTime « HH:MM »), DEFAULT_SETTINGS
   db/db.ts            Dexie 'cairn' : v1 tables tracks (id, createdAt) et settings (key='app') ;
                       v2 table weather (trackId) = CachedForecast. getSettings / updateSettings
                       (via normalizeSettings). Nouvelle table → db.version(3)
@@ -199,6 +204,11 @@ src/
     weatherTable.ts   forecastDays, dayHourIndices (6–21 h), indexForDay, tempColor (+ TEMP_LEGEND),
                       detectInversion / inversionExplanation, computeAlerts (rafales > 50 au sommet,
                       orage, ressenti < −5, isotherme < sommet), formatHourRanges, summitIndex
+    trackForecast.ts  passageHours (DIN par tronçons de 100 m, recalé sur la durée totale),
+                      parseClock / formatClockMinutes, departureIndex (indice horaire fractionnaire),
+                      makeWeatherSampler(data, points) → (ele, f) => WeatherSample | null,
+                      colorOf / LEGENDS / GUST_CLASSES / PRECIP_CLASSES, coloredRuns,
+                      nearestProfileIndexByLatLng
     din.ts            dinDurationHours(distanceKm, D+, D-, speeds)
     settings.ts       normalizeSettings (valeurs par défaut + validation, base et sauvegarde)
     format.ts         formatage FR (km, m, durée « 5 h 15 », coordonnées, « – » si null)
@@ -216,7 +226,8 @@ src/
   components/         MapView (fonds, polylines 3 couches, marqueurs sommet / survol / points météo,
                       AutoResize), FitBounds, Sidebar (zone défilante stats + météo + liste),
                       TrackItem, TrackStats, WeatherPanel (+ bloc soleil, bouton vers le tableau),
-                      WeatherView (onglet Météo, heatmap), WeatherPointTooltip,
+                      WeatherView (onglet Météo, heatmap), WeatherPointTooltip, ForecastControl
+                      (panneau de coloration, en bas à gauche de la carte), PassageTooltip,
                       ElevationProfile (SVG), SettingsDialog, HoverMarker, DropZone, Toasts,
                       ErrorBoundary, CairnLogo
   App.tsx             orchestration : sélection, analyse mémoïsée du tracé sélectionné, zoom
@@ -280,6 +291,28 @@ samples/              GPX fictifs pour tests manuels (trk avec ele, rte sans ele
   850 hPa seulement pour les points ≤ 1 300 m, 700 hPa pour les points ≤ 2 700 m, plus le cas
   700 hPa > 850 hPa ; marge 1 °C ; la plus marquée est retenue. Lignes du haut du tableau et
   alertes rafales/isotherme = point « Sommet ».
+- **Heures de passage (étape 5)** : DIN appliquée par tronçons de 100 m sur l'altitude
+  interpolée (`eleAt`), puis **recalée** pour que le temps total = durée DIN des statistiques
+  (la somme des DIN par tronçon n'est pas égale à la DIN globale : max + min/2 n'est pas additif).
+- **Temps = indice horaire fractionnaire** dans `ForecastData.times` (heure de Paris) :
+  départ = indice de `${jour}T00:00` + minutes/60 ; passage = départ + heures écoulées. Aucune
+  conversion de fuseau. Hors des séries → `null` → tronçon gris (`NO_DATA_COLOR`).
+- **Météo le long du tracé** : interpolation linéaire en altitude entre les deux points de
+  prévision qui encadrent l'altitude (point le plus proche au-delà), et linéaire entre les deux
+  heures ; direction du vent et code WMO = point et heure les plus proches.
+- **Lignes colorées** : morceaux ≤ 100 m (tracés peu denses subdivisés), couleur prise au milieu
+  du morceau, morceaux consécutifs de même classe fusionnés, jamais de ligne entre deux segments
+  (`ProfilePoint.seg`). Température : pas de 1 °C via `tempColor` (même échelle que le tableau) ;
+  rafales et pluie : classes. En mode coloré, le liseré du tracé sélectionné devient **sombre**
+  (sinon 0 °C, quasi blanc, disparaît sur le liseré blanc).
+- **Jour de départ** : choix explicite (état App, non persisté) s'il est couvert par la prévision,
+  sinon le jour affiché dans le panneau/tableau météo. Heure de départ et variable : persistées
+  dans `Settings`.
+- **Survol** : le store `useHoverPoint` porte `d` (distance) ; profil et tracé coloré l'alimentent,
+  `HoverMarker` affiche l'infobulle de passage (`renderInfo`) seulement en mode coloré. Clic sur le
+  tracé coloré = infobulle (pas de nouveau zoom) ; clic sur le fond de carte = fermeture.
+- Contrôles carte : échelle et zoom en bas à droite, panneau de prévision en bas à gauche,
+  bouton « ⛰ Profil » en haut à gauche (sous le bouton Cairn sur mobile).
 - **Heure météo affichée** : état `HourSelection` dans App, lié à la clé de la prévision ; une
   sélection d'une autre prévision est ignorée → retour à l'heure courante au changement de tracé.
 - La sauvegarde/les paramètres anciens sont complétés par `normalizeSettings` : toujours
