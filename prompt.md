@@ -23,7 +23,7 @@ L'interface est entièrement en français.
 ## Docker
 Je travaille sur plusieurs postes (Windows, macOS, Linux) : tout l'environnement
 doit tourner dans Docker. Je ne veux rien installer en local à part Docker.
-- `Dockerfile` multi-stage, image de base `node:22-alpine` :
+- `Dockerfile` multi-stage, image de base `node:26-alpine` (Node 26 LTS) :
   - stage `dev` : serveur Vite avec hot reload, lancé avec `--host 0.0.0.0`.
   - stage `build` : `npm run build`.
   - stage `prod` : `nginx:alpine` qui sert le dossier `dist`, avec une config
@@ -197,9 +197,9 @@ Comme toujours, exécute toutes les commandes via
      `"outputDirectory": "dist"` et `"installCommand": "npm ci"`, pour que la
      config soit versionnée dans le dépôt plutôt que dépendre de l'interface Vercel.
 
-2. **Version de Node alignée avec Docker (Node 22)** :
-   - Ajoute `"engines": { "node": "22.x" }` dans `package.json`.
-   - Ajoute un fichier `.nvmrc` contenant `22`.
+2. **Version de Node alignée avec Docker (Node 26)** :
+   - Ajoute `"engines": { "node": "26.x" }` dans `package.json`.
+   - Ajoute un fichier `.nvmrc` contenant `26`.
 
 3. **Lockfile** : vérifie que `package-lock.json` existe, qu'il est à jour et
    qu'il n'est pas exclu par `.gitignore` (`npm ci` en a besoin).
