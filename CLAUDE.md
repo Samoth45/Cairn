@@ -277,6 +277,18 @@ samples/              GPX fictifs pour tests manuels (trk avec ele, rte sans ele
   d'ajout, et un tracé importé/réaffiché après un marqueur le recouvrait.
 - Tests : le DOMParser de jsdom est très lent sur les gros GPX (~1 min pour 30 000 points,
   contre quelques centaines de ms dans le navigateur) → ne pas parser de gros fichiers dans les tests.
+- **react-leaflet : `interactive={false}` en prop, jamais dans `pathOptions`.** `pathOptions` est
+  appliqué par `setStyle` *après* l'ajout à la carte ; or Leaflet lit `interactive` à
+  l'insertion (classe `leaflet-interactive` des chemins SVG). Dans `pathOptions`, la forme reste
+  cliquable **en production seulement** (en dev, le StrictMode retire puis réinsère chaque couche,
+  ce qui masque le bug). Bug réel corrigé : le marqueur de survol passait sous la souris et volait
+  le survol du tracé coloré (infobulle qui clignote, curseur « main ouverte »).
+- **Dev ≠ prod (StrictMode)** : tout comportement de carte (survol, clics, couches) doit être
+  vérifié aussi sur le build (`npm run preview`). Pour mesurer sans navigateur à l'écran : un
+  conteneur jetable `node:26-alpine` + `apk add chromium` + `puppeteer-core`, sur le réseau
+  `cairn_default`, en visant l'IP des conteneurs (Vite refuse les noms d'hôte inconnus) ; la
+  carte Leaflet se retrouve via l'arbre React (`memoizedProps.value.map`), les pixels du tracé
+  via `getImageData` du canvas. Ne rien installer dans le projet pour ça.
 - **Marqueur « Point culminant » = point météo « Sommet »** (mêmes coordonnées) : un seul
   marqueur (le noir), dont l'infobulle porte la météo ; le rond blanc du sommet n'est pas dessiné,
   sinon l'un masque l'autre au survol.
