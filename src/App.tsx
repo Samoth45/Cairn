@@ -23,8 +23,11 @@ import {
   parseClock,
   passageHours,
 } from './lib/trackForecast';
-import { forecastDays } from './lib/weatherTable';
-import { parisHourKey } from './lib/time';
+import { forecastDays, TABLE_FIRST_HOUR, TABLE_LAST_HOUR } from './lib/weatherTable';
+import { nextDays, parisHourKey } from './lib/time';
+import { useAllForecasts } from './hooks/useAllForecasts';
+import { SummaryView } from './components/SummaryView';
+import type { CachedForecast } from './db/db';
 import { setHoverPoint, type HoverPoint } from './hooks/useHoverPoint';
 import { ForecastControl, type PassageSummary } from './components/ForecastControl';
 import { PassageTooltip } from './components/PassageTooltip';
@@ -81,7 +84,7 @@ export default function App() {
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   /** Vue principale : carte ou tableau météo par altitude. */
-  const [mainView, setMainView] = useState<'map' | 'weather'>('map');
+  const [mainView, setMainView] = useState<'map' | 'weather' | 'summary'>('map');
   const openWeatherView = useCallback(() => {
     setMainView('weather');
     if (isMobile()) setPanelOpen(false);
@@ -116,6 +119,10 @@ export default function App() {
     analysis && settings && analysis.stats.ascentM !== null
       ? dinDurationHours(analysis.stats.distanceM / 1000, analysis.stats.ascentM, analysis.stats.descentM ?? 0, settings.din)
       : null;
+  // ---------- Étape 6 : prévisions de tous les tracés (vue « Meilleur jour ») ----------
+  const summaryOpen = mainView === 'summary' && (tracks?.length ?? 0) > 0;
+  const allForecasts = useAllForecasts(tracks, weatherModel, summaryOpen);
+
   // ---------- Étape 5 : prévision le long du tracé à l'heure de passage ----------
   const coloring = settings?.trackColoring ?? 'none';
   const [departureDayChoice, setDepartureDayChoice] = useState<string | null>(null);
@@ -296,8 +303,20 @@ export default function App() {
   }
 
   const selElevationStatus = selectedTrack ? elevationStatus[selectedTrack.id] : undefined;
-  // Sans tracé sélectionné, l'onglet Météo n'a pas de sens : retour à la carte.
-  const view = selectedTrack ? mainView : 'map';
+  // Sans tracé sélectionné, l'onglet Météo n'a pas de sens ; sans tracé du tout, le
+  // comparatif non plus : retour à la carte.
+  const view =
+    (mainView === 'weather' && !selectedTrack) || (mainView === 'summary' && tracks.length === 0) ? 'map' : mainView;
+
+  /** Clic sur une case du comparatif : météo de ce tracé, ce jour-là, à l'heure de départ. */
+  const openTrackDay = (trackId: string, day: string, dayForecast: CachedForecast) => {
+    selectTrack(trackId);
+    const hour = Math.min(TABLE_LAST_HOUR, Math.max(TABLE_FIRST_HOUR, Math.floor(departureMinutes / 60)));
+    const index = dayForecast.data.times.indexOf(`${day}T${String(hour).padStart(2, '0')}:00`);
+    if (index >= 0) setHourSelection({ key: dayForecast.key, index });
+    setDepartureDayChoice(day);
+    setMainView('weather');
+  };
   const showProfile = Boolean(selectedTrack && analysis && selectedTrack.visible);
 
   return (
@@ -360,21 +379,58 @@ export default function App() {
           <span className="count">{tracks.length}</span>
         </button>
         <div className="view-tabs" role="tablist" aria-label="Vue">
-          <button type="button" role="tab" aria-selected={view === 'map'} className={view === 'map' ? 'active' : ''} onClick={() => setMainView('map')}>
-            🗺 Carte
+          <button
+            type="button"
+            role="tab"
+            aria-label="Carte"
+            aria-selected={view === 'map'}
+            className={view === 'map' ? 'active' : ''}
+            onClick={() => setMainView('map')}
+          >
+            🗺 <span className="tab-text">Carte</span>
           </button>
           <button
             type="button"
             role="tab"
+            aria-label="Météo"
             aria-selected={view === 'weather'}
             className={view === 'weather' ? 'active' : ''}
             onClick={() => setMainView('weather')}
             disabled={!selectedTrack}
             title={selectedTrack ? 'Météo par altitude du tracé sélectionné' : 'Sélectionnez un tracé'}
           >
-            🌡 Météo
+            🌡 <span className="tab-text">Météo</span>
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-label="Meilleur jour"
+            aria-selected={view === 'summary'}
+            className={view === 'summary' ? 'active' : ''}
+            onClick={() => setMainView('summary')}
+            disabled={tracks.length === 0}
+            title="Comparer les tracés jour par jour (score « meilleur jour »)"
+          >
+            ★ <span className="tab-text">Meilleur jour</span>
           </button>
         </div>
+
+        {view === 'summary' && (
+          <SummaryView
+            entries={allForecasts.entries}
+            days={nextDays(todayKey, 7)}
+            today={todayKey}
+            model={weatherModel}
+            din={settings.din}
+            weights={settings.scoreWeights}
+            departureTime={settings.departureTime}
+            departureMinutes={departureMinutes}
+            loading={allForecasts.loading}
+            onDepartureTime={(t) => void setSettings({ departureTime: t })}
+            onRefresh={allForecasts.refresh}
+            onOpenDay={openTrackDay}
+          />
+        )}
 
         {view === 'weather' && selectedTrack && (
           <WeatherView
@@ -449,6 +505,7 @@ export default function App() {
         <SettingsDialog
           din={settings.din}
           weatherModel={settings.weatherModel}
+          scoreWeights={settings.scoreWeights}
           onSave={(patch) => void setSettings(patch)}
           onClose={() => setSettingsOpen(false)}
         />

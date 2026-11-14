@@ -1,4 +1,11 @@
-import { DEFAULT_DIN, DEFAULT_SETTINGS, type DinSpeeds, type Settings } from '../types';
+import {
+  DEFAULT_DIN,
+  DEFAULT_SCORE_WEIGHTS,
+  DEFAULT_SETTINGS,
+  type DinSpeeds,
+  type ScoreWeights,
+  type Settings,
+} from '../types';
 
 function positive(value: unknown, fallback: number): number {
   return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : fallback;
@@ -22,6 +29,13 @@ export function normalizeSettings(raw: unknown): Settings {
     trackColoring: (['none', 'temperature', 'gusts', 'precipitation'] as const).includes(o.trackColoring as never)
       ? (o.trackColoring as Settings['trackColoring'])
       : DEFAULT_SETTINGS.trackColoring,
+    scoreWeights: Object.fromEntries(
+      (Object.keys(DEFAULT_SCORE_WEIGHTS) as Array<keyof ScoreWeights>).map((k) => {
+        const v = (o.scoreWeights as Partial<Record<keyof ScoreWeights, unknown>> | undefined)?.[k];
+        // Un poids peut valoir 0 (pénalité désactivée), jusqu'à 100.
+        return [k, typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 100 ? v : DEFAULT_SCORE_WEIGHTS[k]];
+      }),
+    ) as unknown as ScoreWeights,
     departureTime:
       typeof o.departureTime === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(o.departureTime)
         ? o.departureTime

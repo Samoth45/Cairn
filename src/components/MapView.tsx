@@ -23,6 +23,7 @@ import type { WeatherPoint } from '../lib/weatherPoints';
 import type { CachedForecast } from '../db/db';
 import { WeatherPointTooltip } from './WeatherPointTooltip';
 import { FitBounds, type FitRequest } from './FitBounds';
+import { otmReferrerPolicy } from '../lib/referrer';
 import { HoverMarker } from './HoverMarker';
 
 /** Clic sur le fond de carte (ferme l'infobulle de passage ouverte au doigt). */
@@ -45,7 +46,18 @@ function AutoResize() {
   return null;
 }
 
-const BASE_LAYERS: Record<BaseLayerId, { name: string; url: string; attribution: string; maxZoom: number; maxNativeZoom: number; subdomains?: string }> = {
+const BASE_LAYERS: Record<
+  BaseLayerId,
+  {
+    name: string;
+    url: string;
+    attribution: string;
+    maxZoom: number;
+    maxNativeZoom: number;
+    subdomains?: string;
+    referrerPolicy?: ReferrerPolicy;
+  }
+> = {
   ign: {
     name: 'Plan IGN',
     url: 'https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/png&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}',
@@ -61,6 +73,8 @@ const BASE_LAYERS: Record<BaseLayerId, { name: string; url: string; attribution:
     maxZoom: 19,
     maxNativeZoom: 17,
     subdomains: 'abc',
+    // Pas de referrer en local : sinon tuiles « Generic referrer detected » (cf. lib/referrer.ts).
+    referrerPolicy: otmReferrerPolicy(window.location.hostname),
   },
 };
 
@@ -176,6 +190,7 @@ export function MapView({
                 maxZoom={l.maxZoom}
                 maxNativeZoom={l.maxNativeZoom}
                 {...(l.subdomains ? { subdomains: l.subdomains } : {})}
+                {...(l.referrerPolicy ? { referrerPolicy: l.referrerPolicy } : {})}
               />
             </LayersControl.BaseLayer>
           );
