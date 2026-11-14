@@ -97,7 +97,7 @@ export function ElevationProfile({ name, color, profile, placeholder, onClose }:
     const d = Math.min(Math.max(px / chart.innerW, 0), 1) * chart.totalD;
     const idx = nearestProfileIndex(points, d);
     setHoverIdx(idx);
-    setHoverPoint({ lat: points[idx].lat, lon: points[idx].lon });
+    setHoverPoint({ lat: points[idx].lat, lon: points[idx].lon, d: points[idx].d });
   };
   const onLeave = () => {
     setHoverIdx(null);

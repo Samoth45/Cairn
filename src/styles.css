@@ -47,6 +47,100 @@ button {
   flex-direction: column;
 }
 
+/* ---------- Prévision le long du tracé (panneau sur la carte) ---------- */
+.fc-panel {
+  position: absolute;
+  left: 10px;
+  bottom: 24px;
+  z-index: 1000;
+  width: min(290px, calc(100% - 80px));
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 10px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+  font-size: 0.8rem;
+}
+
+.fc-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fc-label {
+  font-weight: 600;
+  flex: 1;
+}
+
+.fc-panel select,
+.fc-panel input {
+  font: inherit;
+  padding: 3px 5px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel);
+}
+
+.fc-departure {
+  margin-top: 6px;
+  justify-content: space-between;
+}
+
+.fc-departure label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+}
+
+.fc-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 6px;
+  margin-top: 7px;
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.fc-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.fc-legend-item i {
+  display: inline-block;
+  width: 12px;
+  height: 8px;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+}
+
+.fc-unit {
+  color: var(--muted);
+}
+
+.fc-summary {
+  margin: 6px 0 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.fc-warn {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.fc-muted,
+.fc-hint {
+  color: var(--muted);
+}
+
+.fc-hint {
+  margin: 4px 0 0;
+  font-size: 0.7rem;
+}
+
 /* ---------- Onglets Carte / Météo ---------- */
 .view-tabs {
   position: absolute;
@@ -1242,9 +1336,8 @@ button {
 
 .profile-open {
   position: absolute;
-  left: 50%;
-  bottom: 24px;
-  transform: translateX(-50%);
+  left: 10px;
+  top: 10px;
   z-index: 1000;
   padding: 6px 14px;
   border: none;
@@ -1379,5 +1472,18 @@ button {
 
   .wt-cell {
     min-width: 46px;
+  }
+
+  .fc-panel {
+    bottom: 12px;
+  }
+
+  .fc-hint {
+    display: none;
+  }
+
+  /* Sous le bouton « Cairn ». */
+  .profile-open {
+    top: 60px;
   }
 }

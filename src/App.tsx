@@ -6,15 +6,28 @@ import { Sidebar } from './components/Sidebar';
 import { TrackStats } from './components/TrackStats';
 import { ElevationProfile } from './components/ElevationProfile';
 import { SettingsDialog } from './components/SettingsDialog';
-import { analyzeTrack } from './lib/stats';
+import { analyzeTrack, nearestProfileIndex } from './lib/stats';
 import { needsElevation } from './lib/elevation';
 import { selectWeatherPoints } from './lib/weatherPoints';
 import { useWeather } from './hooks/useWeather';
 import { WeatherPanel } from './components/WeatherPanel';
 import { WeatherView } from './components/WeatherView';
 import { resolveHourIndex, type HourSelection } from './lib/forecast';
-import { isNightHour, sunTimes } from './lib/sun';
+import { isNightHour, parisMinutes, sunTimes } from './lib/sun';
 import { dinDurationHours } from './lib/din';
+import {
+  coloredRuns,
+  departureIndex,
+  makeWeatherSampler,
+  nearestProfileIndexByLatLng,
+  parseClock,
+  passageHours,
+} from './lib/trackForecast';
+import { forecastDays } from './lib/weatherTable';
+import { parisHourKey } from './lib/time';
+import { setHoverPoint, type HoverPoint } from './hooks/useHoverPoint';
+import { ForecastControl, type PassageSummary } from './components/ForecastControl';
+import { PassageTooltip } from './components/PassageTooltip';
 import { buildGpx, gpxFileName } from './lib/gpxExport';
 import { downloadText } from './lib/download';
 import { DropZone } from './components/DropZone';
@@ -103,6 +116,82 @@ export default function App() {
     analysis && settings && analysis.stats.ascentM !== null
       ? dinDurationHours(analysis.stats.distanceM / 1000, analysis.stats.ascentM, analysis.stats.descentM ?? 0, settings.din)
       : null;
+  // ---------- Étape 5 : prévision le long du tracé à l'heure de passage ----------
+  const coloring = settings?.trackColoring ?? 'none';
+  const [departureDayChoice, setDepartureDayChoice] = useState<string | null>(null);
+  const forecastDayList = useMemo(() => (forecast ? forecastDays(forecast.data.times) : []), [forecast]);
+  const todayKey = parisHourKey().slice(0, 10);
+  // Jour de départ : choix explicite s'il est couvert, sinon le jour affiché dans le panneau météo.
+  const departureDay =
+    departureDayChoice && forecastDayList.includes(departureDayChoice)
+      ? departureDayChoice
+      : forecast && hourIndex !== null
+        ? forecast.data.times[hourIndex].slice(0, 10)
+        : todayKey;
+  const departureMinutes = parseClock(settings?.departureTime ?? '') ?? 8 * 60;
+  const din = settings?.din;
+  const passage = useMemo(
+    () => (analysis && din ? passageHours(analysis.profile, din, durationHours) : null),
+    [analysis, din, durationHours],
+  );
+  const sampler = useMemo(() => (forecast ? makeWeatherSampler(forecast.data, forecast.points) : null), [forecast]);
+  const startIndex = forecast ? departureIndex(forecast.data.times, departureDay, departureMinutes) : null;
+  const forecastRuns = useMemo(() => {
+    if (coloring === 'none' || !analysis || !passage || !sampler || startIndex === null || selectedNeedsElevation) return null;
+    return coloredRuns(analysis.profile, passage, sampler, startIndex, coloring);
+  }, [coloring, analysis, passage, sampler, startIndex, selectedNeedsElevation]);
+
+  const departureSun = start ? sunTimes(departureDay, start.lat, start.lon) : null;
+  const passageSummary: PassageSummary | null =
+    forecast && startIndex !== null && durationHours !== null
+      ? {
+          departureMinutes,
+          durationHours,
+          beyondForecast: startIndex + durationHours > forecast.data.times.length - 1,
+          sunset: departureSun?.sunset ?? null,
+          afterSunset:
+            !!departureSun?.sunset && departureMinutes + durationHours * 60 > parisMinutes(departureSun.sunset),
+        }
+      : null;
+
+  /** Survol du tracé coloré : on se cale sur le point du profil le plus proche. */
+  const onTrackHover = useCallback(
+    (lat: number, lon: number) => {
+      if (!analysis) return;
+      const i = nearestProfileIndexByLatLng(analysis.profile, lat, lon);
+      if (i >= 0) setHoverPoint({ lat: analysis.profile[i].lat, lon: analysis.profile[i].lon, d: analysis.profile[i].d });
+    },
+    [analysis],
+  );
+  const onTrackLeave = useCallback(() => setHoverPoint(null), []);
+
+  /** Infobulle de passage (survol du tracé coloré ou du profil). */
+  const hoverInfo = useCallback(
+    (p: HoverPoint) => {
+      if (!forecastRuns || !analysis || !passage || !sampler || startIndex === null || p.d === undefined) return null;
+      const i = nearestProfileIndex(analysis.profile, p.d);
+      if (i < 0) return null;
+      const point = analysis.profile[i];
+      const clockMinutes = departureMinutes + passage[i] * 60;
+      const night =
+        !!departureSun?.sunrise &&
+        !!departureSun.sunset &&
+        (clockMinutes < parisMinutes(departureSun.sunrise) || clockMinutes > parisMinutes(departureSun.sunset));
+      return (
+        <PassageTooltip
+          info={{
+            clockMinutes,
+            elapsedHours: passage[i],
+            ele: point.ele,
+            sample: point.ele === null ? null : sampler(point.ele, startIndex + passage[i]),
+            night,
+          }}
+        />
+      );
+    },
+    [forecastRuns, analysis, passage, sampler, startIndex, departureMinutes, departureSun],
+  );
+
   const nightHour = useMemo(() => {
     if (!forecast || hourIndex === null || !start) return false;
     const time = forecast.data.times[hourIndex];
@@ -313,9 +402,26 @@ export default function App() {
             forecast={forecast}
             hourIndex={hourIndex}
             nightHour={nightHour}
+            forecastRuns={forecastRuns}
+            onTrackHover={onTrackHover}
+            onTrackLeave={onTrackLeave}
+            hoverInfo={hoverInfo}
             onSelect={selectTrack}
             onBaseLayerChange={(id) => void setSettings({ baseLayer: id })}
           />
+          {showProfile && forecast && !selectedNeedsElevation && (
+            <ForecastControl
+              coloring={coloring}
+              onColoring={(c) => void setSettings({ trackColoring: c })}
+              days={forecastDayList}
+              today={todayKey}
+              day={departureDay}
+              onDay={setDepartureDayChoice}
+              departureTime={settings.departureTime}
+              onDepartureTime={(t) => void setSettings({ departureTime: t })}
+              summary={passageSummary}
+            />
+          )}
           {showProfile && !settings.showProfile && (
             <button type="button" className="profile-open" onClick={() => void setSettings({ showProfile: true })}>
               ⛰ Profil

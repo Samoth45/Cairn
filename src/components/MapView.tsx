@@ -1,4 +1,6 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, type ReactNode } from 'react';
+import type { ColoredRun } from '../lib/trackForecast';
+import type { HoverPoint } from '../hooks/useHoverPoint';
 import L from 'leaflet';
 import {
   CircleMarker,
@@ -22,6 +24,12 @@ import type { CachedForecast } from '../db/db';
 import { WeatherPointTooltip } from './WeatherPointTooltip';
 import { FitBounds, type FitRequest } from './FitBounds';
 import { HoverMarker } from './HoverMarker';
+
+/** Clic sur le fond de carte (ferme l'infobulle de passage ouverte au doigt). */
+function MapClickWatcher({ onClick }: { onClick: () => void }) {
+  useMapEvents({ click: onClick });
+  return null;
+}
 
 /** Calque des marqueurs (sommet, points météo, survol du profil), au-dessus des tracés. */
 const MARKERS_PANE = 'cairn-markers';
@@ -86,6 +94,12 @@ interface Props {
   nightHour: boolean;
   /** false quand la carte est masquée (onglet Météo). */
   active: boolean;
+  /** Tronçons colorés du tracé sélectionné selon la prévision (null : couleur du tracé). */
+  forecastRuns: ColoredRun[] | null;
+  onTrackHover: (lat: number, lon: number) => void;
+  onTrackLeave: () => void;
+  /** Infobulle au point survolé (heure de passage et météo), ou null. */
+  hoverInfo?: (p: HoverPoint) => ReactNode | null;
   onSelect: (id: string) => void;
   onBaseLayerChange: (id: BaseLayerId) => void;
 }
@@ -106,6 +120,10 @@ export function MapView({
   hourIndex,
   nightHour,
   active,
+  forecastRuns,
+  onTrackHover,
+  onTrackLeave,
+  hoverInfo,
   onSelect,
   onBaseLayerChange,
 }: Props) {
@@ -164,8 +182,10 @@ export function MapView({
         })}
       </LayersControl>
       <ZoomControl position="bottomright" />
-      <ScaleControl position="bottomleft" imperial={false} />
+      {/* En bas à droite : le coin inférieur gauche accueille le panneau de prévision. */}
+      <ScaleControl position="bottomright" imperial={false} />
       <BaseLayerWatcher onChange={onBaseLayerChange} />
+      <MapClickWatcher onClick={onTrackLeave} />
       <FitBounds request={fitRequest} active={active} />
       <AutoResize />
 
@@ -174,6 +194,9 @@ export function MapView({
         const positions = latLngs.get(t.id) ?? [];
         // Chaque tracé est entouré d'un liseré (sombre puis blanc) pour ressortir
         // sur n'importe quel fond, quelle que soit sa couleur.
+        // Tracé sélectionné coloré selon la prévision : liseré sombre (les couleurs proches du
+        // blanc, comme 0 °C, resteraient invisibles sur un liseré blanc) et tronçons colorés.
+        const colored = selected && forecastRuns;
         return [
           <Polyline
             key={`${t.id}-shadow`}
@@ -186,16 +209,40 @@ export function MapView({
             }}
           />,
           <Polyline
-            key={`${t.id}-halo`}
+            key={`${t.id}-halo${colored ? '-dark' : ''}`}
             positions={positions}
-            pathOptions={{ color: '#ffffff', weight: selected ? 10 : 7, opacity: 1, interactive: false }}
+            pathOptions={{
+              color: colored ? '#263238' : '#ffffff',
+              weight: selected ? 10 : 7,
+              opacity: 1,
+              interactive: false,
+            }}
           />,
-          <Polyline
-            key={t.id}
-            positions={positions}
-            pathOptions={{ color: t.color, weight: selected ? 6 : 4, opacity: 1 }}
-            eventHandlers={{ click: () => onSelect(t.id) }}
-          />,
+          colored ? (
+            forecastRuns.map((run, k) => (
+              <Polyline
+                key={`${t.id}-run-${k}-${run.color}`}
+                positions={run.positions}
+                pathOptions={{ color: run.color, weight: 6, opacity: 1, lineCap: 'butt' }}
+                eventHandlers={{
+                  mousemove: (e) => onTrackHover(e.latlng.lat, e.latlng.lng),
+                  mouseout: () => onTrackLeave(),
+                  // Au doigt : un appui affiche l'infobulle (pas de nouveau zoom).
+                  click: (e) => {
+                    L.DomEvent.stopPropagation(e);
+                    onTrackHover(e.latlng.lat, e.latlng.lng);
+                  },
+                }}
+              />
+            ))
+          ) : (
+            <Polyline
+              key={t.id}
+              positions={positions}
+              pathOptions={{ color: t.color, weight: selected ? 6 : 4, opacity: 1 }}
+              eventHandlers={{ click: () => onSelect(t.id) }}
+            />
+          ),
         ];
       })}
 
@@ -241,7 +288,7 @@ export function MapView({
           </Tooltip>
         </CircleMarker>
       )}
-      <HoverMarker color={selectedColor} />
+      <HoverMarker color={selectedColor} renderInfo={hoverInfo} />
       </Pane>
     </MapContainer>
   );
