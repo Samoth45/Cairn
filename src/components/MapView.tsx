@@ -201,21 +201,21 @@ export function MapView({
           <Polyline
             key={`${t.id}-shadow`}
             positions={positions}
+            interactive={false}
             pathOptions={{
               color: '#000000',
               weight: selected ? 13 : 9,
               opacity: selected ? 0.45 : 0.3,
-              interactive: false,
             }}
           />,
           <Polyline
             key={`${t.id}-halo${colored ? '-dark' : ''}`}
             positions={positions}
+            interactive={false}
             pathOptions={{
               color: colored ? '#263238' : '#ffffff',
               weight: selected ? 10 : 7,
               opacity: 1,
-              interactive: false,
             }}
           />,
           colored ? (

@@ -17,7 +17,12 @@ export function HoverMarker({ color, renderInfo }: Props) {
     <CircleMarker
       center={[p.lat, p.lon]}
       radius={7}
-      pathOptions={{ color: '#ffffff', weight: 3, fillColor: color, fillOpacity: 1, interactive: false }}
+      // `interactive` doit être une option de création : dans `pathOptions`, react-leaflet
+      // l'applique après l'ajout à la carte (setStyle) et le cercle reste cliquable. Il
+      // passerait alors sous la souris et « volerait » le survol du tracé (bug visible en
+      // production uniquement : en dev, le StrictMode réinsère la couche une seconde fois).
+      interactive={false}
+      pathOptions={{ color: '#ffffff', weight: 3, fillColor: color, fillOpacity: 1 }}
     >
       {info && (
         <Tooltip permanent direction="top" offset={[0, -8]} className="wx-tooltip-wrap">
