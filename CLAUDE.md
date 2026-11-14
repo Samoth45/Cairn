@@ -64,7 +64,13 @@ indiquer le résultat des trois commandes.
   heures de passage DIN par tronçons de 100 m recalées sur la durée totale ; tracé sélectionné
   découpé en lignes colorées (météo interpolée en altitude et dans le temps) ; infobulle de
   passage au survol du tracé ou du profil (appui au doigt). Validée.
-- [ ] **Étape 6** — score « meilleur jour ». ← prochaine étape
+- [x] **Étape 6** — onglet « ★ Meilleur jour » : tableau tracés × 7 jours, score 0–100 coloré
+  (rouge → vert) sur la fenêtre de rando (heure de départ + durée DIN), icônes des principales
+  pénalités, détail au survol, ★ meilleur jour (jusqu'à J+4), jours lointains atténués +
+  avertissement de fiabilité, clic = onglet Météo de ce tracé ce jour-là ; poids des pénalités
+  réglables dans les paramètres ; prévisions de tous les tracés (cache 1 h, 2 requêtes en
+  parallèle). Validée. Dernière étape du cahier des charges. Correction ensuite : pas de
+  referrer vers OpenTopoMap en local (tuiles « Generic referrer detected »).
 - [x] **Préparation du déploiement Vercel** (section en fin de `prompt.md`, faite avant
   l'étape 5 à la demande de l'utilisateur, pour qu'il pousse et vérifie le déploiement à
   chaque étape) — `vercel.json`, `.nvmrc`, `engines`, script `preview`, README. Validée.
@@ -168,7 +174,7 @@ Dexie 4 + `dexie-react-hooks`, Vitest + jsdom + fake-indexeddb. Graphiques : **S
 src/
   types.ts            Point = [lat, lon, ele|null], Track (elevationSource?), Settings
                       (baseLayer, selectedTrackId, showProfile, din, weatherModel, trackColoring,
-                      departureTime « HH:MM »), DEFAULT_SETTINGS
+                      departureTime « HH:MM », scoreWeights), DEFAULT_SETTINGS, DEFAULT_SCORE_WEIGHTS
   db/db.ts            Dexie 'cairn' : v1 tables tracks (id, createdAt) et settings (key='app') ;
                       v2 table weather (trackId) = CachedForecast. getSettings / updateSettings
                       (via normalizeSettings). Nouvelle table → db.version(3)
@@ -179,6 +185,9 @@ src/
                             statut par tracé (loading/error/done) + retry
     useWeather.ts           prévision du tracé sélectionné via weatherCache ; { forecast, loading,
                             error, refresh } ; AbortController si le tracé change
+    useAllForecasts.ts      prévisions de tous les tracés pour l'onglet « Meilleur jour » (actif
+                            seulement onglet ouvert) : analyse + points de chaque tracé, même
+                            cache que useWeather, 2 requêtes en parallèle, refresh
     useHoverPoint.ts        mini-store (useSyncExternalStore) de la position survolée sur le profil,
                             pour ne pas re-rendre l'app à chaque mouvement de souris
   lib/                fonctions pures + tests (*.test.ts)
@@ -193,9 +202,11 @@ src/
                       10–15, 15–25, > 25 %), slopeRuns (tronçons colorés du profil)
     gpxExport.ts      buildGpx(track) → GPX 1.1 (1 trk, 1 trkseg par segment), gpxFileName
     download.ts       downloadText(contenu, nom, mime) (GPX, sauvegarde JSON)
+    referrer.ts       isLoopbackHost, otmReferrerPolicy (pas de referrer vers OpenTopoMap en local)
     weatherPoints.ts  selectWeatherPoints(profile) → WeatherPoint[] (lat, lon, ele, d, roles
                       summit/start/lowest), triés du plus haut au plus bas ; rolesLabel ; weatherPointsKey
-    time.ts           parisHourKey (heure de Paris au format des séries Open-Meteo), formatClock, formatAgo
+    time.ts           parisHourKey (heure de Paris au format des séries Open-Meteo), nextDays,
+                      formatClock, formatAgo
     wmo.ts            codes WMO → libellé FR + pictogramme, isThunderstorm
     sun.ts            sunTimes(jour, lat, lon) (calcul astronomique local), daylightInfo (durée du
                       jour, départ au plus tard = coucher − durée DIN, longerThanDay), isNightHour,
@@ -209,6 +220,9 @@ src/
                       makeWeatherSampler(data, points) → (ele, f) => WeatherSample | null,
                       colorOf / LEGENDS / GUST_CLASSES / PRECIP_CLASSES, coloredRuns,
                       nearestProfileIndexByLatLng
+    score.ts          computeDayScore(input, weights) → { score, penalties, coverage } | null,
+                      gravités (rain/gust/cloud/coldSeverity), PENALTY_LABELS / ICONS, scoreColor,
+                      reliability(échéance)
     din.ts            dinDurationHours(distanceKm, D+, D-, speeds)
     settings.ts       normalizeSettings (valeurs par défaut + validation, base et sauvegarde)
     format.ts         formatage FR (km, m, durée « 5 h 15 », coordonnées, « – » si null)
@@ -228,6 +242,7 @@ src/
                       TrackItem, TrackStats, WeatherPanel (+ bloc soleil, bouton vers le tableau),
                       WeatherView (onglet Météo, heatmap), WeatherPointTooltip, ForecastControl
                       (panneau de coloration, en bas à gauche de la carte), PassageTooltip,
+                      SummaryView (onglet « Meilleur jour »),
                       ElevationProfile (SVG), SettingsDialog, HoverMarker, DropZone, Toasts,
                       ErrorBoundary, CairnLogo
   App.tsx             orchestration : sélection, analyse mémoïsée du tracé sélectionné, zoom
@@ -323,15 +338,38 @@ samples/              GPX fictifs pour tests manuels (trk avec ele, rte sans ele
 - **Survol** : le store `useHoverPoint` porte `d` (distance) ; profil et tracé coloré l'alimentent,
   `HoverMarker` affiche l'infobulle de passage (`renderInfo`) seulement en mode coloré. Clic sur le
   tracé coloré = infobulle (pas de nouveau zoom) ; clic sur le fond de carte = fermeture.
+- **Score « meilleur jour » (étape 6)** : 100 − Σ (gravité 0–1 × poids). Pluie, orage et
+  froid : météo à l'endroit où se trouve le randonneur, toutes les 15 min de marche (même
+  échantillonneur que la coloration du tracé). Rafales et nébulosité : série du point « Sommet »
+  sur les heures de la fenêtre. Gravités : pluie cumulée 0 → 5 mm (ou risque moyen × 0,6) ;
+  orage 1 pendant la rando, 0,5 dans les 2 h autour ; rafales max 30 → 70 km/h ; nébulosité
+  moyenne 50 → 100 % ; ressenti minimal −5 → −20 °C. Poids par défaut : pluie 35, orage 40,
+  rafales 25, nébulosité 15, froid 20 (0 = ignoré, max 100). Score null si la prévision ne couvre
+  rien ; `coverage` < 1 → astérisque. Heure de départ = `settings.departureTime` (la même qu'à
+  l'étape 5) pour tous les jours.
+- **Fiabilité** : J0–J+2 bonne, J+3–J+4 moyenne (opacité 0,8), au-delà faible (opacité 0,45,
+  « peu fiable ») ; le ★ meilleur jour n'est choisi que parmi J0–J+4.
+- **Clic sur une case** (`openTrackDay` dans App) : `selectTrack`, `HourSelection` sur ce jour à
+  l'heure de départ (bornée à 6–21 h) avec la clé de la prévision du tracé (identique à celle de
+  `useWeather` : mêmes points, même modèle), jour de départ de l'étape 5 = ce jour, onglet Météo.
+- **Onglets** : Carte / Météo (tracé sélectionné requis) / Meilleur jour (au moins un tracé). Sur
+  mobile, icônes seules (`.tab-text` masqué, libellés en `aria-label`).
 - Contrôles carte : échelle et zoom en bas à droite, panneau de prévision en bas à gauche,
   bouton « ⛰ Profil » en haut à gauche (sous le bouton Cairn sur mobile).
 - **Heure météo affichée** : état `HourSelection` dans App, lié à la clé de la prévision ; une
   sélection d'une autre prévision est ignorée → retour à l'heure courante au changement de tracé.
 - La sauvegarde/les paramètres anciens sont complétés par `normalizeSettings` : toujours
   ajouter un nouveau réglage là et dans `DEFAULT_SETTINGS`.
-- Les paramètres (`Settings`) sont persistés en base et inclus dans la sauvegarde JSON :
-  y ajouter les futurs réglages (vitesses DIN, modèle météo, poids du score).
+- Les paramètres (`Settings`) sont persistés en base et inclus dans la sauvegarde JSON
+  (vitesses DIN, modèle météo, coloration, heure de départ, poids du score) : y ajouter tout
+  futur réglage.
 - Carte : renderer canvas (`tolerance: 8` pour le clic au doigt), le tracé sélectionné est
   dessiné en dernier. Fond IGN : maxNativeZoom 19 ; OpenTopoMap : maxNativeZoom 17.
+- **OpenTopoMap refuse les referrers `localhost` / `127.0.0.1`** : il renvoie des tuiles (HTTP 200)
+  barrées de « Generic referrer detected. Please contact us: otm@top-o-map.com ». Vérifié : sans
+  referrer, avec l'adresse Vercel ou une IP du réseau local, les tuiles sont normales. D'où
+  `otmReferrerPolicy` (`lib/referrer.ts`) : `referrerPolicy: 'no-referrer'` sur la couche OTM
+  **uniquement** quand la page est servie en boucle locale ; en ligne, referrer par défaut du
+  navigateur (identifie honnêtement le site, comme l'attend OpenTopoMap). L'IGN accepte localhost.
 - Responsive : panneau latéral fixe ≥ 768 px, tiroir + bouton flottant en dessous.
 - Vite : `server.watch.usePolling: true` (hot reload avec volumes Windows/macOS).

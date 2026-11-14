@@ -43,7 +43,19 @@ export interface Settings {
   trackColoring: 'none' | 'temperature' | 'gusts' | 'precipitation';
   /** Heure de départ habituelle, « HH:MM » (heure de Paris). */
   departureTime: string;
+  /** Poids des pénalités du score « meilleur jour » (étape 6), en points retirés au maximum. */
+  scoreWeights: ScoreWeights;
 }
+
+export interface ScoreWeights {
+  rain: number;
+  storm: number;
+  gusts: number;
+  clouds: number;
+  cold: number;
+}
+
+export const DEFAULT_SCORE_WEIGHTS: ScoreWeights = { rain: 35, storm: 40, gusts: 25, clouds: 15, cold: 20 };
 
 export const DEFAULT_DIN: DinSpeeds = { flatKmh: 4, ascentMh: 300, descentMh: 500 };
 
@@ -54,6 +66,7 @@ export const DEFAULT_SETTINGS: Settings = {
   weatherModel: 'meteofrance_seamless',
   trackColoring: 'none',
   departureTime: '08:00',
+  scoreWeights: DEFAULT_SCORE_WEIGHTS,
 };
 
 export interface BackupFile {

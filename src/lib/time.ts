@@ -15,6 +15,12 @@ export function parisHourKey(date = new Date()): string {
   return `${p.year}-${p.month}-${p.day}T${hour}:00`;
 }
 
+/** `count` jours civils consécutifs à partir de `day` (« 2026-11-12 »), sans fuseau horaire. */
+export function nextDays(day: string, count: number): string[] {
+  const [y, m, d] = day.split('-').map(Number);
+  return Array.from({ length: count }, (_, i) => new Date(Date.UTC(y, m - 1, d + i)).toISOString().slice(0, 10));
+}
+
 /** « 14:05 » (heure de Paris). */
 export function formatClock(timestamp: number): string {
   return new Date(timestamp).toLocaleTimeString('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit' });
