@@ -14,7 +14,24 @@ statistiques, météo détaillée par altitude pour choisir le meilleur jour / h
   Les commentaires du code sont aussi en français.
 - Aucune API nécessitant une clé : uniquement des services gratuits et ouverts (IGN Géoplateforme,
   OpenTopoMap, Open-Meteo).
-- Ne pas commiter sans demande explicite.
+- Ne pas commiter sans demande explicite. Ne jamais pousser sur Git (le push déclenche un
+  déploiement Vercel).
+
+## Routine de vérification (fin de chaque étape, avant de rendre la main)
+
+Toujours dans le conteneur, dans cet ordre ; tout doit passer sans erreur ni avertissement :
+
+```bash
+docker compose run --rm dev npm test          # tests unitaires (Vitest)
+docker compose run --rm dev npm run lint      # ESLint (0 erreur, 0 warning)
+docker compose run --rm dev npm run build     # tsc -b + vite build = ce que Vercel exécute
+```
+
+Le build de production est **obligatoire** : Vercel échoue sur toute erreur TypeScript ou de
+build, même si le serveur dev (qui ne vérifie pas les types) fonctionne. Lire aussi ses
+avertissements (chunks vides, taille…). Puis vérifier que le serveur dev compile les modules
+modifiés (`curl http://localhost:5173/src/...` → 200). Dans le compte rendu à l'utilisateur,
+indiquer le résultat des trois commandes.
 
 ## État d'avancement
 
@@ -41,9 +58,12 @@ statistiques, météo détaillée par altitude pour choisir le meilleur jour / h
   heatmap points × heures 6 h–21 h (température bleu→rouge centrée sur 0, ressenti, flèche de
   vent, 💧 > 0,2 mm, ⚡ orage), lignes temps / nébulosité / risque de pluie / isotherme / inversion,
   badge « Inversion probable », alertes, heures de nuit grisées, clic sur une heure = heure
-  affichée sur la carte. **En attente de validation.**
+  affichée sur la carte. Validée.
 - [ ] **Étape 5** — tracé coloré selon la prévision à l'heure de passage. ← prochaine étape
 - [ ] Étape 6 — score « meilleur jour ».
+- [x] **Préparation du déploiement Vercel** (section en fin de `prompt.md`, faite avant
+  l'étape 5 à la demande de l'utilisateur, pour qu'il pousse et vérifie le déploiement à
+  chaque étape) — `vercel.json`, `.nvmrc`, `engines`, script `preview`, README. Validée.
 
 ## Idées pour après la fin des étapes
 
@@ -69,11 +89,53 @@ docker compose run --rm dev npm test           # Vitest (jsdom)
 docker compose run --rm dev npm run lint       # ESLint
 docker compose run --rm dev npm run build      # tsc -b + vite build (sert de typecheck)
 docker compose run --rm dev npm install <pkg>  # puis : docker compose up --build -V dev
+docker compose run --rm -p 4173:4173 dev sh -c "npm run build && npm run preview"  # build servi comme en prod
 ```
+
+Si Docker répond « failed to connect to the docker API » : Docker Desktop n'est pas lancé
+(`C:\Program Files\Docker\Docker\Docker Desktop.exe` sur le poste Windows).
 
 `-V` est indispensable après un ajout de dépendance : `node_modules` vit dans un volume
 anonyme qui sinon reste périmé. Sous Windows, le shell Bash de l'outil gère mal certains
 heredocs longs contenant des apostrophes : préférer l'outil Write pour créer les fichiers.
+
+## Déploiement Vercel
+
+Le projet est importé dans Vercel depuis le dépôt Git. **Vercel construit depuis les sources
+(`npm ci` puis `npm run build`, sortie `dist/`) et ne lance pas Docker.** La configuration Docker
+doit rester intacte (dev et prod locale). L'utilisateur pousse lui-même après chaque étape
+validée. Mis en place (détail dans `prompt.md`) :
+
+- `vercel.json` à la racine : `framework: vite`, `buildCommand: npm run build`,
+  `outputDirectory: dist`, `installCommand: npm ci`, rewrite `/(.*)` → `/index.html` (SPA,
+  équivalent de `docker/nginx.conf`), `Cache-Control: public, max-age=31536000, immutable`
+  sur `/assets/(.*)`.
+- Node 22 partout : `"engines": { "node": "22.x" }` dans `package.json` + `.nvmrc` (`22`),
+  aligné sur l'image `node:22-alpine`.
+- `package-lock.json` versionné et à jour (requis par `npm ci`).
+- Contraintes à respecter dans tout le code, dès maintenant :
+  - pas de `base` dans `vite.config.ts` (app servie à la racine du domaine) ;
+  - aucune URL `localhost` codée en dur ; toutes les API et tuiles en **HTTPS**
+    (sinon « mixed content » en production) ;
+  - **aucune variable d'environnement** : si une devient nécessaire, le signaler à l'utilisateur ;
+  - les options `server.*` de Vite (host, polling) ne concernent que le dev.
+- Tester le build comme Vercel : le script `preview` inclut `--host 0.0.0.0 --port 4173
+  --strictPort` ; le port est publié à la volée (pas de changement de `docker-compose.yml`) :
+  `docker compose run --rm -p 4173:4173 dev sh -c "npm run build && npm run preview"` →
+  http://localhost:4173 (le fallback SPA de `vite preview` est actif).
+- Vérifier la cohérence du lockfile comme Vercel : `docker compose run --rm dev npm ci --dry-run`.
+  Après toute modification de `package.json`, resynchroniser avec
+  `docker compose run --rm dev npm install --package-lock-only`. Le lockfile, généré sous
+  Alpine, contient bien les binaires natifs Linux glibc (`@rollup/rollup-linux-x64-gnu`,
+  `@esbuild/linux-x64`) dont Vercel a besoin.
+- `.vercel/` (dossier local de la CLI Vercel) est dans `.gitignore`.
+- Seule URL en `http://` du code : le namespace XML GPX `http://www.topografix.com/GPX/1/1`
+  (identifiant obligatoire, jamais appelé) — ce n'est pas du mixed content.
+- README : section « Déploiement sur Vercel » (build depuis les sources via `vercel.json`, push
+  sur la branche principale = production, autres branches = previews, données stockées dans le
+  navigateur → la version déployée démarre vide, importer la sauvegarde JSON).
+- Fin de cette tâche : ne rien pousser ; lister les fichiers créés/modifiés, expliquer le test
+  avec `npm run preview`, s'arrêter.
 
 ## Stack
 
