@@ -12,7 +12,7 @@ function positive(value: unknown, fallback: number): number {
 }
 
 /**
- * Complète et valide des paramètres partiels (base IndexedDB, sauvegarde importée…)
+ * Complète et valide des paramètres partiels (lus dans IndexedDB, éventuellement anciens)
  * en retombant sur les valeurs par défaut pour tout champ absent ou invalide.
  */
 export function normalizeSettings(raw: unknown): Settings {

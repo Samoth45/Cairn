@@ -11,7 +11,7 @@ Traces Strava, montres GPS : ~1 point/s, ex. 30 000 points pour 23 km.
 
 - Supprimer les points quasi alignés (type Douglas-Peucker, tolérance de quelques mètres, en
   tenant compte de l'altitude) → typiquement 2 000–3 000 points sans différence visible.
-- But : alléger IndexedDB, la sauvegarde JSON et le dessin de la carte (le temps de calcul
+- But : alléger IndexedDB et le dessin de la carte (le temps de calcul
   n'est pas un problème : ~60 ms pour 30 000 points).
 - **Garde-fou** : calculer l'empreinte (`id`) sur le fichier d'origine **avant** simplification,
   pour que le dédoublonnage continue de fonctionner.

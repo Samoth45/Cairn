@@ -62,18 +62,11 @@ altitudes, une route `rte` sans altitude et un fichier volontairement invalide.
 src/
   components/   interface (carte, panneau des tracés, glisser-déposer, notifications)
   hooks/        accès aux données (useTracks)
-  lib/          calculs purs : parsing GPX, empreinte, emprise, sauvegarde (+ tests)
+  lib/          calculs purs : parsing GPX, empreinte, emprise, statistiques, météo (+ tests)
   db/           base IndexedDB (Dexie)
   services/     appels aux API externes Open-Meteo (altitudes, prévisions météo + cache)
 docker/         configuration nginx
 ```
-
-## Sauvegarde
-
-« Exporter » produit un fichier `cairn-sauvegarde-AAAA-MM-JJ.json` contenant tous les
-tracés et les paramètres. « Importer » le recharge en fusionnant : un tracé déjà présent
-(mêmes coordonnées) n'est pas dupliqué. Pratique pour passer d'un poste à l'autre, les
-données IndexedDB étant propres à chaque navigateur.
 
 ## Déploiement sur Vercel
 
@@ -93,9 +86,9 @@ Le projet est relié à Vercel depuis le dépôt Git.
 - **Aucune variable d'environnement** n'est nécessaire : toutes les API utilisées sont
   gratuites, sans clé, et appelées en HTTPS.
 - **Les données restent dans le navigateur** (IndexedDB) : la version déployée démarre vide,
-  même si vous avez des tracés en local. Exportez une sauvegarde JSON depuis votre version
-  locale (« Sauvegarde → Exporter ») et importez-la dans la version déployée. Chaque navigateur
-  et chaque appareil a ses propres données.
+  même si vous avez des tracés en local. Chaque navigateur et chaque appareil a ses propres
+  données : pour en changer, réimportez vos GPX (chaque tracé peut être retéléchargé en GPX,
+  altitudes corrigées incluses, depuis le panneau des tracés).
 
 ## Crédits
 

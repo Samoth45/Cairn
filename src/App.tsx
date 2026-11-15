@@ -38,7 +38,6 @@ import { Toasts, type Toast } from './components/Toasts';
 import { CairnLogo } from './components/CairnLogo';
 import type { FitRequest } from './components/FitBounds';
 import { trackBounds, type Bounds } from './lib/geo';
-import { backupFileName, BackupError } from './lib/backup';
 import type { Track } from './types';
 
 const isMobile = () => window.matchMedia('(max-width: 767px)').matches;
@@ -58,8 +57,6 @@ export default function App() {
     setTrackVisible,
     deleteTrack,
     setSettings,
-    exportBackup,
-    importBackup,
   } = useTracks();
 
   const [panelOpen, setPanelOpen] = useState(false);
@@ -245,17 +242,6 @@ export default function App() {
     [importGpxFiles, pushToast, setSettings, fitTo],
   );
 
-  const handleExport = useCallback(async () => {
-    try {
-      const backup = await exportBackup();
-      downloadText(JSON.stringify(backup), backupFileName(), 'application/json');
-      pushToast({ kind: 'success', title: `Sauvegarde exportée (${backup.tracks.length} tracés)` });
-    } catch (e) {
-      console.error(e);
-      pushToast({ kind: 'error', title: "Échec de l'export de la sauvegarde" });
-    }
-  }, [exportBackup, pushToast]);
-
   const handleDownloadGpx = useCallback(
     (track: Track) => {
       try {
@@ -266,25 +252,6 @@ export default function App() {
       }
     },
     [pushToast],
-  );
-
-  const handleImportBackup = useCallback(
-    async (file: File) => {
-      try {
-        const { added, skipped } = await importBackup(await file.text());
-        const parts = [`${added} ajouté${added > 1 ? 's' : ''}`];
-        if (skipped) parts.push(`${skipped} déjà présent${skipped > 1 ? 's' : ''}`);
-        pushToast({ kind: 'success', title: `Sauvegarde importée : ${parts.join(', ')}` });
-      } catch (e) {
-        if (!(e instanceof BackupError)) console.error(e);
-        pushToast({
-          kind: 'error',
-          title: 'Sauvegarde non importée',
-          details: [`${file.name} : ${e instanceof BackupError ? e.message : 'erreur inattendue'}`],
-        });
-      }
-    },
-    [importBackup, pushToast],
   );
 
   if (loading || !tracks || !settings) {
@@ -361,8 +328,6 @@ export default function App() {
         onOpenSettings={() => setSettingsOpen(true)}
         onClose={() => setPanelOpen(false)}
         onImportGpx={handleImportGpx}
-        onExportBackup={handleExport}
-        onImportBackup={handleImportBackup}
         onSelect={selectTrack}
         onRename={(id, name) => void renameTrack(id, name)}
         onColor={(id, c) => void setTrackColor(id, c)}

@@ -30,7 +30,7 @@ Pourquoi, en 2-3 phrases. Cas d'usage principal.
 
 ## Contraintes
 - Ce qui ne doit pas changer (ex. id = empreinte du fichier d'origine).
-- Performances, compatibilité avec la sauvegarde JSON, paramètres à ajouter…
+- Performances, données déjà stockées dans IndexedDB, paramètres à ajouter…
 
 ## Hors périmètre
 - Ce qu'on ne fait pas cette fois.

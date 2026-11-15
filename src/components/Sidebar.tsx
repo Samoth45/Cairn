@@ -14,8 +14,6 @@ interface Props {
   onClose: () => void;
   onOpenSettings: () => void;
   onImportGpx: (files: File[]) => void;
-  onExportBackup: () => void;
-  onImportBackup: (file: File) => void;
   onSelect: (id: string) => void;
   onRename: (id: string, name: string) => void;
   onColor: (id: string, color: string) => void;
@@ -26,7 +24,6 @@ interface Props {
 
 export function Sidebar(p: Props) {
   const gpxInput = useRef<HTMLInputElement>(null);
-  const backupInput = useRef<HTMLInputElement>(null);
 
   return (
     <aside className={`sidebar${p.open ? ' open' : ''}`} aria-label="Tracés">
@@ -92,27 +89,6 @@ export function Sidebar(p: Props) {
         </ul>
       )}
       </div>
-
-      <footer className="sidebar-footer">
-        <span className="footer-label">Sauvegarde</span>
-        <button type="button" className="btn" onClick={p.onExportBackup} disabled={p.tracks.length === 0}>
-          Exporter
-        </button>
-        <button type="button" className="btn" onClick={() => backupInput.current?.click()}>
-          Importer
-        </button>
-        <input
-          ref={backupInput}
-          type="file"
-          accept=".json,application/json"
-          hidden
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            e.target.value = '';
-            if (file) p.onImportBackup(file);
-          }}
-        />
-      </footer>
     </aside>
   );
 }

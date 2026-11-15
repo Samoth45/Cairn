@@ -91,7 +91,7 @@ src/
                       (via normalizeSettings). Nouvelle table → db.version(3)
   hooks/
     useTracks.ts            useLiveQuery (l'UI suit la base) + actions : import GPX, renommer,
-                            couleur, visibilité, suppression, export/import de sauvegarde
+                            couleur, visibilité, suppression
     useElevationFetcher.ts  récupère en arrière-plan (1 tracé à la fois) les altitudes manquantes,
                             statut par tracé (loading/error/done) + retry
     useWeather.ts           prévision du tracé sélectionné via weatherCache ; { forecast, loading,
@@ -114,7 +114,7 @@ samples/              GPX fictifs pour tests manuels (trk avec ele, rte sans ele
 ## Décisions transverses
 
 - **id d'un tracé = empreinte de ses coordonnées** (pas un UUID) → dédoublonnage à l'import
-  GPX et à la fusion de sauvegarde. Pas de `crypto.subtle` : indisponible en HTTP hors
+  GPX. Pas de `crypto.subtle` : indisponible en HTTP hors
   localhost (test depuis le téléphone via l'IP du PC).
 - **Un fichier GPX = un tracé**, chaque `trkseg` / `rte` devient un segment de `segments`.
   Les `wpt` sont ignorés. Nom : `metadata/name` → nom du 1er trk/rte → nom de fichier.
@@ -127,7 +127,8 @@ samples/              GPX fictifs pour tests manuels (trk avec ele, rte sans ele
 - **Heure de Paris** : les séries horaires sont en heure locale de Paris
   (`timezone=Europe/Paris`) : comparer avec `parisHourKey()`, ne jamais convertir avec le
   fuseau du navigateur.
-- **Paramètres** : les `Settings` sont persistés en base et inclus dans la sauvegarde JSON
-  (vitesses DIN, modèle météo, coloration, heure de départ, poids du score). Tout nouveau
-  réglage : l'ajouter à `DEFAULT_SETTINGS` **et** à `normalizeSettings` (qui complète les
-  sauvegardes et paramètres anciens).
+- **Paramètres** : les `Settings` sont persistés en base (vitesses DIN, modèle météo,
+  coloration, heure de départ, poids du score). Tout nouveau réglage : l'ajouter à
+  `DEFAULT_SETTINGS` **et** à `normalizeSettings` (qui complète les paramètres anciens).
+- **Pas de sauvegarde JSON** (supprimée, cf. `docs/specs/suppression-sauvegarde.md`) : les
+  données vivent dans IndexedDB du navigateur ; pour changer de navigateur, réimporter les GPX.

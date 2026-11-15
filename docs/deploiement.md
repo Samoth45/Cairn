@@ -27,7 +27,7 @@ validée : ne jamais pousser.
 - `.vercel/` (dossier local de la CLI Vercel) est dans `.gitignore`.
 - **README** : section « Déploiement sur Vercel » (build depuis les sources via `vercel.json`,
   push sur la branche principale = production, autres branches = previews, données stockées
-  dans le navigateur → la version déployée démarre vide, importer la sauvegarde JSON).
+  dans le navigateur → la version déployée démarre vide, réimporter les GPX).
 
 ## Contraintes de code
 

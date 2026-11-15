@@ -16,7 +16,7 @@ stats.ts          elevationGain (hystérésis 5 m), analyzeTrack → { stats (do
 slope.ts          eleAt, slopeAt (fenêtre 100 m), maxSlopes, SLOPE_CLASSES (< 5, 5–10,
                   10–15, 15–25, > 25 %), slopeRuns (tronçons colorés du profil)
 gpxExport.ts      buildGpx(track) → GPX 1.1 (1 trk, 1 trkseg par segment), gpxFileName
-download.ts       downloadText(contenu, nom, mime) (GPX, sauvegarde JSON)
+download.ts       downloadText(contenu, nom, mime) (retéléchargement GPX)
 referrer.ts       isLoopbackHost, otmReferrerPolicy (pas de referrer vers OpenTopoMap en local)
 weatherPoints.ts  selectWeatherPoints(profile) → WeatherPoint[] (lat, lon, ele, d, roles
                   summit/start/lowest), triés du plus haut au plus bas ; rolesLabel ; weatherPointsKey
@@ -39,10 +39,9 @@ score.ts          computeDayScore(input, weights) → { score, penalties, covera
                   gravités (rain/gust/cloud/coldSeverity), PENALTY_LABELS / ICONS, scoreColor,
                   reliability(échéance)
 din.ts            dinDurationHours(distanceKm, D+, D-, speeds)
-settings.ts       normalizeSettings (valeurs par défaut + validation, base et sauvegarde)
+settings.ts       normalizeSettings (valeurs par défaut + validation des paramètres stockés)
 format.ts         formatage FR (km, m, durée « 5 h 15 », coordonnées, « – » si null)
 ticks.ts          graduations rondes pour les graphiques
-backup.ts         buildBackup, parseBackup (validation), mergeTracks (fusion par id)
 colors.ts         palette cyclique des tracés
 ```
 

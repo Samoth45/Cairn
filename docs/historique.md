@@ -4,7 +4,8 @@ Ce qui a été fait, étape par étape, par rapport au cahier des charges
 (`docs/cahier-des-charges.md`). Toutes les étapes ont été validées par l'utilisateur.
 
 - [x] **Étape 1** — carte (IGN / OpenTopoMap), import GPX multiple (bouton + glisser-déposer),
-  IndexedDB, panneau des tracés, sélection/zoom, erreurs, export/import de sauvegarde JSON.
+  IndexedDB, panneau des tracés, sélection/zoom, erreurs, export/import de sauvegarde JSON
+  (supprimé ensuite, voir plus bas).
   Validée par l'utilisateur. Ajustement ensuite : tracés dessinés en 3 couches
   (ombre noire + liseré blanc + couleur) pour le contraste.
 - [x] **Étape 2** — statistiques (distance, D+/D- avec hystérésis 5 m, min/max, point culminant),
@@ -48,3 +49,8 @@ Ce qui a été fait, étape par étape, par rapport au cahier des charges
 
 Les nouvelles fonctionnalités ont chacune leur spec dans `docs/specs/`. Ajouter ici une ligne
 par fonctionnalité validée.
+
+- [x] **Suppression de la sauvegarde JSON** (15/11/2026) — export/import et pied de panneau
+  « Sauvegarde » retirés : l'app n'est utilisée que sur Vercel, les GPX sont réimportés en cas
+  de changement de navigateur. Retéléchargement GPX conservé, données IndexedDB intactes.
+  Spec : `docs/specs/suppression-sauvegarde.md`.

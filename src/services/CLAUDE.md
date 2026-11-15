@@ -28,6 +28,5 @@ weatherCache.ts   getTrackForecast(trackId, points, model, {force}) : mémoire �
 - **Points météo** calculés seulement quand les altitudes sont définitives (pas pendant la
   récupération Open-Meteo Elevation), sinon double requête.
 - **Cache** : TTL 1 h ; invalidé si le modèle ou les points changent (clé `modèle|points`).
-  Le cache n'est pas dans la sauvegarde JSON.
 - Les séries sont demandées avec `timezone=Europe/Paris` : voir « Heure de Paris » dans le
   CLAUDE.md racine.

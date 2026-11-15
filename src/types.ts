@@ -68,11 +68,3 @@ export const DEFAULT_SETTINGS: Settings = {
   departureTime: '08:00',
   scoreWeights: DEFAULT_SCORE_WEIGHTS,
 };
-
-export interface BackupFile {
-  app: 'cairn';
-  version: 1;
-  exportedAt: string;
-  tracks: Track[];
-  settings: Settings;
-}
