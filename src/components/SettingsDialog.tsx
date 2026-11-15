@@ -2,18 +2,22 @@ import { useEffect, useState, type FormEvent } from 'react';
 import {
   DEFAULT_DIN,
   DEFAULT_SCORE_WEIGHTS,
+  DEFAULT_SETTINGS,
   type DinSpeeds,
   type ScoreWeights,
   type Settings,
+  type Theme,
   type WeatherModel,
 } from '../types';
 import { MODEL_LABELS } from '../services/weather';
 import { PENALTY_ICONS, PENALTY_LABELS } from '../lib/score';
+import { THEME_LABELS } from '../lib/theme';
 
 interface Props {
   din: DinSpeeds;
   weatherModel: WeatherModel;
   scoreWeights: ScoreWeights;
+  theme: Theme;
   onSave: (patch: Partial<Settings>) => void;
   onClose: () => void;
 }
@@ -24,9 +28,10 @@ const FIELDS: Array<{ key: keyof DinSpeeds; label: string; unit: string; step: n
   { key: 'descentMh', label: 'Vitesse en descente', unit: 'm/h', step: 10 },
 ];
 
-export function SettingsDialog({ din, weatherModel, scoreWeights, onSave, onClose }: Props) {
+export function SettingsDialog({ din, weatherModel, scoreWeights, theme, onSave, onClose }: Props) {
   const [draft, setDraft] = useState<Record<keyof DinSpeeds, string>>(() => toDraft(din));
   const [model, setModel] = useState<WeatherModel>(weatherModel);
+  const [themeDraft, setThemeDraft] = useState<Theme>(theme);
   const [weightsDraft, setWeightsDraft] = useState<Record<keyof ScoreWeights, string>>(() => toWeightsDraft(scoreWeights));
 
   useEffect(() => {
@@ -45,7 +50,7 @@ export function SettingsDialog({ din, weatherModel, scoreWeights, onSave, onClos
   const submit = (e: FormEvent) => {
     e.preventDefault();
     if (!valid) return;
-    onSave({ din: parsed, weatherModel: model, scoreWeights: parsedWeights });
+    onSave({ din: parsed, weatherModel: model, scoreWeights: parsedWeights, theme: themeDraft });
     onClose();
   };
 
@@ -115,6 +120,23 @@ export function SettingsDialog({ din, weatherModel, scoreWeights, onSave, onClos
             rando sous 5 mm de pluie perd 35 points.
           </p>
         </fieldset>
+        <fieldset>
+          <legend>Apparence</legend>
+          <label className="field field-select">
+            <span>Thème</span>
+            <select value={themeDraft} onChange={(e) => setThemeDraft(e.target.value as Theme)}>
+              {(Object.keys(THEME_LABELS) as Theme[]).map((t) => (
+                <option key={t} value={t}>
+                  {THEME_LABELS[t]}
+                </option>
+              ))}
+            </select>
+          </label>
+          <p className="hint">
+            « Système » suit le réglage clair / sombre de l’appareil. Le bouton ☾ / ☀ du panneau choisit
+            directement clair ou sombre.
+          </p>
+        </fieldset>
         <div className="modal-actions">
           <button
             type="button"
@@ -123,6 +145,7 @@ export function SettingsDialog({ din, weatherModel, scoreWeights, onSave, onClos
               setDraft(toDraft(DEFAULT_DIN));
               setModel('meteofrance_seamless');
               setWeightsDraft(toWeightsDraft(DEFAULT_SCORE_WEIGHTS));
+              setThemeDraft(DEFAULT_SETTINGS.theme);
             }}
           >
             Valeurs par défaut

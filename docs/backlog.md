@@ -31,3 +31,21 @@ Signalées par `npm ci` sous Node 26 / npm 11 ; elles fonctionnent encore. Sans 
   (environnement des tests) ; se règle en mettant `jsdom` à jour, pas directement.
 
 Après mise à jour : `npm install` dans le conteneur, puis `/verifier` (tests, lint, build).
+
+## Réorganisation du panneau latéral (stats + météo)
+
+Rendre l'interface plus lisible : le panneau latéral est encombré.
+
+Constat :
+- Les blocs « Statistiques » et « Météo » prennent trop de place à eux deux.
+- Le bloc météo grossit avec le nombre de points d'altitude et devient très envahissant.
+
+Idée :
+- Fusionner les deux blocs en un seul panneau à onglets : « Stats » | « Météo ».
+- Réduire l'encombrement du bloc météo quand il y a beaucoup de points.
+
+À réfléchir (→ spec avant d'implémenter) :
+- Où placer ce panneau fusionné : panneau latéral, sous la carte, ailleurs ?
+- Comment compacter la météo : n'afficher que quelques points (départ, sommet…),
+  repli/dépli, défilement ?
+- Comportement sur mobile (tiroir).

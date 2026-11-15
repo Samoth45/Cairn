@@ -54,3 +54,9 @@ par fonctionnalité validée.
   « Sauvegarde » retirés : l'app n'est utilisée que sur Vercel, les GPX sont réimportés en cas
   de changement de navigateur. Retéléchargement GPX conservé, données IndexedDB intactes.
   Spec : `docs/specs/suppression-sauvegarde.md`.
+- [x] **Mode sombre** (15/11/2026, sans spec : consignes du backlog suffisantes) — bouton ☾ / ☀
+  à gauche de ⚙, réglage `theme` (Système par défaut, suivi en direct ; Clair ; Sombre) aussi
+  dans les Paramètres (section « Apparence »), sans flash au chargement (copie localStorage lue
+  par `index.html`). Interface seulement : fonds de carte intacts, contrôles et infobulles
+  Leaflet assombris ; couleurs d'interface en variables CSS. Au passage : listes déroulantes
+  des Paramètres qui étaient tronquées.

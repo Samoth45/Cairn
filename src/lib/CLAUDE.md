@@ -43,6 +43,8 @@ settings.ts       normalizeSettings (valeurs par défaut + validation des param�
 format.ts         formatage FR (km, m, durée « 5 h 15 », coordonnées, « – » si null)
 ticks.ts          graduations rondes pour les graphiques
 colors.ts         palette cyclique des tracés
+theme.ts          resolveTheme (réglage + préférence système), toggledTheme, THEME_LABELS,
+                  THEME_STORAGE_KEY
 ```
 
 ## Décisions

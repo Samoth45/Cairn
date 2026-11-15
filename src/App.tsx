@@ -39,6 +39,8 @@ import { CairnLogo } from './components/CairnLogo';
 import type { FitRequest } from './components/FitBounds';
 import { trackBounds, type Bounds } from './lib/geo';
 import type { Track } from './types';
+import { useTheme } from './hooks/useTheme';
+import { toggledTheme } from './lib/theme';
 
 const isMobile = () => window.matchMedia('(max-width: 767px)').matches;
 
@@ -58,6 +60,7 @@ export default function App() {
     deleteTrack,
     setSettings,
   } = useTracks();
+  const theme = useTheme(settings?.theme);
 
   const [panelOpen, setPanelOpen] = useState(false);
   const [fitRequest, setFitRequest] = useState<FitRequest | null>(null);
@@ -326,6 +329,8 @@ export default function App() {
           )
         }
         onOpenSettings={() => setSettingsOpen(true)}
+        theme={theme}
+        onToggleTheme={() => void setSettings({ theme: toggledTheme(theme) })}
         onClose={() => setPanelOpen(false)}
         onImportGpx={handleImportGpx}
         onSelect={selectTrack}
@@ -471,6 +476,7 @@ export default function App() {
           din={settings.din}
           weatherModel={settings.weatherModel}
           scoreWeights={settings.scoreWeights}
+          theme={settings.theme}
           onSave={(patch) => void setSettings(patch)}
           onClose={() => setSettingsOpen(false)}
         />

@@ -13,6 +13,9 @@ interface Props {
   weatherPanel?: ReactNode;
   onClose: () => void;
   onOpenSettings: () => void;
+  /** Thème affiché, et bascule clair / sombre. */
+  theme: 'light' | 'dark';
+  onToggleTheme: () => void;
   onImportGpx: (files: File[]) => void;
   onSelect: (id: string) => void;
   onRename: (id: string, name: string) => void;
@@ -30,6 +33,15 @@ export function Sidebar(p: Props) {
       <header className="sidebar-header">
         <CairnLogo />
         <h1>Cairn</h1>
+        <button
+          type="button"
+          className="icon-btn"
+          onClick={p.onToggleTheme}
+          aria-label={p.theme === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre'}
+          title={p.theme === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre'}
+        >
+          {p.theme === 'dark' ? '☀' : '☾'}
+        </button>
         <button type="button" className="icon-btn" onClick={p.onOpenSettings} aria-label="Paramètres" title="Paramètres">
           ⚙
         </button>

@@ -66,7 +66,7 @@ const TEMP_STOPS: Array<[number, [number, number, number]]> = [
 
 /** Couleur de fond et couleur de texte lisible pour une température. */
 export function tempColor(t: number | null | undefined): { bg: string; fg: string } {
-  if (t === null || t === undefined || !Number.isFinite(t)) return { bg: '#eceae4', fg: '#6b7378' };
+  if (t === null || t === undefined || !Number.isFinite(t)) return { bg: 'var(--nodata-bg)', fg: 'var(--muted)' };
   let rgb = TEMP_STOPS[TEMP_STOPS.length - 1][1];
   if (t <= TEMP_STOPS[0][0]) rgb = TEMP_STOPS[0][1];
   for (let k = 1; k < TEMP_STOPS.length; k++) {

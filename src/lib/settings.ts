@@ -36,6 +36,7 @@ export function normalizeSettings(raw: unknown): Settings {
         return [k, typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 100 ? v : DEFAULT_SCORE_WEIGHTS[k]];
       }),
     ) as unknown as ScoreWeights,
+    theme: o.theme === 'light' || o.theme === 'dark' || o.theme === 'system' ? o.theme : DEFAULT_SETTINGS.theme,
     departureTime:
       typeof o.departureTime === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(o.departureTime)
         ? o.departureTime

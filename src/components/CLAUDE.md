@@ -73,6 +73,22 @@ React (`memoizedProps.value.map`), les pixels du tracé via `getImageData` du ca
   `HoverMarker` affiche l'infobulle de passage (`renderInfo`) seulement en mode coloré. Clic sur le
   tracé coloré = infobulle (pas de nouveau zoom) ; clic sur le fond de carte = fermeture.
 
+## Mode sombre
+
+- `Settings.theme` : `'system'` (défaut, suit l'appareil en direct) | `'light'` | `'dark'`. Le
+  bouton ☾ / ☀ (à gauche de ⚙) enregistre le thème opposé à celui affiché ; on ne revient à
+  `'system'` que par les Paramètres (section « Apparence » : Système / Clair / Sombre, appliqué
+  à « Enregistrer » comme les autres réglages ; « Valeurs par défaut » remet Système).
+- Thème appliqué par `<html data-theme="light|dark">`. Copie du réglage dans localStorage
+  (`cairn-theme`) lue par un script inline de `index.html` **avant** le premier rendu : sans
+  elle, flash du thème clair (IndexedDB arrive trop tard). La source de vérité reste `Settings`.
+- **Toutes les couleurs d'interface passent par les variables de `:root`** (redéfinies sous
+  `:root[data-theme='dark']`) : ne plus écrire de couleur en dur dans `styles.css`. Les
+  couleurs de données (températures, scores, pentes, tracés) ne changent pas ; leurs cases
+  « sans donnée » utilisent `var(--nodata-bg)` / `var(--muted)` (styles en ligne).
+- **La carte reste intacte** (choix de l'utilisateur) : seuls les contrôles et infobulles Leaflet
+  sont assombris (fin de `styles.css`) ; tuiles et marqueurs gardent leurs couleurs.
+
 ## Responsive
 
 Panneau latéral fixe ≥ 768 px, tiroir + bouton flottant en dessous.
