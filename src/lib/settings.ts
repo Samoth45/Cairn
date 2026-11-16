@@ -12,7 +12,7 @@ function positive(value: unknown, fallback: number): number {
 }
 
 /**
- * Complète et valide des paramètres partiels (base IndexedDB, sauvegarde importée…)
+ * Complète et valide des paramètres partiels (lus dans IndexedDB, éventuellement anciens)
  * en retombant sur les valeurs par défaut pour tout champ absent ou invalide.
  */
 export function normalizeSettings(raw: unknown): Settings {
@@ -36,6 +36,8 @@ export function normalizeSettings(raw: unknown): Settings {
         return [k, typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 100 ? v : DEFAULT_SCORE_WEIGHTS[k]];
       }),
     ) as unknown as ScoreWeights,
+    theme: o.theme === 'light' || o.theme === 'dark' || o.theme === 'system' ? o.theme : DEFAULT_SETTINGS.theme,
+    sidePanelTab: o.sidePanelTab === 'weather' || o.sidePanelTab === 'stats' ? o.sidePanelTab : DEFAULT_SETTINGS.sidePanelTab,
     departureTime:
       typeof o.departureTime === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(o.departureTime)
         ? o.departureTime

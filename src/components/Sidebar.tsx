@@ -7,15 +7,14 @@ interface Props {
   open: boolean;
   tracks: Track[];
   selectedId?: string;
-  /** Statistiques du tracé sélectionné. */
-  statsPanel?: ReactNode;
-  /** Météo du tracé sélectionné. */
-  weatherPanel?: ReactNode;
+  /** Panneau à onglets (Stats | Météo) du tracé sélectionné. */
+  trackPanel?: ReactNode;
   onClose: () => void;
   onOpenSettings: () => void;
+  /** Thème affiché, et bascule clair / sombre. */
+  theme: 'light' | 'dark';
+  onToggleTheme: () => void;
   onImportGpx: (files: File[]) => void;
-  onExportBackup: () => void;
-  onImportBackup: (file: File) => void;
   onSelect: (id: string) => void;
   onRename: (id: string, name: string) => void;
   onColor: (id: string, color: string) => void;
@@ -26,13 +25,21 @@ interface Props {
 
 export function Sidebar(p: Props) {
   const gpxInput = useRef<HTMLInputElement>(null);
-  const backupInput = useRef<HTMLInputElement>(null);
 
   return (
     <aside className={`sidebar${p.open ? ' open' : ''}`} aria-label="Tracés">
       <header className="sidebar-header">
         <CairnLogo />
         <h1>Cairn</h1>
+        <button
+          type="button"
+          className="icon-btn"
+          onClick={p.onToggleTheme}
+          aria-label={p.theme === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre'}
+          title={p.theme === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre'}
+        >
+          {p.theme === 'dark' ? '☀' : '☾'}
+        </button>
         <button type="button" className="icon-btn" onClick={p.onOpenSettings} aria-label="Paramètres" title="Paramètres">
           ⚙
         </button>
@@ -60,8 +67,7 @@ export function Sidebar(p: Props) {
       </div>
 
       <div className="sidebar-scroll">
-      {p.statsPanel}
-      {p.weatherPanel}
+      {p.trackPanel}
 
       <div className="track-list-header">
         <span>Tracés</span>
@@ -92,27 +98,6 @@ export function Sidebar(p: Props) {
         </ul>
       )}
       </div>
-
-      <footer className="sidebar-footer">
-        <span className="footer-label">Sauvegarde</span>
-        <button type="button" className="btn" onClick={p.onExportBackup} disabled={p.tracks.length === 0}>
-          Exporter
-        </button>
-        <button type="button" className="btn" onClick={() => backupInput.current?.click()}>
-          Importer
-        </button>
-        <input
-          ref={backupInput}
-          type="file"
-          accept=".json,application/json"
-          hidden
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            e.target.value = '';
-            if (file) p.onImportBackup(file);
-          }}
-        />
-      </footer>
     </aside>
   );
 }

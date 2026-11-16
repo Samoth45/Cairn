@@ -95,3 +95,8 @@ export function rolesLabel(roles: PointRole[]): string {
     .map((r) => ROLE_LABELS[r])
     .join(' · ');
 }
+
+/** Point clé (sommet, départ ou point bas) : affiché d'office dans le tableau du panneau latéral. */
+export function isKeyPoint(p: Pick<WeatherPoint, 'roles'>): boolean {
+  return p.roles.length > 0;
+}

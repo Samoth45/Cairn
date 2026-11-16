@@ -33,6 +33,9 @@ export interface DinSpeeds {
 /** Modèle météo Open-Meteo. */
 export type WeatherModel = 'meteofrance_seamless' | 'best_match';
 
+/** Thème de l'interface : « system » suit le réglage de l'appareil. */
+export type Theme = 'system' | 'light' | 'dark';
+
 export interface Settings {
   baseLayer: BaseLayerId;
   selectedTrackId?: string;
@@ -45,7 +48,13 @@ export interface Settings {
   departureTime: string;
   /** Poids des pénalités du score « meilleur jour » (étape 6), en points retirés au maximum. */
   scoreWeights: ScoreWeights;
+  /** Thème clair / sombre de l'interface (la carte n'est pas modifiée). */
+  theme: Theme;
+  /** Onglet ouvert du panneau du tracé sélectionné (barre latérale). */
+  sidePanelTab: SidePanelTab;
 }
+
+export type SidePanelTab = 'stats' | 'weather';
 
 export interface ScoreWeights {
   rain: number;
@@ -67,12 +76,6 @@ export const DEFAULT_SETTINGS: Settings = {
   trackColoring: 'none',
   departureTime: '08:00',
   scoreWeights: DEFAULT_SCORE_WEIGHTS,
+  theme: 'system',
+  sidePanelTab: 'stats',
 };
-
-export interface BackupFile {
-  app: 'cairn';
-  version: 1;
-  exportedAt: string;
-  tracks: Track[];
-  settings: Settings;
-}

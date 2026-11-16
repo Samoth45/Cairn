@@ -4,6 +4,7 @@ import { useElevationFetcher } from './hooks/useElevationFetcher';
 import { MapView } from './components/MapView';
 import { Sidebar } from './components/Sidebar';
 import { TrackStats } from './components/TrackStats';
+import { TrackPanel } from './components/TrackPanel';
 import { ElevationProfile } from './components/ElevationProfile';
 import { SettingsDialog } from './components/SettingsDialog';
 import { analyzeTrack, nearestProfileIndex } from './lib/stats';
@@ -38,8 +39,9 @@ import { Toasts, type Toast } from './components/Toasts';
 import { CairnLogo } from './components/CairnLogo';
 import type { FitRequest } from './components/FitBounds';
 import { trackBounds, type Bounds } from './lib/geo';
-import { backupFileName, BackupError } from './lib/backup';
 import type { Track } from './types';
+import { useTheme } from './hooks/useTheme';
+import { toggledTheme } from './lib/theme';
 
 const isMobile = () => window.matchMedia('(max-width: 767px)').matches;
 
@@ -58,9 +60,8 @@ export default function App() {
     setTrackVisible,
     deleteTrack,
     setSettings,
-    exportBackup,
-    importBackup,
   } = useTracks();
+  const theme = useTheme(settings?.theme);
 
   const [panelOpen, setPanelOpen] = useState(false);
   const [fitRequest, setFitRequest] = useState<FitRequest | null>(null);
@@ -245,17 +246,6 @@ export default function App() {
     [importGpxFiles, pushToast, setSettings, fitTo],
   );
 
-  const handleExport = useCallback(async () => {
-    try {
-      const backup = await exportBackup();
-      downloadText(JSON.stringify(backup), backupFileName(), 'application/json');
-      pushToast({ kind: 'success', title: `Sauvegarde exportée (${backup.tracks.length} tracés)` });
-    } catch (e) {
-      console.error(e);
-      pushToast({ kind: 'error', title: "Échec de l'export de la sauvegarde" });
-    }
-  }, [exportBackup, pushToast]);
-
   const handleDownloadGpx = useCallback(
     (track: Track) => {
       try {
@@ -266,25 +256,6 @@ export default function App() {
       }
     },
     [pushToast],
-  );
-
-  const handleImportBackup = useCallback(
-    async (file: File) => {
-      try {
-        const { added, skipped } = await importBackup(await file.text());
-        const parts = [`${added} ajouté${added > 1 ? 's' : ''}`];
-        if (skipped) parts.push(`${skipped} déjà présent${skipped > 1 ? 's' : ''}`);
-        pushToast({ kind: 'success', title: `Sauvegarde importée : ${parts.join(', ')}` });
-      } catch (e) {
-        if (!(e instanceof BackupError)) console.error(e);
-        pushToast({
-          kind: 'error',
-          title: 'Sauvegarde non importée',
-          details: [`${file.name} : ${e instanceof BackupError ? e.message : 'erreur inattendue'}`],
-        });
-      }
-    },
-    [importBackup, pushToast],
   );
 
   if (loading || !tracks || !settings) {
@@ -325,44 +296,50 @@ export default function App() {
         open={panelOpen}
         tracks={tracks}
         selectedId={settings.selectedTrackId}
-        statsPanel={
-          selectedTrack &&
-          analysis && (
-            <TrackStats
-              track={selectedTrack}
-              stats={analysis.stats}
-              din={settings.din}
-              elevationStatus={selElevationStatus}
-              onRetryElevation={() => retryElevation(selectedTrack.id)}
-              onDownload={() => handleDownloadGpx(selectedTrack)}
-              onShowSummit={() => {
-                const s = analysis.stats.summit;
-                if (s) fitTo([[s.lat, s.lon], [s.lat, s.lon]]);
-                if (isMobile()) setPanelOpen(false);
-              }}
-            />
-          )
-        }
-        weatherPanel={
+        trackPanel={
           selectedTrack && (
-            <WeatherPanel
-              key={selectedTrack.id}
-              weather={weather}
-              model={weatherModel}
-              waitingForElevation={selectedNeedsElevation}
-              start={start}
-              durationHours={durationHours}
-              hourIndex={hourIndex}
-              onSelectHour={setHourSelection}
-              onOpenTable={view === 'weather' ? undefined : () => openWeatherView()}
+            <TrackPanel
+              track={selectedTrack}
+              tab={settings.sidePanelTab}
+              onTabChange={(tab) => void setSettings({ sidePanelTab: tab })}
+              stats={
+                analysis && (
+                  <TrackStats
+                    track={selectedTrack}
+                    stats={analysis.stats}
+                    din={settings.din}
+                    elevationStatus={selElevationStatus}
+                    onRetryElevation={() => retryElevation(selectedTrack.id)}
+                    onDownload={() => handleDownloadGpx(selectedTrack)}
+                    onShowSummit={() => {
+                      const s = analysis.stats.summit;
+                      if (s) fitTo([[s.lat, s.lon], [s.lat, s.lon]]);
+                      if (isMobile()) setPanelOpen(false);
+                    }}
+                  />
+                )
+              }
+              weather={
+                <WeatherPanel
+                  key={selectedTrack.id}
+                  weather={weather}
+                  model={weatherModel}
+                  waitingForElevation={selectedNeedsElevation}
+                  start={start}
+                  durationHours={durationHours}
+                  hourIndex={hourIndex}
+                  onSelectHour={setHourSelection}
+                  onOpenTable={view === 'weather' ? undefined : () => openWeatherView()}
+                />
+              }
             />
           )
         }
         onOpenSettings={() => setSettingsOpen(true)}
+        theme={theme}
+        onToggleTheme={() => void setSettings({ theme: toggledTheme(theme) })}
         onClose={() => setPanelOpen(false)}
         onImportGpx={handleImportGpx}
-        onExportBackup={handleExport}
-        onImportBackup={handleImportBackup}
         onSelect={selectTrack}
         onRename={(id, name) => void renameTrack(id, name)}
         onColor={(id, c) => void setTrackColor(id, c)}
@@ -506,6 +483,7 @@ export default function App() {
           din={settings.din}
           weatherModel={settings.weatherModel}
           scoreWeights={settings.scoreWeights}
+          theme={settings.theme}
           onSave={(patch) => void setSettings(patch)}
           onClose={() => setSettingsOpen(false)}
         />

@@ -6,17 +6,11 @@ import { trackFingerprint } from '../lib/hash';
 import { pickColor } from '../lib/colors';
 import { needsElevation } from '../lib/elevation';
 import { deleteTrackForecast } from '../services/weatherCache';
-import { buildBackup, mergeTracks, parseBackup } from '../lib/backup';
 import type { Settings, Track } from '../types';
 
 export interface ImportReport {
   added: Track[];
   errors: string[];
-}
-
-export interface BackupImportReport {
-  added: number;
-  skipped: number;
 }
 
 /** Accès aux tracés et paramètres persistés dans IndexedDB, avec les actions associées. */
@@ -100,29 +94,6 @@ export function useTracks() {
 
   const setSettings = useCallback((patch: Partial<Settings>) => updateSettings(patch), []);
 
-  const exportBackup = useCallback(async () => {
-    const [all, s] = await Promise.all([db.tracks.orderBy('createdAt').toArray(), getSettings()]);
-    return buildBackup(all, s);
-  }, []);
-
-  const importBackup = useCallback(async (text: string): Promise<BackupImportReport> => {
-    const backup = parseBackup(text); // lève BackupError si invalide
-    return db.transaction('rw', db.tracks, db.settings, async () => {
-      const existing = await db.tracks.toArray();
-      const { toAdd, skipped } = mergeTracks(existing, backup.tracks);
-      await db.tracks.bulkAdd(toAdd);
-      // Les paramètres de la sauvegarde sont restaurés, sauf la sélection
-      // si elle pointe vers un tracé inexistant.
-      const ids = new Set([...existing, ...toAdd].map((t) => t.id));
-      const sel = backup.settings.selectedTrackId;
-      await updateSettings({
-        ...backup.settings,
-        selectedTrackId: sel && ids.has(sel) ? sel : (await getSettings()).selectedTrackId,
-      });
-      return { added: toAdd.length, skipped };
-    });
-  }, []);
-
   return {
     tracks,
     settings,
@@ -133,7 +104,5 @@ export function useTracks() {
     setTrackVisible,
     deleteTrack,
     setSettings,
-    exportBackup,
-    importBackup,
   };
 }

@@ -70,7 +70,7 @@ describe('couleurs de température', () => {
     expect(rh).toBeGreaterThan(bh);
     expect(tempColor(-20).fg).toBe('#ffffff'); // texte clair sur bleu foncé
     expect(tempColor(1).fg).toBe('#1d2327');
-    expect(tempColor(null).bg).toBe('#eceae4');
+    expect(tempColor(null).bg).toBe('var(--nodata-bg)');
   });
 });
 

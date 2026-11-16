@@ -20,9 +20,6 @@ export function TrackStats({ track, stats, din, elevationStatus, onRetryElevatio
 
   return (
     <section className="stats" aria-label="Statistiques du tracé sélectionné">
-      <h2 className="stats-title" style={{ borderColor: track.color }} title={track.name}>
-        {track.name}
-      </h2>
       <dl className="stats-grid">
         <div>
           <dt>Distance</dt>

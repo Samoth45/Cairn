@@ -1,7 +1,8 @@
+import { useState } from 'react';
 import type { WeatherModel } from '../types';
 import type { WeatherState } from '../hooks/useWeather';
 import { MODEL_LABELS } from '../services/weather';
-import { rolesLabel } from '../lib/weatherPoints';
+import { isKeyPoint, rolesLabel } from '../lib/weatherPoints';
 import { formatClock, formatAgo, parisHourKey } from '../lib/time';
 import { currentHourIndex, formatForecastHour, type HourSelection } from '../lib/forecast';
 import { daylightInfo, isNightHour, sunTimes } from '../lib/sun';
@@ -48,6 +49,10 @@ export function WeatherPanel({
   const index = data && hourIndex !== null ? hourIndex : null;
   const nowIndex = data ? currentHourIndex(data.times) : 0;
   const go = (i: number) => forecast && onSelectHour({ key: forecast.key, index: i });
+  // Tableau allégé : points clés seulement, sauf dépliage (non persisté, repart replié à chaque
+  // tracé grâce à la `key` posée par App).
+  const [showAll, setShowAll] = useState(false);
+  const hasIntermediate = forecast ? forecast.points.some((p) => !isKeyPoint(p)) : false;
 
   // Jour affiché : celui de l'heure sélectionnée, sinon aujourd'hui.
   const day = data && index !== null ? data.times[index].slice(0, 10) : parisHourKey().slice(0, 10);
@@ -57,20 +62,19 @@ export function WeatherPanel({
   return (
     <section className="weather" aria-label="Météo">
       <header className="weather-header">
-        <h2>Météo</h2>
+        <p className="weather-meta">
+          {MODEL_LABELS[model]}
+          {forecast && (
+            <>
+              {' · mise à jour à '}
+              {formatClock(forecast.fetchedAt)} ({formatAgo(forecast.fetchedAt)})
+            </>
+          )}
+        </p>
         <button type="button" className="btn small" onClick={refresh} disabled={loading || (!forecast && !error)}>
           {loading ? 'Chargement…' : 'Actualiser'}
         </button>
       </header>
-      <p className="weather-meta">
-        {MODEL_LABELS[model]}
-        {forecast && (
-          <>
-            {' · mise à jour à '}
-            {formatClock(forecast.fetchedAt)} ({formatAgo(forecast.fetchedAt)})
-          </>
-        )}
-      </p>
 
       {sun && <SunBlock sun={sun} durationHours={durationHours} />}
 
@@ -150,6 +154,7 @@ export function WeatherPanel({
             </thead>
             <tbody>
               {forecast.points.map((p, i) => {
+                if (!showAll && !isKeyPoint(p)) return null;
                 const s = data.points[i];
                 const label = rolesLabel(p.roles);
                 return (
@@ -172,6 +177,11 @@ export function WeatherPanel({
               })}
             </tbody>
           </table>
+          {hasIntermediate && (
+            <button type="button" className="link-btn weather-more" onClick={() => setShowAll((v) => !v)} aria-expanded={showAll}>
+              {showAll ? 'Points clés seulement' : `Voir les ${forecast.points.length} points`}
+            </button>
+          )}
 
           {model !== 'best_match' && !data.primary[index] && (
             <p className="weather-info">Au-delà de l’échéance d’AROME/ARPEGE : valeurs complétées par le modèle Open-Meteo.</p>
