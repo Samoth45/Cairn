@@ -85,7 +85,8 @@ Graphiques : **SVG maison** (pas de recharts), cf. `ElevationProfile.tsx` ; gard
 src/
   types.ts            Point = [lat, lon, ele|null], Track (elevationSource?), Settings
                       (baseLayer, selectedTrackId, showProfile, din, weatherModel, trackColoring,
-                      departureTime « HH:MM », scoreWeights, theme), DEFAULT_SETTINGS, DEFAULT_SCORE_WEIGHTS
+                      departureTime « HH:MM », scoreWeights, theme, sidePanelTab), DEFAULT_SETTINGS,
+                      DEFAULT_SCORE_WEIGHTS
   db/db.ts            Dexie 'cairn' : v1 tables tracks (id, createdAt) et settings (key='app') ;
                       v2 table weather (trackId) = CachedForecast. getSettings / updateSettings
                       (via normalizeSettings). Nouvelle table → db.version(3)
@@ -130,7 +131,7 @@ samples/              GPX fictifs pour tests manuels (trk avec ele, rte sans ele
   (`timezone=Europe/Paris`) : comparer avec `parisHourKey()`, ne jamais convertir avec le
   fuseau du navigateur.
 - **Paramètres** : les `Settings` sont persistés en base (vitesses DIN, modèle météo,
-  coloration, heure de départ, poids du score, thème). Tout nouveau réglage : l'ajouter à
+  coloration, heure de départ, poids du score, thème, onglet du panneau). Tout nouveau réglage : l'ajouter à
   `DEFAULT_SETTINGS` **et** à `normalizeSettings` (qui complète les paramètres anciens).
 - **Pas de sauvegarde JSON** (supprimée, cf. `docs/specs/suppression-sauvegarde.md`) : les
   données vivent dans IndexedDB du navigateur ; pour changer de navigateur, réimporter les GPX.

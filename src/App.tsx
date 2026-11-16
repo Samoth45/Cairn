@@ -4,6 +4,7 @@ import { useElevationFetcher } from './hooks/useElevationFetcher';
 import { MapView } from './components/MapView';
 import { Sidebar } from './components/Sidebar';
 import { TrackStats } from './components/TrackStats';
+import { TrackPanel } from './components/TrackPanel';
 import { ElevationProfile } from './components/ElevationProfile';
 import { SettingsDialog } from './components/SettingsDialog';
 import { analyzeTrack, nearestProfileIndex } from './lib/stats';
@@ -295,36 +296,42 @@ export default function App() {
         open={panelOpen}
         tracks={tracks}
         selectedId={settings.selectedTrackId}
-        statsPanel={
-          selectedTrack &&
-          analysis && (
-            <TrackStats
-              track={selectedTrack}
-              stats={analysis.stats}
-              din={settings.din}
-              elevationStatus={selElevationStatus}
-              onRetryElevation={() => retryElevation(selectedTrack.id)}
-              onDownload={() => handleDownloadGpx(selectedTrack)}
-              onShowSummit={() => {
-                const s = analysis.stats.summit;
-                if (s) fitTo([[s.lat, s.lon], [s.lat, s.lon]]);
-                if (isMobile()) setPanelOpen(false);
-              }}
-            />
-          )
-        }
-        weatherPanel={
+        trackPanel={
           selectedTrack && (
-            <WeatherPanel
-              key={selectedTrack.id}
-              weather={weather}
-              model={weatherModel}
-              waitingForElevation={selectedNeedsElevation}
-              start={start}
-              durationHours={durationHours}
-              hourIndex={hourIndex}
-              onSelectHour={setHourSelection}
-              onOpenTable={view === 'weather' ? undefined : () => openWeatherView()}
+            <TrackPanel
+              track={selectedTrack}
+              tab={settings.sidePanelTab}
+              onTabChange={(tab) => void setSettings({ sidePanelTab: tab })}
+              stats={
+                analysis && (
+                  <TrackStats
+                    track={selectedTrack}
+                    stats={analysis.stats}
+                    din={settings.din}
+                    elevationStatus={selElevationStatus}
+                    onRetryElevation={() => retryElevation(selectedTrack.id)}
+                    onDownload={() => handleDownloadGpx(selectedTrack)}
+                    onShowSummit={() => {
+                      const s = analysis.stats.summit;
+                      if (s) fitTo([[s.lat, s.lon], [s.lat, s.lon]]);
+                      if (isMobile()) setPanelOpen(false);
+                    }}
+                  />
+                )
+              }
+              weather={
+                <WeatherPanel
+                  key={selectedTrack.id}
+                  weather={weather}
+                  model={weatherModel}
+                  waitingForElevation={selectedNeedsElevation}
+                  start={start}
+                  durationHours={durationHours}
+                  hourIndex={hourIndex}
+                  onSelectHour={setHourSelection}
+                  onOpenTable={view === 'weather' ? undefined : () => openWeatherView()}
+                />
+              }
             />
           )
         }

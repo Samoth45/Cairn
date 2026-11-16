@@ -5,7 +5,8 @@ Ces règles valent aussi pour `src/App.tsx` (état partagé, onglets, sélection
 ## Composants
 
 MapView (fonds, polylines 3 couches, marqueurs sommet / survol / points météo, AutoResize),
-FitBounds, Sidebar (zone défilante stats + météo + liste), TrackItem, TrackStats, WeatherPanel
+FitBounds, Sidebar (zone défilante : TrackPanel + liste), TrackPanel (onglets Stats | Météo du
+tracé sélectionné), TrackItem, TrackStats, WeatherPanel
 (+ bloc soleil, bouton vers le tableau), WeatherView (onglet Météo, heatmap), WeatherPointTooltip,
 ForecastControl (panneau de coloration, en bas à gauche de la carte), PassageTooltip,
 SummaryView (onglet « Meilleur jour »), ElevationProfile (SVG), SettingsDialog, HoverMarker,
@@ -88,6 +89,18 @@ React (`memoizedProps.value.map`), les pixels du tracé via `getImageData` du ca
   « sans donnée » utilisent `var(--nodata-bg)` / `var(--muted)` (styles en ligne).
 - **La carte reste intacte** (choix de l'utilisateur) : seuls les contrôles et infobulles Leaflet
   sont assombris (fin de `styles.css`) ; tuiles et marqueurs gardent leurs couleurs.
+
+## Panneau du tracé sélectionné (TrackPanel)
+
+- Un seul bloc en haut de la barre latérale : nom du tracé, puis onglets **Stats | Météo**
+  (onglet persisté dans `Settings.sidePanelTab`, défaut Stats). Les deux contenus restent
+  montés (l'inactif est `hidden`) ; la prévision est chargée par `App` quel que soit l'onglet
+  (coloration et infobulles de la carte en dépendent).
+- Les onglets du panneau ont pour aria-label « Stats du tracé » / « Météo du tracé » : ne pas
+  reprendre « Météo », déjà utilisé par l'onglet principal (sélecteurs des sondes, lecteurs d'écran).
+- Tableau météo du panneau : points clés seulement (`isKeyPoint`), « Voir les N points » pour
+  déplier ; dépliage non persisté (repart replié à chaque tracé via la `key` de `WeatherPanel`).
+  L'onglet principal Météo montre toujours tous les points.
 
 ## Responsive
 

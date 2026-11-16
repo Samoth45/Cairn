@@ -1101,16 +1101,47 @@ button {
   }
 }
 
-/* ---------- Statistiques du tracé sélectionné ---------- */
-.stats {
+/* ---------- Panneau du tracé sélectionné (onglets Stats | Météo) ---------- */
+.track-panel {
   margin: 0 12px 10px;
-  padding: 10px 12px 8px;
+  padding: 10px 12px;
   border: 1px solid var(--border);
   border-radius: 10px;
   background: var(--bg);
 }
 
-.stats-title {
+.track-panel-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  margin-bottom: 10px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+
+.track-panel-tabs button {
+  flex: 1;
+  border: none;
+  background: none;
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.track-panel-tabs button.active {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.track-panel-tabs button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.track-panel-title {
   margin: 0 0 8px;
   padding-left: 8px;
   border-left: 4px solid;
@@ -1169,11 +1200,6 @@ button {
 
 /* ---------- Météo ---------- */
 .weather {
-  margin: 0 12px 10px;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--bg);
   font-size: 0.85rem;
 }
 
@@ -1181,15 +1207,18 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
-.weather-header h2 {
-  margin: 0;
-  font-size: 0.95rem;
+.weather-more {
+  display: block;
+  margin: 6px auto 0;
+  font-size: 0.8rem;
 }
 
 .weather-meta {
-  margin: 4px 0 8px;
+  margin: 0;
   font-size: 0.72rem;
   color: var(--muted);
 }
@@ -1650,6 +1679,11 @@ button {
 
   .stats-grid {
     grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Onglets du panneau : cible tactile plus haute. */
+  .track-panel-tabs button {
+    padding: 8px 10px;
   }
 
   /* Onglets à droite du bouton « Cairn », sous les contrôles de la carte. */

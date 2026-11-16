@@ -60,3 +60,8 @@ par fonctionnalité validée.
   par `index.html`). Interface seulement : fonds de carte intacts, contrôles et infobulles
   Leaflet assombris ; couleurs d'interface en variables CSS. Au passage : listes déroulantes
   des Paramètres qui étaient tronquées.
+- [x] **Réorganisation du panneau latéral** (16/11/2026) — stats et météo du tracé sélectionné
+  regroupées en un seul bloc à onglets « Stats | Météo » (nom du tracé en en-tête, onglet
+  mémorisé dans `Settings.sidePanelTab`, flèches ← → au clavier), au-dessus de la liste des
+  tracés. Tableau météo du panneau limité aux points clés (Sommet, Départ, Point bas), lien
+  « Voir les N points » pour déplier. Spec : `docs/specs/reorganisation-panneau.md`.

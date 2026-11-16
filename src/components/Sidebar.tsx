@@ -7,10 +7,8 @@ interface Props {
   open: boolean;
   tracks: Track[];
   selectedId?: string;
-  /** Statistiques du tracé sélectionné. */
-  statsPanel?: ReactNode;
-  /** Météo du tracé sélectionné. */
-  weatherPanel?: ReactNode;
+  /** Panneau à onglets (Stats | Météo) du tracé sélectionné. */
+  trackPanel?: ReactNode;
   onClose: () => void;
   onOpenSettings: () => void;
   /** Thème affiché, et bascule clair / sombre. */
@@ -69,8 +67,7 @@ export function Sidebar(p: Props) {
       </div>
 
       <div className="sidebar-scroll">
-      {p.statsPanel}
-      {p.weatherPanel}
+      {p.trackPanel}
 
       <div className="track-list-header">
         <span>Tracés</span>

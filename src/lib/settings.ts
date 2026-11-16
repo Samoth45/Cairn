@@ -37,6 +37,7 @@ export function normalizeSettings(raw: unknown): Settings {
       }),
     ) as unknown as ScoreWeights,
     theme: o.theme === 'light' || o.theme === 'dark' || o.theme === 'system' ? o.theme : DEFAULT_SETTINGS.theme,
+    sidePanelTab: o.sidePanelTab === 'weather' || o.sidePanelTab === 'stats' ? o.sidePanelTab : DEFAULT_SETTINGS.sidePanelTab,
     departureTime:
       typeof o.departureTime === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(o.departureTime)
         ? o.departureTime

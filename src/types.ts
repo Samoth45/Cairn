@@ -50,7 +50,11 @@ export interface Settings {
   scoreWeights: ScoreWeights;
   /** Thème clair / sombre de l'interface (la carte n'est pas modifiée). */
   theme: Theme;
+  /** Onglet ouvert du panneau du tracé sélectionné (barre latérale). */
+  sidePanelTab: SidePanelTab;
 }
+
+export type SidePanelTab = 'stats' | 'weather';
 
 export interface ScoreWeights {
   rain: number;
@@ -73,4 +77,5 @@ export const DEFAULT_SETTINGS: Settings = {
   departureTime: '08:00',
   scoreWeights: DEFAULT_SCORE_WEIGHTS,
   theme: 'system',
+  sidePanelTab: 'stats',
 };

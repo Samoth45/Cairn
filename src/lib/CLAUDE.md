@@ -19,7 +19,8 @@ gpxExport.ts      buildGpx(track) → GPX 1.1 (1 trk, 1 trkseg par segment), gpx
 download.ts       downloadText(contenu, nom, mime) (retéléchargement GPX)
 referrer.ts       isLoopbackHost, otmReferrerPolicy (pas de referrer vers OpenTopoMap en local)
 weatherPoints.ts  selectWeatherPoints(profile) → WeatherPoint[] (lat, lon, ele, d, roles
-                  summit/start/lowest), triés du plus haut au plus bas ; rolesLabel ; weatherPointsKey
+                  summit/start/lowest), triés du plus haut au plus bas ; rolesLabel ; weatherPointsKey ;
+                  isKeyPoint (point portant un rôle)
 time.ts           parisHourKey (heure de Paris au format des séries Open-Meteo), nextDays,
                   formatClock, formatAgo
 wmo.ts            codes WMO → libellé FR + pictogramme, isThunderstorm
