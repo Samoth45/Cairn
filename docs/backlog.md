@@ -31,3 +31,54 @@ Signalées par `npm ci` sous Node 26 / npm 11 ; elles fonctionnent encore. Sans 
   (environnement des tests) ; se règle en mettant `jsdom` à jour, pas directement.
 
 Après mise à jour : `npm install` dans le conteneur, puis `/verifier` (tests, lint, build).
+
+## Intégration continue (GitHub Actions)
+
+Vérifier automatiquement le code à chaque push, en complément des previews Vercel
+(qui se créent déjà à chaque push sur n'importe quelle branche). Prérequis du badge
+« tests » du nouveau README.
+
+- Workflow GitHub Actions déclenché à chaque push (toutes branches) et sur les pull requests :
+  `npm ci`, tests, lint (0 warning), build — la même routine que `/verifier`.
+- Comme Vercel, la CI construit depuis les sources, sans Docker : Node 26 lu depuis `.nvmrc`.
+  (La règle « tout passe par Docker » concerne mon poste, pas la CI.)
+- Étudier si Vercel peut attendre la réussite de la CI avant de déployer en production
+  (vérifier le nom et la disponibilité de l'option sur l'offre gratuite), et me dire
+  ce qui doit être réglé dans l'interface Vercel ou GitHub.
+- Ne rien pousser : je pousse moi-même pour tester le premier déclenchement.
+
+## Refonte du README
+
+Le README actuel est un guide d'installation. Le site est déployé : le README doit
+maintenant présenter le projet, pour un visiteur ou un recruteur (en français).
+Prérequis : l'intégration continue (pour le badge des tests).
+
+Contenu souhaité :
+- En-tête : logo Cairn, accroche, badges, **lien vers la version en ligne** bien visible,
+  capture principale.
+- Le problème (la météo en vallée ne dit rien de celle du sommet) et les fonctionnalités,
+  par onglet (Carte, Météo, Meilleur jour).
+- Choix techniques **avec leur justification** (pas de backend, API sans clé, requête
+  météo multi-points et fusion des modèles, DIN 33466, soleil calculé localement,
+  SVG maison, Docker multi-postes…) + schéma d'architecture en Mermaid.
+- Quelques difficultés techniques résolues et leur explication (les plus parlantes).
+- **Méthode : développement 100 % agentique avec Claude Code**, objectif principal du
+  projet : je n'ai pas écrit une ligne de code. Détailler l'organisation mise en place
+  (spec-driven, humain dans la boucle, CLAUDE.md hiérarchiques, journal des décisions,
+  `/verifier` comme définition de « terminé », garde-fous, vérification autonome
+  du rendu par puppeteer, backlog → spec → implémentation → validation).
+- Développement local réduit à l'essentiel, dans un bloc repliable `<details>`.
+- Crédits (IGN, OpenTopoMap/OSM, Open-Meteo) et licence.
+
+Badges : technos (React, TypeScript, Vite, Leaflet, Docker, Node 26), état du
+déploiement Vercel, CI (tests), licence, version.
+
+À prévoir :
+- **Emplacements pour les captures** : je les ferai moi-même. Prévoir un dossier
+  (ex. `docs/images/`), des noms de fichiers explicites et, pour chacune, ce qu'elle
+  doit montrer.
+- **Licence MIT** : ajouter le fichier `LICENSE`.
+- **Version** : proposer une façon de versionner (tag Git `v1.0.0`, version de
+  `package.json`) pour le badge.
+- Écrire une spec avant d'implémenter : me proposer le plan du README et la liste
+  des captures pour validation.
