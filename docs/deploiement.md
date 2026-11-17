@@ -88,4 +88,4 @@ Réglage (une fois, après un premier passage de la CI pour que le check existe)
   « not yet covered by allowScripts » : simple avertissement (le script s'exécute encore),
   esbuild fonctionne (vérifié). Si une future version de npm bloque ces scripts, approuver
   avec `npm install-scripts approve esbuild` (non fait : pas demandé).
-- Dépréciations `eslint@9` et `whatwg-encoding` (via jsdom) : voir `docs/backlog.md`.
+- `npm audit` : 3 vulnérabilités dans `vitest@3` (outils de test seulement) : voir `docs/backlog.md`.

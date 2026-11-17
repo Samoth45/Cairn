@@ -9,8 +9,8 @@ statistiques, météo détaillée par altitude pour choisir le meilleur jour / h
   et validées**). Référence figée : ne plus le modifier.
 - `docs/historique.md` — ce qui a été réalisé à chaque étape, ajouts et corrections.
 - `docs/specs/` — une spec courte par nouvelle fonctionnalité (modèle : `docs/specs/README.md`).
-- `docs/backlog.md` — idées en attente (simplification des GPX denses, dépendances dépréciées,
-  refonte du README).
+- `docs/backlog.md` — idées en attente (simplification des GPX denses, refonte du README,
+  règles React Compiler du lint, Vitest 3 et `npm audit`).
 - `docs/deploiement.md` — détail Vercel, Node, lockfile, test du build, intégration continue.
 - `src/lib/CLAUDE.md` — décisions de calcul (stats, pentes, soleil, météo le long du tracé, score).
 - `src/services/CLAUDE.md` — API Open-Meteo (altitudes, prévisions) et cache.
@@ -74,7 +74,10 @@ docker compose run --rm dev npm ci --dry-run   # cohérence du lockfile, comme V
 ```
 
 `-V` est indispensable après un ajout de dépendance : `node_modules` vit dans un volume
-anonyme qui sinon reste périmé.
+anonyme qui sinon reste périmé. Les conteneurs `docker compose run --rm dev` repartent aussi
+des `node_modules` **de l'image** : après un `npm install`, reconstruire (`docker compose build
+dev`, ou le `up --build -V` ci-dessus) avant de lancer tests/lint, sinon ils tournent sur les
+anciennes versions.
 
 Vite : `server.watch.usePolling: true` (hot reload avec volumes Windows/macOS). Les options
 `server.*` ne concernent que le dev.
@@ -82,7 +85,9 @@ Vite : `server.watch.usePolling: true` (hot reload avec volumes Windows/macOS). 
 ## Stack
 
 Node 26 / npm 11 (image `node:26-alpine`), Vite 6 + React 19 + TypeScript strict, Leaflet 1.9 +
-react-leaflet 5, `@tmcw/togeojson`, Dexie 4 + `dexie-react-hooks`, Vitest + jsdom + fake-indexeddb.
+react-leaflet 5, `@tmcw/togeojson`, Dexie 4 + `dexie-react-hooks`, Vitest 3 + jsdom 31 +
+fake-indexeddb, ESLint 10 (`defineConfig` ; de React Hooks, seules `rules-of-hooks` et
+`exhaustive-deps` sont actives, cf. backlog).
 Graphiques : **SVG maison** (pas de recharts), cf. `ElevationProfile.tsx` ; garder ce choix.
 
 ## Architecture

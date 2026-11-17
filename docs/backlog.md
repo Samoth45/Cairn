@@ -20,18 +20,6 @@ Traces Strava, montres GPS : ~1 point/s, ex. 30 000 points pour 23 km.
   secondaires. Leur profil paraît plus lisse (altitude barométrique/corrigée par Strava, points
   denses) : normal.
 
-## Dépendances dépréciées
-
-Signalées par `npm ci` sous Node 26 / npm 11 ; elles fonctionnent encore. Sans lien avec Node 26.
-
-- `eslint@9` : « no longer supported ». Passer à ESLint 10 ; vérifier la compatibilité de
-  `typescript-eslint`, `eslint-plugin-react-hooks`, `eslint-plugin-react-refresh` et adapter
-  `eslint.config.js` si besoin.
-- `whatwg-encoding@3.1.1` (« Use @exodus/bytes instead ») : dépendance transitive de `jsdom`
-  (environnement des tests) ; se règle en mettant `jsdom` à jour, pas directement.
-
-Après mise à jour : `npm install` dans le conteneur, puis `/verifier` (tests, lint, build).
-
 ## Refonte du README
 
 Le README actuel est un guide d'installation. Le site est déployé : le README doit
@@ -67,3 +55,25 @@ déploiement Vercel, CI (tests), licence, version.
   `package.json`) pour le badge.
 - Écrire une spec avant d'implémenter : me proposer le plan du README et la liste
   des captures pour validation.
+
+## Règles « React Compiler » d'eslint-plugin-react-hooks
+
+Découvert lors du passage à ESLint 10 (17/11/2026). `eslint-plugin-react-hooks` 7 (requis par
+ESLint 10) ajoute à sa config `recommended` 13 règles issues du React Compiler. Pour l'instant,
+`eslint.config.js` n'active que `rules-of-hooks` et `exhaustive-deps` (comme avant). Activer la
+config complète signale 10 erreurs dans du code qui fonctionne :
+
+- `preserve-manual-memoization` : 5 mémoïsations de `App.tsx` (l. ~150, 178, 200).
+- `refs` : lecture d'une ref pendant le rendu (`App.tsx` l. ~431, `DropZone.tsx`).
+- `set-state-in-effect` : `ElevationProfile.tsx` (remise à zéro du survol),
+  `useElevationFetcher.ts` (statut « loading »), `useWeather.ts` (remise à zéro sans tracé).
+
+Corriger ces endroits puis passer à `reactHooks.configs.recommended`. À retester ensuite :
+météo, altitudes, profil, glisser-déposer.
+
+## Vitest 3 : vulnérabilités signalées par `npm audit`
+
+`npm audit` : 3 vulnérabilités (2 critiques `tinypool`, 1 modérée `@vitest/mocker`), via
+`vitest@3`. Outils de test uniquement (rien dans le build déployé). Correctif : Vitest 4 ou 5
+(changement majeur) — vérifier la compatibilité avec Vite 6 (Vitest récent peut exiger Vite 7+,
+cf. `npm outdated` : Vite 8, `@vitejs/plugin-react` 6, TypeScript 7 disponibles).
