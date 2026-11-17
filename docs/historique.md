@@ -76,3 +76,9 @@ par fonctionnalité validée.
   qu'avant (seules `rules-of-hooks` et `exhaustive-deps` de React Hooks : les règles du React
   Compiler de la v7 sont au backlog). jsdom 31 (plus de `whatwg-encoding`). Plus aucun
   avertissement « deprecated » à `npm ci`. Vulnérabilités de Vitest 3 notées au backlog.
+- [x] **Refonte du README** (17/11/2026) — README de présentation (visiteur / recruteur) :
+  en-tête avec badges et lien vers https://cairn-gpx.vercel.app/, fonctionnalités par onglet
+  avec captures (`docs/images/`, compressées), choix techniques justifiés, schémas Mermaid,
+  difficultés résolues, méthode de développement agentique ; développement local en bloc
+  repliable. Licence MIT (`LICENSE`), version 1.0.0. Pas de capture mobile (interface mobile
+  à revoir). Spec : `docs/specs/refonte-readme.md`.
