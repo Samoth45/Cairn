@@ -100,3 +100,20 @@ par fonctionnalité validée.
   `production`, lien `cairn-gpx.vercel.app`, `concurrency` sans annulation). Déploiement Git de
   Vercel coupé (`git.deploymentEnabled: false`). README : badge unique « CI/CD ». Mise en place
   des secrets et réglages Vercel : `docs/deploiement.md`. Spec : `docs/specs/deploiement-continu.md`.
+- [x] **globals 17** (17/11/2026) — lot 1 de `docs/specs/montees-de-version.md` : `globals`
+  16.5 → 17.14 (configuration ESLint). Globales des AudioWorklets et `DisposableStack`
+  retirées de `browser` (non utilisées). Lint et bundle inchangés. Nouvelle alerte `npm audit`
+  sur picomatch (sans correctif) consignée dans `docs/deploiement.md` et au backlog.
+- [x] **dexie-react-hooks 4** (17/11/2026) — lot 2 de `docs/specs/montees-de-version.md` :
+  `dexie-react-hooks` 1.1.7 → 4.4.0 (Dexie 4.4.7). `useLiveQuery` inchangé (vérifié en comparant
+  les paquets npm). Contrôle headless sur le build : la liste suit la base (import, masquage,
+  renommage, suppression, rechargement).
+- [x] **TypeScript 6.0** (17/11/2026) — lot 3 de `docs/specs/montees-de-version.md` :
+  `typescript` 5.8.3 → 6.0.3, sans changement de code ni de `tsconfig`. TypeScript 7 essayé
+  (`tsc -b` OK) mais bloqué par `typescript-eslint` (`<6.1.0`) : noté au backlog.
+- [x] **Vite 8** (17/11/2026) — lot 4, le dernier, de `docs/specs/montees-de-version.md`
+  (spec réalisée) : `vite` 6.4 → 8.3.8 (Rolldown, Oxc, Lightning CSS) et `@vitejs/plugin-react`
+  4.7 → 6.3. `manualChunks` remplacé par `rolldownOptions.output.codeSplitting` (chunk
+  `leaflet`). Build 5× plus rapide, JS −11 kB. CSS Leaflet dans un fichier à part, chargé avant
+  le nôtre. Contrôlés : headless sur le build, hot reload sous Docker, `vercel build`, image
+  nginx. esbuild n'est plus installé.

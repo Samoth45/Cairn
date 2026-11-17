@@ -25,8 +25,9 @@ ne jamais pousser.
   29/10/2026), 24.x et 22.x. Toujours changer ces trois endroits ensemble (Dockerfile,
   engines, .nvmrc).
 - **`package-lock.json`** versionné et à jour (requis par `npm ci`). Le lockfile, généré sous
-  Alpine, contient bien les binaires natifs Linux glibc (`@rollup/rollup-linux-x64-gnu`,
-  `@esbuild/linux-x64`) dont Vercel a besoin.
+  Alpine, contient bien les binaires natifs Linux glibc dont Vercel et la CI ont besoin. Depuis
+  Vite 8 : `@rolldown/binding-linux-x64-gnu` et `lightningcss-linux-x64-gnu`. Rollup et
+  esbuild ne sont plus installés.
 - `.vercel/` (dossier local de la CLI Vercel) est dans `.gitignore`.
 - Données stockées dans le navigateur : la version déployée démarre vide, réimporter les GPX.
 
@@ -125,9 +126,14 @@ et CD sont donc dans le même fichier, et le badge « CI/CD » du README (`ci.ym
 
 ## Avertissements connus
 
-- npm 11 affiche `npm warn install-scripts … esbuild@0.25.12 (postinstall: node install.js)`
-  « not yet covered by allowScripts » : simple avertissement (le script s'exécute encore),
-  esbuild fonctionne (vérifié). Si une future version de npm bloque ces scripts, approuver
-  avec `npm install-scripts approve esbuild` (non fait : pas demandé).
-- `npm audit` : 0 vulnérabilité depuis le passage à Vitest 5 (17/11/2026, cf.
-  `docs/specs/vitest-5.md`).
+- L'avertissement npm 11 `install-scripts … esbuild` (« not yet covered by allowScripts ») a
+  disparu avec Vite 8, qui n'installe plus esbuild. Si un autre paquet à script
+  d'installation le déclenche, approuver avec `npm install-scripts approve <paquet>`.
+- `npm audit` : 0 vulnérabilité après le passage à Vitest 5 (17/11/2026, cf.
+  `docs/specs/vitest-5.md`), puis **11 « high »** le soir même (12 depuis Vite 8 :
+  `@vitejs/plugin-react` 6 dépend de Vite, ce qui ajoute une ligne). Elles viennent toutes de la
+  nouvelle alerte GHSA-fc5q-39xc-vjpf : un ReDoS sur les extglobs de **picomatch, toutes
+  versions**. picomatch est tiré par Vite (via `tinyglobby` / `fdir`) et par
+  `typescript-eslint`. Il ne sert qu'au développement et au build : il n'est pas livré dans
+  le bundle. Aucun correctif n'existe encore : `npm audit fix --force` rétrograderait Vite en
+  6.2.7, **ne pas le lancer**. À suivre au backlog.

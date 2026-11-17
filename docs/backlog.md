@@ -23,12 +23,22 @@ Traces Strava, montres GPS : ~1 point/s, ex. 30 000 points pour 23 km.
 ## Montées de version majeures en attente
 
 Relevées par `npm outdated` le 17/11/2026 (lors du passage à Vitest 5), volontairement non
-faites. Une à la fois, chacune avec sa spec, en lisant les notes de version :
+faites, puis traitées par lots le 17/11/2026 (`docs/specs/montees-de-version.md` : globals 17,
+dexie-react-hooks 4, TypeScript 6.0, Vite 8). Il ne reste que :
 
-- **Vite 6 → 8** et **`@vitejs/plugin-react` 4 → 6** (la v6 exige Vite 8) : à faire ensemble.
-  Vérifier `manualChunks` (`vite.config.ts`), le polling du serveur dev, le build Vercel et
-  Vitest 5 (accepte Vite 6.4 à 8).
-- **TypeScript 5.8 → 7** : vérifier la compatibilité de `typescript-eslint` et de `tsc -b`.
-- **`globals` 16 → 17** (configuration ESLint).
-- **`dexie-react-hooks` 1 → 4** : vérifier `useLiveQuery` (`useTracks`) et la compatibilité
-  avec Dexie 4.
+- **TypeScript 6.0 → 7** : en attente de `typescript-eslint`. Au 17/11/2026, sa version 8.73
+  exige `typescript <6.1.0`, car TS 7, le compilateur réécrit en Go, n'a pas la même API JS.
+  Notre code passe déjà `tsc -b` avec TS 7.0.2, essayé sur une copie jetable : la montée se
+  résumera à changer la version quand `typescript-eslint` l'acceptera. Surveiller ses notes de
+  version.
+
+## npm audit : picomatch (GHSA-fc5q-39xc-vjpf)
+
+Signalé le 17/11/2026 : 11 vulnérabilités « high » qui viennent toutes de picomatch (ReDoS sur
+les extglobs, **toutes versions** touchées). Il est tiré par Vite (`tinyglobby`, `fdir`) et par
+`typescript-eslint`, seulement au développement et au build : il n'est pas livré dans le bundle.
+
+- Aucun correctif pour l'instant. **Ne pas** lancer `npm audit fix --force` : il rétrograderait
+  Vite en 6.2.7.
+- À faire quand une version corrigée de picomatch sort : mettre à jour (au besoin avec un
+  `overrides` dans `package.json`), vérifier `npm audit`, puis `/verifier`.
