@@ -1,0 +1,43 @@
+# Intégration continue : même routine que /verifier (tests, lint sans avertissement, build),
+# exécutée depuis les sources sans Docker, comme Vercel (Node lu dans .nvmrc).
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+# Un nouveau push sur la même branche annule la vérification devenue obsolète.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # Nom du job = nom du « check » GitHub sélectionné dans les Deployment Checks de Vercel :
+  # le renommer impose de mettre à jour ce réglage.
+  checks:
+    name: Lint, test & build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Installation (npm ci)
+        run: npm ci
+
+      - name: Tests
+        run: npm test
+
+      - name: Lint (0 avertissement)
+        run: npm run lint
+
+      - name: Build (tsc -b + vite build)
+        run: npm run build

@@ -32,21 +32,6 @@ Signalées par `npm ci` sous Node 26 / npm 11 ; elles fonctionnent encore. Sans 
 
 Après mise à jour : `npm install` dans le conteneur, puis `/verifier` (tests, lint, build).
 
-## Intégration continue (GitHub Actions)
-
-Vérifier automatiquement le code à chaque push, en complément des previews Vercel
-(qui se créent déjà à chaque push sur n'importe quelle branche). Prérequis du badge
-« tests » du nouveau README.
-
-- Workflow GitHub Actions déclenché à chaque push (toutes branches) et sur les pull requests :
-  `npm ci`, tests, lint (0 warning), build — la même routine que `/verifier`.
-- Comme Vercel, la CI construit depuis les sources, sans Docker : Node 26 lu depuis `.nvmrc`.
-  (La règle « tout passe par Docker » concerne mon poste, pas la CI.)
-- Étudier si Vercel peut attendre la réussite de la CI avant de déployer en production
-  (vérifier le nom et la disponibilité de l'option sur l'offre gratuite), et me dire
-  ce qui doit être réglé dans l'interface Vercel ou GitHub.
-- Ne rien pousser : je pousse moi-même pour tester le premier déclenchement.
-
 ## Refonte du README
 
 Le README actuel est un guide d'installation. Le site est déployé : le README doit

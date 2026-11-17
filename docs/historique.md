@@ -65,3 +65,8 @@ par fonctionnalité validée.
   mémorisé dans `Settings.sidePanelTab`, flèches ← → au clavier), au-dessus de la liste des
   tracés. Tableau météo du panneau limité aux points clés (Sommet, Départ, Point bas), lien
   « Voir les N points » pour déplier. Spec : `docs/specs/reorganisation-panneau.md`.
+- [x] **Intégration continue** (17/11/2026, sans spec) — workflow GitHub Actions
+  `.github/workflows/ci.yml` (job « Lint, test & build ») à chaque push et sur les PR : `npm ci`,
+  tests, lint, build, sans Docker (Node lu dans `.nvmrc`), exécution précédente annulée.
+  Lint désormais bloquant sur les avertissements (`--max-warnings=0`). Réglage Vercel
+  « Deployment Checks » pour ne promouvoir en production qu'après la CI : `docs/deploiement.md`.
