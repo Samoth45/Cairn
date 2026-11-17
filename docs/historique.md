@@ -100,3 +100,7 @@ par fonctionnalité validée.
   `production`, lien `cairn-gpx.vercel.app`, `concurrency` sans annulation). Déploiement Git de
   Vercel coupé (`git.deploymentEnabled: false`). README : badge unique « CI/CD ». Mise en place
   des secrets et réglages Vercel : `docs/deploiement.md`. Spec : `docs/specs/deploiement-continu.md`.
+- [x] **globals 17** (17/11/2026) — lot 1 de `docs/specs/montees-de-version.md` : `globals`
+  16.5 → 17.14 (configuration ESLint). Globales des AudioWorklets et `DisposableStack`
+  retirées de `browser` (non utilisées). Lint et bundle inchangés. Nouvelle alerte `npm audit`
+  sur picomatch (sans correctif) consignée dans `docs/deploiement.md` et au backlog.
