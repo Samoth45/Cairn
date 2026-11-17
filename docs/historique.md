@@ -89,3 +89,8 @@ par fonctionnalité validée.
   initiale de la carte), dépendances des mémoïsations de `App` mémoïsées. Seul effet visible :
   un tracé en file d'attente d'altitudes s'affiche « en cours de récupération » dès l'import.
   Spec : `docs/specs/regles-react-compiler.md`.
+- [x] **Vitest 5** (17/11/2026) — `vitest` 3.2 → 5.1 (accepte Vite 6.4 : Vite inchangé), installé
+  explicitement (pas de `npm audit fix --force`). `npm audit` : 0 vulnérabilité (3 avant :
+  `tinypool`, `@vitest/mocker`). Aucun changement de tests ni de configuration ; bundle de
+  production identique. Autres montées majeures (Vite 8, TypeScript 7…) notées au backlog.
+  Spec : `docs/specs/vitest-5.md`.

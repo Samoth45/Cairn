@@ -20,9 +20,15 @@ Traces Strava, montres GPS : ~1 point/s, ex. 30 000 points pour 23 km.
   secondaires. Leur profil paraît plus lisse (altitude barométrique/corrigée par Strava, points
   denses) : normal.
 
-## Vitest 3 : vulnérabilités signalées par `npm audit`
+## Montées de version majeures en attente
 
-`npm audit` : 3 vulnérabilités (2 critiques `tinypool`, 1 modérée `@vitest/mocker`), via
-`vitest@3`. Outils de test uniquement (rien dans le build déployé). Correctif : Vitest 4 ou 5
-(changement majeur) — vérifier la compatibilité avec Vite 6 (Vitest récent peut exiger Vite 7+,
-cf. `npm outdated` : Vite 8, `@vitejs/plugin-react` 6, TypeScript 7 disponibles).
+Relevées par `npm outdated` le 17/11/2026 (lors du passage à Vitest 5), volontairement non
+faites. Une à la fois, chacune avec sa spec, en lisant les notes de version :
+
+- **Vite 6 → 8** et **`@vitejs/plugin-react` 4 → 6** (la v6 exige Vite 8) : à faire ensemble.
+  Vérifier `manualChunks` (`vite.config.ts`), le polling du serveur dev, le build Vercel et
+  Vitest 5 (accepte Vite 6.4 à 8).
+- **TypeScript 5.8 → 7** : vérifier la compatibilité de `typescript-eslint` et de `tsc -b`.
+- **`globals` 16 → 17** (configuration ESLint).
+- **`dexie-react-hooks` 1 → 4** : vérifier `useLiveQuery` (`useTracks`) et la compatibilité
+  avec Dexie 4.
