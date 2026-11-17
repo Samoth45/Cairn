@@ -65,7 +65,14 @@ Contexte utile : Dexie 4.4.7, Node 26, Vitest 5.1 (accepte Vite `^6.4 || ^7 || ^
   la base sans rechargement.
 - Risque : faible à moyen. Toute l'interface dépend de `useLiveQuery`.
 
-### Lot 3 — TypeScript 5.8 → 6.0
+### Lot 3 — TypeScript 5.8 → 6.0 (réalisé le 17/11/2026)
+**Résultat** : 6.0.3 (`~6.0.3`), partagé avec `typescript-eslint` 8.73.
+- Aucun changement de code ni de `tsconfig`. Aucun nouveau défaut ne nous touche, aucune
+  option dépréciée n'est utilisée, et le lint ne signale pas de version non prise en charge.
+- `tsc -b --force` (les deux projets) passe sans erreur. Bundle identique.
+- **Bilan TS 7** : `tsc -b --force` passe aussi avec TypeScript 7.0.2, essayé sur une copie
+  jetable. Le seul blocage est `typescript-eslint` (`<6.1.0`), noté au backlog.
+
 - Mettre `~6.0.3` dans `package.json`, en gardant le `~` actuel : pas de montée mineure
   automatique.
 - Nouveaux défauts de TS 6.0 qui nous concernent :

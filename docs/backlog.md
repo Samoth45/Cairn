@@ -29,7 +29,11 @@ faites. Spec par lots : `docs/specs/montees-de-version.md` (TypeScript visé : 6
 - **Vite 6 → 8** et **`@vitejs/plugin-react` 4 → 6** (la v6 exige Vite 8) : à faire ensemble.
   Vérifier `manualChunks` (`vite.config.ts`), le polling du serveur dev, le build Vercel et
   Vitest 5 (accepte Vite 6.4 à 8).
-- **TypeScript 5.8 → 7** : vérifier la compatibilité de `typescript-eslint` et de `tsc -b`.
+- **TypeScript 6.0 → 7** : en attente de `typescript-eslint`. Au 17/11/2026, sa version 8.73
+  exige `typescript <6.1.0`, car TS 7, le compilateur réécrit en Go, n'a pas la même API JS.
+  Notre code passe déjà `tsc -b` avec TS 7.0.2, essayé sur une copie jetable : la montée se
+  résumera à changer la version quand `typescript-eslint` l'acceptera. Surveiller ses notes de
+  version.
 
 ## npm audit : picomatch (GHSA-fc5q-39xc-vjpf)
 

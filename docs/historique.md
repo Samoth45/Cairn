@@ -108,3 +108,6 @@ par fonctionnalité validée.
   `dexie-react-hooks` 1.1.7 → 4.4.0 (Dexie 4.4.7). `useLiveQuery` inchangé (vérifié en comparant
   les paquets npm). Contrôle headless sur le build : la liste suit la base (import, masquage,
   renommage, suppression, rechargement).
+- [x] **TypeScript 6.0** (17/11/2026) — lot 3 de `docs/specs/montees-de-version.md` :
+  `typescript` 5.8.3 → 6.0.3, sans changement de code ni de `tsconfig`. TypeScript 7 essayé
+  (`tsc -b` OK) mais bloqué par `typescript-eslint` (`<6.1.0`) : noté au backlog.
