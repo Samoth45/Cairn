@@ -9,8 +9,9 @@ statistiques, météo détaillée par altitude pour choisir le meilleur jour / h
   et validées**). Référence figée : ne plus le modifier.
 - `docs/historique.md` — ce qui a été réalisé à chaque étape, ajouts et corrections.
 - `docs/specs/` — une spec courte par nouvelle fonctionnalité (modèle : `docs/specs/README.md`).
-- `docs/backlog.md` — idées en attente (simplification des GPX denses, dépendances dépréciées).
-- `docs/deploiement.md` — détail Vercel, Node, lockfile, test du build.
+- `docs/backlog.md` — idées en attente (simplification des GPX denses, dépendances dépréciées,
+  refonte du README).
+- `docs/deploiement.md` — détail Vercel, Node, lockfile, test du build, intégration continue.
 - `src/lib/CLAUDE.md` — décisions de calcul (stats, pentes, soleil, météo le long du tracé, score).
 - `src/services/CLAUDE.md` — API Open-Meteo (altitudes, prévisions) et cache.
 - `src/components/CLAUDE.md` — pièges Leaflet, carte, onglets, état partagé.
@@ -37,6 +38,11 @@ Lancer **`/verifier`** (`.claude/commands/verifier.md`) : tests, lint (0 erreur,
 **build de production obligatoire** (Vercel échoue sur toute erreur TypeScript ou de build, même
 si le serveur dev, qui ne vérifie pas les types, fonctionne), puis contrôle du serveur dev.
 Indiquer le résultat des trois commandes dans le compte rendu.
+
+**CI** (`.github/workflows/ci.yml`, job « Lint, test & build ») : la même routine tourne sur
+GitHub Actions à chaque push, sans Docker (Node lu dans `.nvmrc`). Le lint échoue sur tout
+avertissement (`--max-warnings=0` dans le script). Renommer le job impose de mettre à jour les
+« Deployment Checks » de Vercel (cf. `docs/deploiement.md`).
 
 **Dev ≠ prod (StrictMode)** : tout comportement de carte (survol, clics, couches) doit être
 vérifié aussi sur le build (`npm run preview`). Voir `src/components/CLAUDE.md`.

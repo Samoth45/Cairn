@@ -39,6 +39,39 @@ validée : ne jamais pousser.
 - Seule URL en `http://` du code : le namespace XML GPX `http://www.topografix.com/GPX/1/1`
   (identifiant obligatoire, jamais appelé) — ce n'est pas du mixed content.
 
+## Intégration continue (GitHub Actions)
+
+- **`.github/workflows/ci.yml`** : à chaque push (toutes branches) et sur les pull requests,
+  job « Lint, test & build » sur `ubuntu-latest` : `npm ci`, `npm test`, `npm run lint`, `npm run build`
+  (même routine que `/verifier`). Sans Docker, comme Vercel : Node lu dans `.nvmrc`
+  (`actions/setup-node`, cache npm). La règle « tout passe par Docker » concerne les postes
+  de dev, pas la CI.
+- **Lint sans avertissement** : le script `lint` est `eslint . --max-warnings=0` (échoue aussi
+  en local et dans `/verifier`).
+- Un nouveau push sur la même branche (ou la même PR) annule l'exécution en cours.
+- **Le nom du job (« Lint, test & build ») est celui du « check » GitHub** sélectionné dans Vercel (voir
+  ci-dessous) : le renommer impose de mettre à jour le réglage Vercel.
+- Versions d'actions : `actions/checkout@v7`, `actions/setup-node@v7` (dernières majeures au
+  17/11/2026). Workflow validé par `actionlint` et rejoué dans un conteneur `node:26` (Debian,
+  glibc, comme le runner Ubuntu).
+
+### Production bloquée tant que la CI échoue (Vercel « Deployment Checks »)
+
+Vercel crée toujours le déploiement, mais ne l'affecte au domaine de production qu'une fois
+les checks GitHub réussis (puis automatiquement). Les previews ne sont pas concernées. En cas
+d'urgence : « Force Promote » depuis la page du déploiement. Fonction ouverte à tous les
+projets liés à GitHub (changelog Vercel du 09/10/2025) ; l'offre Hobby n'est pas citée
+nommément : à confirmer dans l'interface.
+
+Réglage (une fois, après un premier passage de la CI pour que le check existe) :
+1. Vercel → projet → **Settings → Git** : le projet est bien lié au dépôt GitHub.
+2. **Settings → Environments → Production** : l'alias automatique de production est activé.
+3. **Settings → Build and Deployment → Deployment Checks → Add Checks** → fournisseur
+   **GitHub** → sélectionner le check **Lint, test & build**.
+4. Côté GitHub, rien d'obligatoire. Facultatif : protection de la branche principale
+   (Settings → Branches / Rulesets → « Require status checks to pass » → « Lint, test & build ») pour
+   interdire une fusion de PR tant que la CI échoue.
+
 ## Procédures
 
 - **Tester le build comme Vercel** : le script `preview` inclut `--host 0.0.0.0 --port 4173
