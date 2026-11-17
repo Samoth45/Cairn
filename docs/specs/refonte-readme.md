@@ -27,7 +27,11 @@ de code écrite à la main).
      « Planifier une rando en montagne avec la météo **à l'altitude où l'on marche**, pas
      celle de la vallée. »
    - Badges (ligne 1, état) : CI (GitHub Actions, job « Lint, test & build »), déploiement
-     Vercel (`github/deployments/…/Production`), version (`github/v/tag`), licence.
+     Vercel, version (`github/v/tag`), licence. Le badge Vercel teste la disponibilité du site
+     (`img.shields.io/website`) : Vercel ne crée pas de déploiements GitHub sur ce dépôt, donc
+     `github/deployments/…` affichait « environment not found » (constaté le 17/11/2026). Badge
+     licence avec `?cacheSeconds=3600` : l'ancienne URL restait en cache « repo not found »
+     (rendue avant que le dépôt soit public).
    - Badges (ligne 2, technos, statiques) : React 19, TypeScript, Vite, Leaflet, Docker,
      Node 26.
    - **Bouton/lien « Essayer Cairn en ligne → »** bien visible, puis capture principale.
