@@ -82,3 +82,10 @@ par fonctionnalité validée.
   difficultés résolues, méthode de développement agentique ; développement local en bloc
   repliable. Licence MIT (`LICENSE`), version 1.0.0. Pas de capture mobile (interface mobile
   à revoir). Spec : `docs/specs/refonte-readme.md`.
+- [x] **Règles « React Compiler » du lint** (17/11/2026) — config `recommended` complète
+  d'`eslint-plugin-react-hooks` 7 activée, les 10 erreurs corrigées sans `eslint-disable` :
+  état déduit pendant le rendu au lieu de `setState` dans les effets (`useWeather`, survol du
+  profil, statut des altitudes), plus de ref lue pendant le rendu (`DropZone`, emprise
+  initiale de la carte), dépendances des mémoïsations de `App` mémoïsées. Seul effet visible :
+  un tracé en file d'attente d'altitudes s'affiche « en cours de récupération » dès l'import.
+  Spec : `docs/specs/regles-react-compiler.md`.

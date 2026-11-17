@@ -20,21 +20,6 @@ Traces Strava, montres GPS : ~1 point/s, ex. 30 000 points pour 23 km.
   secondaires. Leur profil paraît plus lisse (altitude barométrique/corrigée par Strava, points
   denses) : normal.
 
-## Règles « React Compiler » d'eslint-plugin-react-hooks
-
-Découvert lors du passage à ESLint 10 (17/11/2026). `eslint-plugin-react-hooks` 7 (requis par
-ESLint 10) ajoute à sa config `recommended` 13 règles issues du React Compiler. Pour l'instant,
-`eslint.config.js` n'active que `rules-of-hooks` et `exhaustive-deps` (comme avant). Activer la
-config complète signale 10 erreurs dans du code qui fonctionne :
-
-- `preserve-manual-memoization` : 5 mémoïsations de `App.tsx` (l. ~150, 178, 200).
-- `refs` : lecture d'une ref pendant le rendu (`App.tsx` l. ~431, `DropZone.tsx`).
-- `set-state-in-effect` : `ElevationProfile.tsx` (remise à zéro du survol),
-  `useElevationFetcher.ts` (statut « loading »), `useWeather.ts` (remise à zéro sans tracé).
-
-Corriger ces endroits puis passer à `reactHooks.configs.recommended`. À retester ensuite :
-météo, altitudes, profil, glisser-déposer.
-
 ## Vitest 3 : vulnérabilités signalées par `npm audit`
 
 `npm audit` : 3 vulnérabilités (2 critiques `tinypool`, 1 modérée `@vitest/mocker`), via

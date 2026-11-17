@@ -9,7 +9,9 @@ export function DropZone({ onFiles }: { onFiles: (files: File[]) => void }) {
   const [active, setActive] = useState(false);
   const depth = useRef(0);
   const onFilesRef = useRef(onFiles);
-  onFilesRef.current = onFiles;
+  useEffect(() => {
+    onFilesRef.current = onFiles;
+  }, [onFiles]);
 
   useEffect(() => {
     const enter = (e: DragEvent) => {

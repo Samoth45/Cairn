@@ -13,8 +13,8 @@ statistiques, météo détaillée par altitude pour choisir le meilleur jour / h
   d'installation) ; captures dans `docs/images/` (faites par l'utilisateur, compressées avec
   pngquant + oxipng dans un conteneur jetable). Le garder à jour quand une fonctionnalité
   visible ou un choix technique qu'il cite change.
-- `docs/backlog.md` — idées en attente (simplification des GPX denses, règles React Compiler
-  du lint, Vitest 3 et `npm audit`).
+- `docs/backlog.md` — idées en attente (simplification des GPX denses, Vitest 3 et
+  `npm audit`).
 - `docs/deploiement.md` — détail Vercel, Node, lockfile, test du build, intégration continue.
 - `src/lib/CLAUDE.md` — décisions de calcul (stats, pentes, soleil, météo le long du tracé, score).
 - `src/services/CLAUDE.md` — API Open-Meteo (altitudes, prévisions) et cache.
@@ -90,8 +90,8 @@ Vite : `server.watch.usePolling: true` (hot reload avec volumes Windows/macOS). 
 
 Node 26 / npm 11 (image `node:26-alpine`), Vite 6 + React 19 + TypeScript strict, Leaflet 1.9 +
 react-leaflet 5, `@tmcw/togeojson`, Dexie 4 + `dexie-react-hooks`, Vitest 3 + jsdom 31 +
-fake-indexeddb, ESLint 10 (`defineConfig` ; de React Hooks, seules `rules-of-hooks` et
-`exhaustive-deps` sont actives, cf. backlog).
+fake-indexeddb, ESLint 10 (`defineConfig` ; config `recommended` complète de React Hooks 7, règles du React
+Compiler comprises, cf. `src/components/CLAUDE.md`).
 Graphiques : **SVG maison** (pas de recharts), cf. `ElevationProfile.tsx` ; garder ce choix.
 
 ## Architecture
