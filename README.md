@@ -7,9 +7,9 @@
 **Planifier une rando en montagne avec la météo _à l'altitude où l'on marche_, pas celle de la vallée.**
 
 [![Tests](https://img.shields.io/github/actions/workflow/status/Samoth45/Cairn/ci.yml?branch=main&label=tests&logo=githubactions&logoColor=white)](https://github.com/Samoth45/Cairn/actions/workflows/ci.yml)
-[![Déploiement Vercel](https://img.shields.io/github/deployments/Samoth45/Cairn/Production?label=vercel&logo=vercel)][site]
+[![Site en ligne](https://img.shields.io/website?url=https%3A%2F%2Fcairn-gpx.vercel.app%2F&label=vercel&logo=vercel&up_message=en%20ligne&down_message=hors%20ligne)][site]
 [![Version](https://img.shields.io/github/v/tag/Samoth45/Cairn?label=version)](https://github.com/Samoth45/Cairn/tags)
-[![Licence MIT](https://img.shields.io/github/license/Samoth45/Cairn)](LICENSE)
+[![Licence MIT](https://img.shields.io/github/license/Samoth45/Cairn?cacheSeconds=3600)](LICENSE)
 
 ![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
