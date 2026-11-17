@@ -104,3 +104,7 @@ par fonctionnalité validée.
   16.5 → 17.14 (configuration ESLint). Globales des AudioWorklets et `DisposableStack`
   retirées de `browser` (non utilisées). Lint et bundle inchangés. Nouvelle alerte `npm audit`
   sur picomatch (sans correctif) consignée dans `docs/deploiement.md` et au backlog.
+- [x] **dexie-react-hooks 4** (17/11/2026) — lot 2 de `docs/specs/montees-de-version.md` :
+  `dexie-react-hooks` 1.1.7 → 4.4.0 (Dexie 4.4.7). `useLiveQuery` inchangé (vérifié en comparant
+  les paquets npm). Contrôle headless sur le build : la liste suit la base (import, masquage,
+  renommage, suppression, rechargement).

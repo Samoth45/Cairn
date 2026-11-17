@@ -30,8 +30,6 @@ faites. Spec par lots : `docs/specs/montees-de-version.md` (TypeScript visé : 6
   Vérifier `manualChunks` (`vite.config.ts`), le polling du serveur dev, le build Vercel et
   Vitest 5 (accepte Vite 6.4 à 8).
 - **TypeScript 5.8 → 7** : vérifier la compatibilité de `typescript-eslint` et de `tsc -b`.
-- **`dexie-react-hooks` 1 → 4** : vérifier `useLiveQuery` (`useTracks`) et la compatibilité
-  avec Dexie 4.
 
 ## npm audit : picomatch (GHSA-fc5q-39xc-vjpf)
 

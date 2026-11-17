@@ -92,7 +92,7 @@ Vite : `server.watch.usePolling: true` (hot reload avec volumes Windows/macOS). 
 ## Stack
 
 Node 26 / npm 11 (image `node:26-alpine`), Vite 6 + React 19 + TypeScript strict, Leaflet 1.9 +
-react-leaflet 5, `@tmcw/togeojson`, Dexie 4 + `dexie-react-hooks`, Vitest 5 + jsdom 31 +
+react-leaflet 5, `@tmcw/togeojson`, Dexie 4 + `dexie-react-hooks` 4, Vitest 5 + jsdom 31 +
 fake-indexeddb, ESLint 10 (`defineConfig` ; config `recommended` complète de React Hooks 7, règles du React
 Compiler comprises, cf. `src/components/CLAUDE.md`).
 Graphiques : **SVG maison** (pas de recharts), cf. `ElevationProfile.tsx` ; garder ce choix.

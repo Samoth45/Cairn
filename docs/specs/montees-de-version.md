@@ -46,7 +46,17 @@ Contexte utile : Dexie 4.4.7, Node 26, Vitest 5.1 (accepte Vite `^6.4 || ^7 || ^
   rester à 0 erreur, 0 avertissement.
 - Risque : faible, la dépendance ne sert qu'au lint.
 
-### Lot 2 — `dexie-react-hooks` 1 → 4
+### Lot 2 — `dexie-react-hooks` 1 → 4 (réalisé le 17/11/2026)
+**Résultat** : 4.4.0, avec Dexie 4.4.7.
+- Les notes de version ne décrivent pas les ruptures. La comparaison des deux paquets npm montre
+  que `useLiveQuery` garde la même signature et le même fonctionnement : seul `liveQuery(…)`
+  devient `Dexie.liveQuery(…)`.
+- Les dépendances requises passent à `dexie >=4.2.0-alpha.1 <5` et `react >=16`, sans
+  `@types/react`.
+- Nouveaux hooks non utilisés : `useSuspendingLiveQuery`, `useDocument`…
+- Contrôle headless sur le build : import, masquage, renommage, suppression et rechargement OK,
+  sans erreur dans la console.
+
 - Mettre `^4` dans `package.json`. La v4 exige `dexie >=4.2.0-alpha.1 <5` (installé :
   4.4.7, OK).
 - Lire les notes de version et vérifier la signature et le comportement de `useLiveQuery`
