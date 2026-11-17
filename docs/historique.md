@@ -94,3 +94,9 @@ par fonctionnalité validée.
   `tinypool`, `@vitest/mocker`). Aucun changement de tests ni de configuration ; bundle de
   production identique. Autres montées majeures (Vite 8, TypeScript 7…) notées au backlog.
   Spec : `docs/specs/vitest-5.md`.
+- [x] **Déploiement continu** (17/11/2026) — workflow `ci.yml` renommé « CI/CD » : après le job
+  « Lint, test & build », la CLI Vercel (65.17.0) déploie une preview sur les PR (environnement
+  GitHub `preview`, ignoré pour les forks) et la production sur `main` (environnement
+  `production`, lien `cairn-gpx.vercel.app`, `concurrency` sans annulation). Déploiement Git de
+  Vercel coupé (`git.deploymentEnabled: false`). README : badge unique « CI/CD ». Mise en place
+  des secrets et réglages Vercel : `docs/deploiement.md`. Spec : `docs/specs/deploiement-continu.md`.

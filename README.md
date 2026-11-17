@@ -6,8 +6,7 @@
 
 **Planifier une rando en montagne avec la météo _à l'altitude où l'on marche_, pas celle de la vallée.**
 
-[![Tests](https://img.shields.io/github/actions/workflow/status/Samoth45/Cairn/ci.yml?branch=main&label=tests&logo=githubactions&logoColor=white)](https://github.com/Samoth45/Cairn/actions/workflows/ci.yml)
-[![Site en ligne](https://img.shields.io/website?url=https%3A%2F%2Fcairn-gpx.vercel.app%2F&label=vercel&logo=vercel&up_message=en%20ligne&down_message=hors%20ligne)][site]
+[![CI/CD](https://img.shields.io/github/actions/workflow/status/Samoth45/Cairn/ci.yml?branch=main&label=CI%2FCD&logo=githubactions&logoColor=white)](https://github.com/Samoth45/Cairn/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/github/v/tag/Samoth45/Cairn?label=version)](https://github.com/Samoth45/Cairn/tags)
 [![Licence MIT](https://img.shields.io/github/license/Samoth45/Cairn?cacheSeconds=3600)](LICENSE)
 
@@ -114,8 +113,8 @@ flowchart LR
   end
   S -->|HTTPS| OM["Open-Meteo<br/>prévisions + altitudes"]
   UI -->|tuiles| T["IGN Géoplateforme<br/>OpenTopoMap"]
-  GH["GitHub"] -->|push| CI["GitHub Actions<br/>tests, lint, build"]
-  GH -->|push| V["Vercel<br/>site statique"]
+  GH["GitHub"] -->|push / PR| CI["GitHub Actions<br/>tests, lint, build"]
+  CI -->|si la CI passe :<br/>CLI Vercel| V["Vercel<br/>site statique"]
   V -.->|sert l'application| nav
 ```
 
@@ -179,7 +178,8 @@ flowchart LR
   [`docs/backlog.md`](docs/backlog.md) liste les idées en attente.
 - **Une définition de « terminé ».** La commande `/verifier` enchaîne tests, lint sans aucun
   avertissement, build de production (celui que Vercel exécutera) et contrôle du serveur de
-  développement. La même routine tourne dans GitHub Actions à chaque push.
+  développement. La même routine tourne dans GitHub Actions à chaque push, et le site n'est
+  déployé que si elle passe.
 - **L'agent vérifie aussi ce qu'il voit.** Pour l'interface, il lance un navigateur sans
   écran (puppeteer) dans un conteneur jetable, sur le build de production, clique, mesure et
   relit ses propres captures d'écran avant de rendre la main.

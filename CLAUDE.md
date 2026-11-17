@@ -15,7 +15,7 @@ statistiques, météo détaillée par altitude pour choisir le meilleur jour / h
   visible ou un choix technique qu'il cite change.
 - `docs/backlog.md` — idées en attente (simplification des GPX denses, montées de version
   majeures : Vite 8, TypeScript 7…).
-- `docs/deploiement.md` — détail Vercel, Node, lockfile, test du build, intégration continue.
+- `docs/deploiement.md` — détail Vercel, Node, lockfile, test du build, CI/CD (mise en place des secrets Vercel).
 - `src/lib/CLAUDE.md` — décisions de calcul (stats, pentes, soleil, météo le long du tracé, score).
 - `src/services/CLAUDE.md` — API Open-Meteo (altitudes, prévisions) et cache.
 - `src/components/CLAUDE.md` — pièges Leaflet, carte, onglets, état partagé.
@@ -43,10 +43,13 @@ Lancer **`/verifier`** (`.claude/commands/verifier.md`) : tests, lint (0 erreur,
 si le serveur dev, qui ne vérifie pas les types, fonctionne), puis contrôle du serveur dev.
 Indiquer le résultat des trois commandes dans le compte rendu.
 
-**CI** (`.github/workflows/ci.yml`, job « Lint, test & build ») : la même routine tourne sur
-GitHub Actions à chaque push, sans Docker (Node lu dans `.nvmrc`). Le lint échoue sur tout
-avertissement (`--max-warnings=0` dans le script). Renommer le job impose de mettre à jour les
-« Deployment Checks » de Vercel (cf. `docs/deploiement.md`).
+**CI/CD** (`.github/workflows/ci.yml`, workflow « CI/CD ») : le job « Lint, test & build »
+rejoue la même routine sur GitHub Actions à chaque push, sans Docker (Node lu dans `.nvmrc`).
+Le lint échoue sur tout avertissement (`--max-warnings=0` dans le script). Si la CI passe, la
+CLI Vercel déploie : preview sur les PR, production sur `main` (environnements GitHub
+`preview` / `production`). Le déploiement Git automatique de Vercel est coupé
+(`vercel.json`). Les secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID` et `VERCEL_PROJECT_ID` sont créés
+par l'utilisateur. Détail : `docs/deploiement.md`.
 
 **Dev ≠ prod (StrictMode)** : tout comportement de carte (survol, clics, couches) doit être
 vérifié aussi sur le build (`npm run preview`). Voir `src/components/CLAUDE.md`.
@@ -55,8 +58,8 @@ vérifié aussi sur le build (`npm run preview`). Voir `src/components/CLAUDE.md
 
 Détail et procédures : `docs/deploiement.md`.
 
-- Vercel construit depuis les sources (`npm ci` puis `npm run build`, sortie `dist/`) et ne lance
-  pas Docker. La configuration Docker doit rester intacte (dev et prod locale).
+- Le déploiement (CLI Vercel dans GitHub Actions) construit depuis les sources (`npm ci` puis
+  `npm run build`, sortie `dist/`, réglages de `vercel.json`) et ne lance pas Docker. La configuration Docker doit rester intacte (dev et prod locale).
 - Pas de `base` dans `vite.config.ts` (app servie à la racine du domaine) ; aucune URL
   `localhost` codée en dur ; toutes les API et tuiles en **HTTPS** (sinon « mixed content »).
 - **Aucune variable d'environnement** : si une devient nécessaire, le signaler à l'utilisateur.
