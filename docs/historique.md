@@ -70,3 +70,15 @@ par fonctionnalité validée.
   tests, lint, build, sans Docker (Node lu dans `.nvmrc`), exécution précédente annulée.
   Lint désormais bloquant sur les avertissements (`--max-warnings=0`). Réglage Vercel
   « Deployment Checks » pour ne promouvoir en production qu'après la CI : `docs/deploiement.md`.
+- [x] **Dépendances dépréciées** (17/11/2026, sans spec) — ESLint 10 (+ `@eslint/js` 10,
+  `eslint-plugin-react-hooks` 7, `eslint-plugin-react-refresh` 0.5, `typescript-eslint` 8.73),
+  `eslint.config.js` passé à `defineConfig` (`tseslint.config` dépréciée), mêmes règles
+  qu'avant (seules `rules-of-hooks` et `exhaustive-deps` de React Hooks : les règles du React
+  Compiler de la v7 sont au backlog). jsdom 31 (plus de `whatwg-encoding`). Plus aucun
+  avertissement « deprecated » à `npm ci`. Vulnérabilités de Vitest 3 notées au backlog.
+- [x] **Refonte du README** (17/11/2026) — README de présentation (visiteur / recruteur) :
+  en-tête avec badges et lien vers https://cairn-gpx.vercel.app/, fonctionnalités par onglet
+  avec captures (`docs/images/`, compressées), choix techniques justifiés, schémas Mermaid,
+  difficultés résolues, méthode de développement agentique ; développement local en bloc
+  repliable. Licence MIT (`LICENSE`), version 1.0.0. Pas de capture mobile (interface mobile
+  à revoir). Spec : `docs/specs/refonte-readme.md`.

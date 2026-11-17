@@ -150,3 +150,6 @@ vite.config.ts.timestamp-*
 
 # Vercel CLI (configuration locale)
 .vercel
+
+# Instructions Claude Code propres à chaque poste (non versionnées)
+CLAUDE.local.md
