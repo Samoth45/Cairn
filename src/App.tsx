@@ -67,7 +67,8 @@ export default function App() {
   const [fitRequest, setFitRequest] = useState<FitRequest | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const toastId = useRef(0);
-  const initialBounds = useRef<Bounds | null | undefined>(undefined);
+  // Emprise initiale de la carte, fixée au premier rendu chargé (undefined = pas encore).
+  const [initialBounds, setInitialBounds] = useState<Bounds | null | undefined>(undefined);
 
   const dismissToast = useCallback((id: number) => setToasts((ts) => ts.filter((t) => t.id !== id)), []);
   const pushToast = useCallback(
@@ -136,20 +137,29 @@ export default function App() {
       : forecast && hourIndex !== null
         ? forecast.data.times[hourIndex].slice(0, 10)
         : todayKey;
-  const departureMinutes = parseClock(settings?.departureTime ?? '') ?? 8 * 60;
+  // Mémoïsés (comme `startIndex` et `departureSun`) : dépendances des useMemo / useCallback
+  // ci-dessous, sans quoi la règle `preserve-manual-memoization` les signale.
+  const departureTime = settings?.departureTime ?? '';
+  const departureMinutes = useMemo(() => parseClock(departureTime) ?? 8 * 60, [departureTime]);
   const din = settings?.din;
   const passage = useMemo(
     () => (analysis && din ? passageHours(analysis.profile, din, durationHours) : null),
     [analysis, din, durationHours],
   );
   const sampler = useMemo(() => (forecast ? makeWeatherSampler(forecast.data, forecast.points) : null), [forecast]);
-  const startIndex = forecast ? departureIndex(forecast.data.times, departureDay, departureMinutes) : null;
+  const startIndex = useMemo(
+    () => (forecast ? departureIndex(forecast.data.times, departureDay, departureMinutes) : null),
+    [forecast, departureDay, departureMinutes],
+  );
   const forecastRuns = useMemo(() => {
     if (coloring === 'none' || !analysis || !passage || !sampler || startIndex === null || selectedNeedsElevation) return null;
     return coloredRuns(analysis.profile, passage, sampler, startIndex, coloring);
   }, [coloring, analysis, passage, sampler, startIndex, selectedNeedsElevation]);
 
-  const departureSun = start ? sunTimes(departureDay, start.lat, start.lon) : null;
+  const departureSun = useMemo(
+    () => (start ? sunTimes(departureDay, start.lat, start.lon) : null),
+    [departureDay, start],
+  );
   const passageSummary: PassageSummary | null =
     forecast && startIndex !== null && durationHours !== null
       ? {
@@ -267,10 +277,12 @@ export default function App() {
     );
   }
 
-  // Emprise initiale calculée une seule fois au démarrage.
-  if (initialBounds.current === undefined) {
+  // Emprise initiale calculée une seule fois au démarrage (mise à jour d'état pendant le rendu,
+  // motif recommandé par React : le rendu repart aussitôt avec la valeur, avant affichage).
+  if (initialBounds === undefined) {
     const selected = tracks.find((t) => t.id === settings.selectedTrackId && t.visible);
-    initialBounds.current = selected ? trackBounds(selected.segments) : boundsOf(tracks.filter((t) => t.visible));
+    setInitialBounds(selected ? trackBounds(selected.segments) : boundsOf(tracks.filter((t) => t.visible)));
+    return null;
   }
 
   const selElevationStatus = selectedTrack ? elevationStatus[selectedTrack.id] : undefined;
@@ -428,7 +440,7 @@ export default function App() {
             tracks={tracks}
             selectedId={settings.selectedTrackId}
             baseLayer={settings.baseLayer}
-            initialBounds={initialBounds.current}
+            initialBounds={initialBounds}
             fitRequest={fitRequest}
             summit={analysis?.stats.summit ?? null}
             weatherPoints={weatherPoints}

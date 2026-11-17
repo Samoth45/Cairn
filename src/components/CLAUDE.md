@@ -74,6 +74,18 @@ React (`memoizedProps.value.map`), les pixels du tracé via `getImageData` du ca
   `HoverMarker` affiche l'infobulle de passage (`renderInfo`) seulement en mode coloré. Clic sur le
   tracé coloré = infobulle (pas de nouveau zoom) ; clic sur le fond de carte = fermeture.
 
+## Lint React Hooks (règles du React Compiler)
+
+La config `recommended` complète d'`eslint-plugin-react-hooks` 7 est active (le compilateur
+lui-même ne l'est pas). Motifs retenus pour la respecter (spec `regles-react-compiler.md`) :
+- **Pas de `setState` synchrone dans un effet** : mémoriser un résultat avec ce qui l'a produit
+  (requête, profil…) et déduire l'état pendant le rendu (`useWeather`, survol
+  d'`ElevationProfile`, statut « loading » de `useElevationFetcher`).
+- **Pas de ref lue ou écrite pendant le rendu** : ref de callback mise à jour dans un effet ;
+  valeur fixée une fois → état posé pendant le rendu (emprise initiale dans `App`).
+- **Dépendances d'un `useMemo` / `useCallback`** : elles-mêmes mémoïsées si elles sont
+  calculées (objets ou appels de fonctions), sinon `preserve-manual-memoization`.
+
 ## Mode sombre
 
 - `Settings.theme` : `'system'` (défaut, suit l'appareil en direct) | `'light'` | `'dark'`. Le

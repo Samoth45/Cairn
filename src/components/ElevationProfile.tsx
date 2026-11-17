@@ -21,7 +21,9 @@ interface Props {
 export function ElevationProfile({ name, color, profile, placeholder, onClose }: Props) {
   const boxRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 0, h: 0 });
-  const [hoverIdx, setHoverIdx] = useState<number | null>(null);
+  // Point survolé, mémorisé avec son profil : un autre profil → aucun survol.
+  const [hover, setHover] = useState<{ profile: ProfilePoint[]; idx: number } | null>(null);
+  const hoverIdx = hover && hover.profile === profile ? hover.idx : null;
 
   useEffect(() => {
     const el = boxRef.current;
@@ -35,10 +37,7 @@ export function ElevationProfile({ name, color, profile, placeholder, onClose }:
   }, []);
 
   // Le marqueur de la carte disparaît quand le profil change ou se ferme.
-  useEffect(() => {
-    setHoverIdx(null);
-    return () => setHoverPoint(null);
-  }, [profile]);
+  useEffect(() => () => setHoverPoint(null), [profile]);
 
   const points = useMemo(() => profile.filter((p) => p.ele !== null) as Array<ProfilePoint & { ele: number }>, [profile]);
 
@@ -96,11 +95,11 @@ export function ElevationProfile({ name, color, profile, placeholder, onClose }:
     const px = e.clientX - rect.left - M.left;
     const d = Math.min(Math.max(px / chart.innerW, 0), 1) * chart.totalD;
     const idx = nearestProfileIndex(points, d);
-    setHoverIdx(idx);
+    setHover({ profile, idx });
     setHoverPoint({ lat: points[idx].lat, lon: points[idx].lon, d: points[idx].d });
   };
   const onLeave = () => {
-    setHoverIdx(null);
+    setHover(null);
     setHoverPoint(null);
   };
 

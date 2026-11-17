@@ -1,23 +1,26 @@
-# Intégration continue : même routine que /verifier (tests, lint sans avertissement, build),
-# exécutée depuis les sources sans Docker, comme Vercel (Node lu dans .nvmrc).
-name: CI
+# CI/CD.
+# - CI : même routine que /verifier (tests, lint sans avertissement, build), exécutée depuis les
+#   sources sans Docker, comme Vercel (Node lu dans .nvmrc).
+# - CD : déploiement Vercel par la CLI, seulement si la CI passe (preview sur les PR, production
+#   sur main). Chaque déploiement apparaît dans GitHub (environnements « preview » / « production »).
+#   Le déploiement Git automatique de Vercel est coupé (vercel.json : git.deploymentEnabled).
+name: CI/CD
 
 on:
   push:
     branches: ['**']
   pull_request:
 
-# Un nouveau push sur la même branche annule la vérification devenue obsolète.
+# Un nouveau push sur la même branche annule l'exécution devenue obsolète, sauf sur main :
+# les exécutions y sont mises en file pour ne jamais couper une mise en production.
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 permissions:
   contents: read
 
 jobs:
-  # Nom du job = nom du « check » GitHub sélectionné dans les Deployment Checks de Vercel :
-  # le renommer impose de mettre à jour ce réglage.
   checks:
     name: Lint, test & build
     runs-on: ubuntu-latest
@@ -41,3 +44,87 @@ jobs:
 
       - name: Build (tsc -b + vite build)
         run: npm run build
+
+  # Les PR venant d'un fork n'ont pas accès aux secrets : job ignoré plutôt qu'en échec.
+  deploy-preview:
+    name: Déploiement preview
+    needs: checks
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: preview
+      url: ${{ steps.deploy.outputs.url }}
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Installation de la CLI Vercel
+        run: npm install --global vercel@65.17.0
+
+      - name: Récupération de la configuration Vercel
+        run: vercel pull --yes --environment=preview --token="$VERCEL_TOKEN"
+
+      - name: Build (vercel build)
+        run: vercel build --token="$VERCEL_TOKEN"
+
+      - name: Déploiement
+        id: deploy
+        run: |
+          url=$(vercel deploy --prebuilt --token="$VERCEL_TOKEN")
+          echo "Déployé sur $url"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+  deploy-production:
+    name: Déploiement production
+    needs: checks
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Jamais deux mises en production simultanées, et jamais d'annulation en cours de route.
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    # Lien « View deployment » : le domaine stable (l'URL unique est dans les logs du job).
+    environment:
+      name: production
+      url: https://cairn-gpx.vercel.app/
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Installation de la CLI Vercel
+        run: npm install --global vercel@65.17.0
+
+      - name: Récupération de la configuration Vercel
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+
+      - name: Build (vercel build --prod)
+        run: vercel build --prod --token="$VERCEL_TOKEN"
+
+      - name: Déploiement
+        id: deploy
+        run: |
+          url=$(vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN")
+          echo "Déployé sur $url"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
