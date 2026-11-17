@@ -1,6 +1,6 @@
 # Montées de version majeures (globals, dexie-react-hooks, TypeScript, Vite)
 
-Statut : à faire
+Statut : réalisée
 
 ## Objectif
 `npm outdated` (17/11/2026) signale quatre dépendances en retard d'une version majeure.
@@ -91,7 +91,30 @@ Contexte utile : Dexie 4.4.7, Node 26, Vitest 5.1 (accepte Vite `^6.4 || ^7 || ^
   « TypeScript 7 » avec la raison du blocage.
 - Risque : moyen. Les erreurs de types apparaissent au build, donc elles sont détectées.
 
-### Lot 4 — Vite 6 → 8 et `@vitejs/plugin-react` 4 → 6 (ensemble)
+### Lot 4 — Vite 6 → 8 et `@vitejs/plugin-react` 4 → 6 (réalisé le 17/11/2026)
+**Résultat** : Vite 8.3.8, `@vitejs/plugin-react` 6.3.0.
+- **Seul changement de code** : `manualChunks` devient
+  `build.rolldownOptions.output.codeSplitting.groups`, avec un groupe `leaflet`. `react()` reste
+  sans option.
+- **Build** : 0,6 s au lieu de 3,2 s.
+  - JS : 565,6 kB (177,4 gzip) au lieu de 576,6 kB (182,8 gzip).
+  - Le CSS est maintenant en deux fichiers, `leaflet-*.css` puis `index-*.css`, dans l'ordre
+    des imports de `main.tsx`, donc nos surcharges restent appliquées. Total : 37,3 kB au lieu
+    de 38,0 kB.
+  - Un chunk `rolldown-runtime` de 0,6 kB est ajouté.
+- **Contrôles** :
+  - Contrôle headless sur le build : styles et tuiles Leaflet, clic sur un tracé, survol du
+    profil et marqueur sur la carte, thème sombre, sans erreur dans la console.
+  - Hot reload par polling sous Docker : 0,4 s.
+  - `vercel build` hors ligne : même bundle, et le rewrite SPA et le cache sont gardés.
+  - Image nginx de prod OK.
+- **Navigateurs ciblés par défaut** : Chrome/Edge 111, Firefox 114, Safari 16.4.
+- **Effets annexes** : esbuild et Rollup ne sont plus installés, ce qui fait disparaître
+  l'avertissement `install-scripts`. `npm audit` passe de 11 à 12 « high », toujours à cause
+  de picomatch.
+- **Piège** : le conteneur dev garde Vite 6 tant qu'on ne relance pas
+  `docker compose up --build -V dev`.
+
 La v6 du plugin exige Vite 8, et Vite 8 remplace Rollup et esbuild par Rolldown et Oxc.
 
 - **`manualChunks` objet n'existe plus** dans Vite 8 (la forme fonction est dépréciée).

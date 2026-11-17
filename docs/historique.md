@@ -111,3 +111,9 @@ par fonctionnalité validée.
 - [x] **TypeScript 6.0** (17/11/2026) — lot 3 de `docs/specs/montees-de-version.md` :
   `typescript` 5.8.3 → 6.0.3, sans changement de code ni de `tsconfig`. TypeScript 7 essayé
   (`tsc -b` OK) mais bloqué par `typescript-eslint` (`<6.1.0`) : noté au backlog.
+- [x] **Vite 8** (17/11/2026) — lot 4, le dernier, de `docs/specs/montees-de-version.md`
+  (spec réalisée) : `vite` 6.4 → 8.3.8 (Rolldown, Oxc, Lightning CSS) et `@vitejs/plugin-react`
+  4.7 → 6.3. `manualChunks` remplacé par `rolldownOptions.output.codeSplitting` (chunk
+  `leaflet`). Build 5× plus rapide, JS −11 kB. CSS Leaflet dans un fichier à part, chargé avant
+  le nôtre. Contrôlés : headless sur le build, hot reload sous Docker, `vercel build`, image
+  nginx. esbuild n'est plus installé.

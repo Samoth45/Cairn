@@ -23,12 +23,9 @@ Traces Strava, montres GPS : ~1 point/s, ex. 30 000 points pour 23 km.
 ## Montées de version majeures en attente
 
 Relevées par `npm outdated` le 17/11/2026 (lors du passage à Vitest 5), volontairement non
-faites. Spec par lots : `docs/specs/montees-de-version.md` (TypeScript visé : 6.0, car
-`typescript-eslint` n'accepte pas encore TS 7).
+faites, puis traitées par lots le 17/11/2026 (`docs/specs/montees-de-version.md` : globals 17,
+dexie-react-hooks 4, TypeScript 6.0, Vite 8). Il ne reste que :
 
-- **Vite 6 → 8** et **`@vitejs/plugin-react` 4 → 6** (la v6 exige Vite 8) : à faire ensemble.
-  Vérifier `manualChunks` (`vite.config.ts`), le polling du serveur dev, le build Vercel et
-  Vitest 5 (accepte Vite 6.4 à 8).
 - **TypeScript 6.0 → 7** : en attente de `typescript-eslint`. Au 17/11/2026, sa version 8.73
   exige `typescript <6.1.0`, car TS 7, le compilateur réécrit en Go, n'a pas la même API JS.
   Notre code passe déjà `tsc -b` avec TS 7.0.2, essayé sur une copie jetable : la montée se

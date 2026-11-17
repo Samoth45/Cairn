@@ -12,10 +12,12 @@ export default defineConfig({
     watch: { usePolling: true, interval: 300 },
   },
   build: {
-    rollupOptions: {
+    rolldownOptions: {
       output: {
-        manualChunks: {
-          leaflet: ['leaflet', 'react-leaflet'],
+        // Leaflet et react-leaflet dans un chunk à part (mis en cache indépendamment du code de
+        // l'app). Vite 8 / Rolldown : remplace l'ancien `manualChunks` objet, qui n'existe plus.
+        codeSplitting: {
+          groups: [{ name: 'leaflet', test: /node_modules[\\/](react-)?leaflet[\\/]/ }],
         },
       },
     },
