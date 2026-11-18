@@ -1,0 +1,189 @@
+/* Entrée CSS de Cairn : Tailwind CSS v4 + tokens (shadcn/ui), cf. docs/specs/migration-ui.md.
+   Couches : l'ancienne feuille (legacy) passe après le preflight (base) mais avant les
+   utilitaires Tailwind, qui l'emportent donc dès qu'un composant migré les utilise.
+   Les surcharges de Leaflet restent hors couche (src/styles/leaflet.css). */
+@layer theme, base, legacy, components, utilities;
+
+@import 'tailwindcss';
+@import './styles/legacy.css' layer(legacy);
+@import './styles/leaflet.css';
+/* Animations et variantes (data-open…) utilisées par les composants shadcn/ui (preset Nova). */
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+/* Mode sombre piloté par <html data-theme="dark"> (script d'index.html + useTheme), pas par
+   la classe .dark par défaut de shadcn. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* ---------- Tokens ----------
+   Noms shadcn (--background, --primary, --accent = fond de sélection, --muted-foreground =
+   texte discret…) + tokens propres à Cairn. Toute couleur d'interface passe par ici. */
+:root {
+  --radius: 0.625rem;
+  --sidebar-w: 320px;
+
+  --background: #f6f5f1;
+  --foreground: #22292f;
+  --card: #ffffff;
+  --card-foreground: #22292f;
+  --popover: #ffffff;
+  --popover-foreground: #22292f;
+  --primary: #2f6f4f;
+  --primary-foreground: #ffffff;
+  --primary-hover: #255a40;
+  --secondary: #ffffff;
+  --secondary-foreground: #22292f;
+  --muted: #f6f5f1;
+  --muted-foreground: #6b7378;
+  --accent: #eaf3ee;
+  --accent-foreground: #22292f;
+  --destructive: #b3261e;
+  --destructive-muted: #fdecea;
+  --border: #e2e0d8;
+  --input: #e2e0d8;
+  --ring: #2f6f4f;
+
+  --warning: #fff8e6;
+  --warning-border: #f3e0b0;
+  --warning-foreground: #8a5300;
+  --badge-bg: #fff1d6;
+  --badge-border: #f0c674;
+  --info: #e8f1fb;
+  --info-border: #2f6fb3;
+  --info-foreground: #1f4f8a;
+  --gold: #b8860b;
+  --faint: #9aa0a6;
+  --card-glass: rgba(255, 255, 255, 0.96);
+  --overlay-glass: rgba(255, 255, 255, 0.92);
+  --swatch-outline: rgba(0, 0, 0, 0.25);
+  --gauge: #eef2f5;
+  --gauge-fill: #b8c4cc;
+  --night: #eceef3;
+  --night-foreground: #8a8f99;
+  --night-accent: #3949ab;
+  --cell-sep: rgba(255, 255, 255, 0.6);
+  --nodata: #eceae4;
+
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --background: #14181b;
+  --foreground: #e2e6e8;
+  --card: #1e2428;
+  --card-foreground: #e2e6e8;
+  --popover: #1e2428;
+  --popover-foreground: #e2e6e8;
+  --primary: #6cbf93;
+  --primary-foreground: #0f2219;
+  --primary-hover: #86cfa7;
+  --secondary: #1e2428;
+  --secondary-foreground: #e2e6e8;
+  --muted: #14181b;
+  --muted-foreground: #9ba4aa;
+  --accent: #213a2d;
+  --accent-foreground: #e2e6e8;
+  --destructive: #f28b82;
+  --destructive-muted: #3e2321;
+  --border: #343c42;
+  --input: #343c42;
+  --ring: #6cbf93;
+
+  --warning: #362f1e;
+  --warning-border: #5e4e28;
+  --warning-foreground: #f0c674;
+  --badge-bg: #3a2d12;
+  --badge-border: #7a5a1c;
+  --info: #1b2c3f;
+  --info-border: #5b9bdc;
+  --info-foreground: #9cc4f0;
+  --gold: #e3b341;
+  --faint: #6f787e;
+  --card-glass: rgba(30, 36, 40, 0.96);
+  --overlay-glass: rgba(30, 36, 40, 0.92);
+  --swatch-outline: rgba(255, 255, 255, 0.3);
+  --gauge: #2a3135;
+  --gauge-fill: #56636b;
+  --night: #181c20;
+  --night-foreground: #6f767f;
+  --night-accent: #a5adff;
+  --cell-sep: rgba(30, 36, 40, 0.7);
+  --nodata: #2c3236;
+
+  color-scheme: dark;
+}
+
+/* Expose les tokens à Tailwind : bg-primary, text-muted-foreground, border-border… */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-muted: var(--destructive-muted);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-warning: var(--warning);
+  --color-warning-border: var(--warning-border);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-border: var(--info-border);
+  --color-info-foreground: var(--info-foreground);
+  --color-gold: var(--gold);
+  --color-faint: var(--faint);
+  --color-card-glass: var(--card-glass);
+  --color-overlay-glass: var(--overlay-glass);
+  --color-gauge: var(--gauge);
+  --color-gauge-fill: var(--gauge-fill);
+  --color-night: var(--night);
+  --color-night-foreground: var(--night-foreground);
+  --color-night-accent: var(--night-accent);
+  --color-nodata: var(--nodata);
+  --color-cell-sep: var(--cell-sep);
+  --color-swatch-outline: var(--swatch-outline);
+
+  --radius-xs: 2px;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  --text-2xs: 0.6875rem;
+
+  --shadow-float: 0 1px 5px rgb(0 0 0 / 0.3);
+  --shadow-overlay: 0 4px 16px rgb(0 0 0 / 0.18);
+  --shadow-modal: 0 10px 40px rgb(0 0 0 / 0.3);
+
+  /* Police système jusqu'au lot 1, qui passe à Geist (@fontsource-variable/geist). */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: var(--font-sans);
+}
+
+/* Base des composants shadcn/ui. Sans effet sur l'ancienne interface : la couche legacy,
+   plus loin dans l'ordre, fixe elle-même bordures, couleurs et police. */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}

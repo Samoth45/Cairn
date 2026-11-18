@@ -124,7 +124,7 @@ describe('affichage', () => {
   it('couleur du score : rouge → vert', () => {
     expect(scoreColor(0).bg).toBe('hsl(0, 68%, 82%)');
     expect(scoreColor(100).bg).toBe('hsl(125, 68%, 82%)');
-    expect(scoreColor(null).bg).toBe('var(--nodata-bg)');
+    expect(scoreColor(null).bg).toBe('var(--nodata)');
   });
   it('jours consécutifs, y compris en changeant de mois', () => {
     expect(nextDays('2026-11-29', 4)).toEqual(['2026-11-29', '2026-11-30', '2026-12-01', '2026-12-02']);
