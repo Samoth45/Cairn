@@ -14,7 +14,8 @@ statistiques, météo détaillée par altitude pour choisir le meilleur jour / h
   pngquant + oxipng dans un conteneur jetable). Le garder à jour quand une fonctionnalité
   visible ou un choix technique qu'il cite change.
 - `docs/backlog.md` — idées en attente (simplification des GPX denses, montées de version
-  majeure en attente : TypeScript 7, bloqué par `typescript-eslint` ; alerte `npm audit` picomatch).
+  majeure en attente : TypeScript 7, bloqué par `typescript-eslint` ; alerte `npm audit` picomatch ;
+  migration UI Tailwind v4 + shadcn/ui en 10 lots, spec `docs/specs/migration-ui.md`).
 - `docs/deploiement.md` — détail Vercel, Node, lockfile, test du build, CI/CD (mise en place des secrets Vercel).
 - `src/lib/CLAUDE.md` — décisions de calcul (stats, pentes, soleil, météo le long du tracé, score).
 - `src/services/CLAUDE.md` — API Open-Meteo (altitudes, prévisions) et cache.

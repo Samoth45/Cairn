@@ -32,6 +32,20 @@ dexie-react-hooks 4, TypeScript 6.0, Vite 8). Il ne reste que :
   résumera à changer la version quand `typescript-eslint` l'acceptera. Surveiller ses notes de
   version.
 
+## Migration de l'interface vers Tailwind CSS v4 + shadcn/ui
+
+**Spec : `docs/specs/migration-ui.md`** (rédigée et tranchée le 18/11/2026).
+
+- **Objectif** : remplacer `src/styles.css` (1 804 lignes) par Tailwind v4 et des composants
+  shadcn/ui (Radix), sans changer le fonctionnement.
+- **Changements visibles voulus** : la police Geist et des contrastes corrigés.
+- **Plan** : 10 lots (0 à 9), une branche et une PR par lot vers `develop`, recette sur la
+  preview Vercel, version 1.1.0 à la fin.
+- **Prérequis du lot 4** : la liste des problèmes de l'interface mobile, à ajouter ici par
+  l'utilisateur.
+- À traiter **un lot à la fois, sur demande** : « implémente le lot N de
+  docs/specs/migration-ui.md ».
+
 ## npm audit : picomatch (GHSA-fc5q-39xc-vjpf)
 
 Signalé le 17/11/2026 : 11 vulnérabilités « high » qui viennent toutes de picomatch (ReDoS sur
