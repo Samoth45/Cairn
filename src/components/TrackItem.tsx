@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
+import { Download, Pencil, Trash2 } from 'lucide-react';
 import type { Track } from '../types';
+import { IconButton } from './IconButton';
 
 interface Props {
   track: Track;
@@ -74,29 +76,26 @@ export function TrackItem({ track, selected, onSelect, onRename, onColor, onTogg
         </button>
       )}
 
-      <button type="button" className="icon-btn" onClick={startEdit} title="Renommer" aria-label={`Renommer ${track.name}`}>
-        ✎
-      </button>
-      <button
-        type="button"
-        className="icon-btn"
+      <IconButton onClick={startEdit} title="Renommer" aria-label={`Renommer ${track.name}`}>
+        <Pencil />
+      </IconButton>
+      <IconButton
         onClick={onDownload}
         title={track.elevationSource === 'dem' ? 'Télécharger le GPX (altitudes corrigées)' : 'Télécharger le GPX'}
         aria-label={`Télécharger ${track.name} en GPX`}
       >
-        ⬇
-      </button>
-      <button
-        type="button"
-        className="icon-btn danger"
+        <Download />
+      </IconButton>
+      <IconButton
+        className="hover:text-destructive"
         onClick={() => {
           if (window.confirm(`Supprimer le tracé « ${track.name} » ?`)) onDelete();
         }}
         title="Supprimer"
         aria-label={`Supprimer ${track.name}`}
       >
-        🗑
-      </button>
+        <Trash2 />
+      </IconButton>
     </li>
   );
 }

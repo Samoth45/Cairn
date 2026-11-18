@@ -10,6 +10,7 @@ import {
   type WeatherModel,
 } from '../types';
 import { MODEL_LABELS } from '../services/weather';
+import { Button } from '@/components/ui/button';
 import { PENALTY_ICONS, PENALTY_LABELS } from '../lib/score';
 import { THEME_LABELS } from '../lib/theme';
 
@@ -133,14 +134,14 @@ export function SettingsDialog({ din, weatherModel, scoreWeights, theme, onSave,
             </select>
           </label>
           <p className="hint">
-            « Système » suit le réglage clair / sombre de l’appareil. Le bouton ☾ / ☀ du panneau choisit
+            « Système » suit le réglage clair / sombre de l’appareil. Le bouton lune / soleil du panneau choisit
             directement clair ou sombre.
           </p>
         </fieldset>
         <div className="modal-actions">
-          <button
+          <Button
             type="button"
-            className="btn"
+            variant="outline"
             onClick={() => {
               setDraft(toDraft(DEFAULT_DIN));
               setModel('meteofrance_seamless');
@@ -149,14 +150,14 @@ export function SettingsDialog({ din, weatherModel, scoreWeights, theme, onSave,
             }}
           >
             Valeurs par défaut
-          </button>
+          </Button>
           <span className="spacer" />
-          <button type="button" className="btn" onClick={onClose}>
+          <Button type="button" variant="outline" onClick={onClose}>
             Annuler
-          </button>
-          <button type="submit" className="btn primary" disabled={!valid}>
+          </Button>
+          <Button type="submit" disabled={!valid}>
             Enregistrer
-          </button>
+          </Button>
         </div>
       </form>
     </div>

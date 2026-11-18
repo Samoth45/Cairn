@@ -1,3 +1,6 @@
+import { X } from 'lucide-react';
+import { IconButton } from './IconButton';
+
 export interface Toast {
   id: number;
   kind: 'success' | 'error' | 'info';
@@ -20,9 +23,9 @@ export function Toasts({ toasts, onDismiss }: { toasts: Toast[]; onDismiss: (id:
               </ul>
             )}
           </div>
-          <button type="button" className="icon-btn" onClick={() => onDismiss(t.id)} aria-label="Fermer">
-            ✕
-          </button>
+          <IconButton onClick={() => onDismiss(t.id)} aria-label="Fermer">
+            <X />
+          </IconButton>
         </div>
       ))}
     </div>

@@ -37,6 +37,8 @@ import { downloadText } from './lib/download';
 import { DropZone } from './components/DropZone';
 import { Toasts, type Toast } from './components/Toasts';
 import { CairnLogo } from './components/CairnLogo';
+import { Mountain } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import type { FitRequest } from './components/FitBounds';
 import { trackBounds, type Bounds } from './lib/geo';
 import type { Track } from './types';
@@ -365,7 +367,7 @@ export default function App() {
         <button type="button" className="panel-toggle" onClick={() => setPanelOpen(true)} aria-label="Ouvrir la liste des tracés">
           <CairnLogo size={22} />
           <span>Cairn</span>
-          <span className="count">{tracks.length}</span>
+          <Badge variant="muted">{tracks.length}</Badge>
         </button>
         <div className="view-tabs" role="tablist" aria-label="Vue">
           <button
@@ -468,8 +470,13 @@ export default function App() {
             />
           )}
           {showProfile && !settings.showProfile && (
-            <button type="button" className="profile-open" onClick={() => void setSettings({ showProfile: true })}>
-              ⛰ Profil
+            <button
+              type="button"
+              className="profile-open inline-flex items-center gap-1.5"
+              onClick={() => void setSettings({ showProfile: true })}
+            >
+              <Mountain className="size-4" />
+              Profil
             </button>
           )}
         </div>

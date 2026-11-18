@@ -1,4 +1,6 @@
 import { useMemo, type ReactNode } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import type { WeatherModel } from '../types';
 import type { WeatherState } from '../hooks/useWeather';
 import type { PointSeries } from '../services/weather';
@@ -97,9 +99,9 @@ export function WeatherView({ trackName, weather, model, waitingForElevation, st
           {MODEL_LABELS[model]}
           {forecast && ` · mise à jour à ${formatClock(forecast.fetchedAt)} (${formatAgo(forecast.fetchedAt)})`}
         </span>
-        <button type="button" className="btn small" onClick={refresh} disabled={loading || (!forecast && !error)}>
+        <Button variant="outline" size="sm" onClick={refresh} disabled={loading || (!forecast && !error)}>
           {loading ? 'Chargement…' : 'Actualiser'}
-        </button>
+        </Button>
       </div>
     </header>
   );
@@ -158,9 +160,9 @@ export function WeatherView({ trackName, weather, model, waitingForElevation, st
           </span>
         )}
         {strongestInversion && (
-          <span className="badge badge-inversion" title={inversionExplanation(strongestInversion)} tabIndex={0}>
+          <Badge variant="warning" className="cursor-help" title={inversionExplanation(strongestInversion)} tabIndex={0}>
             ⇅ Inversion probable
-          </span>
+          </Badge>
         )}
       </div>
 

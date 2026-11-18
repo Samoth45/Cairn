@@ -1,4 +1,6 @@
+import { Download } from 'lucide-react';
 import type { DinSpeeds, Track } from '../types';
+import { Button } from '@/components/ui/button';
 import type { TrackStats as Stats } from '../lib/stats';
 import type { ElevationStatus } from '../hooks/useElevationFetcher';
 import { dinDurationHours } from '../lib/din';
@@ -58,9 +60,9 @@ export function TrackStats({ track, stats, din, elevationStatus, onRetryElevatio
       <div className="stats-summit">
         <span className="stats-label">Point culminant</span>
         {stats.summit ? (
-          <button type="button" className="link-btn" onClick={onShowSummit} title="Centrer la carte sur le point culminant">
+          <Button variant="link" size="inline" onClick={onShowSummit} title="Centrer la carte sur le point culminant">
             ▲ {formatMeters(stats.summit.ele)} · {formatCoords(stats.summit.lat, stats.summit.lon)}
-          </button>
+          </Button>
         ) : (
           <span>{DASH}</span>
         )}
@@ -72,9 +74,9 @@ export function TrackStats({ track, stats, din, elevationStatus, onRetryElevatio
         ) : elevationStatus === 'error' ? (
           <>
             Altitudes indisponibles.{' '}
-            <button type="button" className="link-btn" onClick={onRetryElevation}>
+            <Button variant="link" size="inline" onClick={onRetryElevation}>
               Réessayer
-            </button>
+            </Button>
           </>
         ) : track.elevationSource === 'dem' ? (
           'Altitudes : modèle de terrain (Open-Meteo)'
@@ -83,9 +85,11 @@ export function TrackStats({ track, stats, din, elevationStatus, onRetryElevatio
         )}
       </p>
 
-      <button type="button" className="btn stats-download" onClick={onDownload} disabled={elevationStatus === 'loading'}>
-        ⬇ Télécharger le GPX{track.elevationSource === 'dem' ? ' (altitudes corrigées)' : ''}
-      </button>
+      {/* Libellé long (« altitudes corrigées ») : retour à la ligne permis, hauteur libre. */}
+      <Button variant="outline" className="mt-2 h-auto min-h-8 w-full py-1.5 whitespace-normal" onClick={onDownload} disabled={elevationStatus === 'loading'}>
+        <Download />
+        Télécharger le GPX{track.elevationSource === 'dem' ? ' (altitudes corrigées)' : ''}
+      </Button>
     </section>
   );
 }

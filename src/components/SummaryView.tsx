@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Button } from '@/components/ui/button';
 import type { DinSpeeds, ScoreWeights, WeatherModel } from '../types';
 import type { CachedForecast } from '../db/db';
 import type { TrackForecastEntry } from '../hooks/useAllForecasts';
@@ -85,9 +86,9 @@ export function SummaryView(p: Props) {
             <input type="time" step={900} value={p.departureTime} onChange={(e) => e.target.value && p.onDepartureTime(e.target.value)} />
           </label>
           <span>{MODEL_LABELS[p.model]}</span>
-          <button type="button" className="btn small" onClick={p.onRefresh} disabled={p.loading}>
+          <Button variant="outline" size="sm" onClick={p.onRefresh} disabled={p.loading}>
             {p.loading ? 'Chargement…' : 'Actualiser'}
-          </button>
+          </Button>
         </div>
       </header>
 
