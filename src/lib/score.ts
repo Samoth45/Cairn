@@ -163,7 +163,7 @@ export function computeDayScore(input: ScoreInput, weights: ScoreWeights): DaySc
 
 /** Fond (pastel) et texte pour un score : rouge (0) → orange → vert (100). */
 export function scoreColor(score: number | null): { bg: string; fg: string } {
-  if (score === null) return { bg: 'var(--nodata-bg)', fg: 'var(--muted)' };
+  if (score === null) return { bg: 'var(--nodata)', fg: 'var(--muted-foreground)' };
   const hue = Math.round((Math.max(0, Math.min(100, score)) / 100) * 125);
   return { bg: `hsl(${hue}, 68%, 82%)`, fg: `hsl(${hue}, 60%, 22%)` };
 }

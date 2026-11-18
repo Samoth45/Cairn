@@ -14,8 +14,11 @@ statistiques, météo détaillée par altitude pour choisir le meilleur jour / h
   pngquant + oxipng dans un conteneur jetable). Le garder à jour quand une fonctionnalité
   visible ou un choix technique qu'il cite change.
 - `docs/backlog.md` — idées en attente (simplification des GPX denses, montées de version
-  majeure en attente : TypeScript 7, bloqué par `typescript-eslint` ; alerte `npm audit` picomatch ;
-  migration UI Tailwind v4 + shadcn/ui en 10 lots, spec `docs/specs/migration-ui.md`).
+  majeure en attente : TypeScript 7, bloqué par `typescript-eslint` ; migration UI Tailwind v4 +
+  shadcn/ui en 10 lots, spec `docs/specs/migration-ui.md`, lot 0 fait).
+- `docs/recette/` — recette visuelle de la migration UI : captures avant/après du build
+  (conteneur jetable, météo rejouée, horloge figée) et mesure des contrastes ; mode d'emploi
+  dans son `README.md`.
 - `docs/deploiement.md` — détail Vercel, Node, lockfile, test du build, CI/CD (mise en place des secrets Vercel).
 - `src/lib/CLAUDE.md` — décisions de calcul (stats, pentes, soleil, météo le long du tracé, score).
 - `src/services/CLAUDE.md` — API Open-Meteo (altitudes, prévisions) et cache.
@@ -97,6 +100,9 @@ react-leaflet 5, `@tmcw/togeojson`, Dexie 4 + `dexie-react-hooks` 4, Vitest 5 + 
 fake-indexeddb, ESLint 10 (`defineConfig` ; config `recommended` complète de React Hooks 7, règles du React
 Compiler comprises, cf. `src/components/CLAUDE.md`).
 Graphiques : **SVG maison** (pas de recharts), cf. `ElevationProfile.tsx` ; garder ce choix.
+Styles : **Tailwind CSS v4** (`@tailwindcss/vite`) + **shadcn/ui** (Radix, preset Nova, icônes
+Lucide), migration en cours par lots (`docs/specs/migration-ui.md`) ; conventions et pièges
+dans `src/components/CLAUDE.md`. Alias `@` → `src` (Vite + `tsconfig.json` + `tsconfig.app.json`).
 
 ## Architecture
 
@@ -123,9 +129,14 @@ src/
                             pour ne pas re-rendre l'app à chaque mouvement de souris
     useTheme.ts             thème affiché (réglage, ou préférence système suivie en direct) ;
                             pose `<html data-theme>` et sa copie localStorage
-  lib/                fonctions pures + tests (*.test.ts) — détail dans src/lib/CLAUDE.md
+  lib/                fonctions pures + tests (*.test.ts) — détail dans src/lib/CLAUDE.md ;
+                      utils.ts = cn() de shadcn (seule exception d'interface)
   services/           elevation.ts, weather.ts, weatherCache.ts — détail dans src/services/CLAUDE.md
-  components/         UI et carte — détail dans src/components/CLAUDE.md
+  components/         UI et carte — détail dans src/components/CLAUDE.md ; ui/ = composants
+                      shadcn (ajoutés par le CLI, components.json)
+  index.css           entrée CSS : couches, Tailwind, tokens clair/sombre, @theme
+  styles/             legacy.css (ancienne feuille, couche « legacy », vidée lot par lot),
+                      leaflet.css (surcharges Leaflet, hors couche)
   App.tsx             orchestration : sélection, analyse mémoïsée du tracé sélectionné, zoom
                       (fitRequest avec nonce), toasts, tiroir mobile, profil, paramètres, durée DIN,
                       heure météo affichée (hourSelection) partagée panneau ↔ infobulles carte

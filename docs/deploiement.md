@@ -135,5 +135,10 @@ et CD sont donc dans le même fichier, et le badge « CI/CD » du README (`ci.ym
   nouvelle alerte GHSA-fc5q-39xc-vjpf : un ReDoS sur les extglobs de **picomatch, toutes
   versions**. picomatch est tiré par Vite (via `tinyglobby` / `fdir`) et par
   `typescript-eslint`. Il ne sert qu'au développement et au build : il n'est pas livré dans
-  le bundle. Aucun correctif n'existe encore : `npm audit fix --force` rétrograderait Vite en
-  6.2.7, **ne pas le lancer**. À suivre au backlog.
+  le bundle. Cette alerte n'est **plus signalée depuis le 19/11/2026** (vérifié au lot 0 de la
+  migration UI).
+- `npm audit` au 19/11/2026 : **4 « moderate »**, toutes sur `minimatch` (GHSA-g3hv-75wg-m249),
+  tiré par `ts-morph`, lui-même dépendance de la CLI `shadcn`. C'est une **devDependency**, qui
+  ne sert qu'à ajouter des composants et à fournir `shadcn/tailwind.css` au build : rien n'est
+  livré dans le site. `npm audit fix --force` rétrograderait `shadcn` en 1.0.0 : **ne pas le
+  lancer**. À revoir à la prochaine version de `shadcn`.

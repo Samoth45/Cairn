@@ -95,12 +95,13 @@ lui-même ne l'est pas). Motifs retenus pour la respecter (spec `regles-react-co
 - Thème appliqué par `<html data-theme="light|dark">`. Copie du réglage dans localStorage
   (`cairn-theme`) lue par un script inline de `index.html` **avant** le premier rendu : sans
   elle, flash du thème clair (IndexedDB arrive trop tard). La source de vérité reste `Settings`.
-- **Toutes les couleurs d'interface passent par les variables de `:root`** (redéfinies sous
-  `:root[data-theme='dark']`) : ne plus écrire de couleur en dur dans `styles.css`. Les
-  couleurs de données (températures, scores, pentes, tracés) ne changent pas ; leurs cases
-  « sans donnée » utilisent `var(--nodata-bg)` / `var(--muted)` (styles en ligne).
+- **Toutes les couleurs d'interface passent par les tokens de `src/index.css`** (`:root`,
+  redéfinis sous `:root[data-theme='dark']`) : pas de couleur en dur. Les couleurs de données
+  (températures, scores, pentes, tracés) ne changent pas ; leurs cases « sans donnée »
+  utilisent `var(--nodata)` / `var(--muted-foreground)` (styles en ligne, `lib/score.ts`,
+  `lib/weatherTable.ts`).
 - **La carte reste intacte** (choix de l'utilisateur) : seuls les contrôles et infobulles Leaflet
-  sont assombris (fin de `styles.css`) ; tuiles et marqueurs gardent leurs couleurs.
+  sont assombris (`src/styles/leaflet.css`) ; tuiles et marqueurs gardent leurs couleurs.
 
 ## Panneau du tracé sélectionné (TrackPanel)
 
@@ -117,3 +118,44 @@ lui-même ne l'est pas). Motifs retenus pour la respecter (spec `regles-react-co
 ## Responsive
 
 Panneau latéral fixe ≥ 768 px, tiroir + bouton flottant en dessous.
+
+## Styles : Tailwind CSS v4 + shadcn/ui (migration en cours)
+
+Migration par lots, cf. `docs/specs/migration-ui.md` (lot 0 fait : base en place, aucun
+composant migré). Recette visuelle : `docs/recette/` (captures avant/après sur le build).
+
+- **Fichiers CSS** :
+  - `src/index.css` : entrée ; ordre des couches `theme, base, legacy, components, utilities` ;
+    tokens (`:root` + `[data-theme='dark']`), `@theme inline`, variante `dark:` sur
+    `data-theme` (pas de classe `.dark`) ;
+  - `src/styles/legacy.css` : l'ancienne feuille, dans la couche `legacy`, que chaque lot
+    vide ; elle commence par un bloc qui rétablit les styles du navigateur effacés par le
+    preflight, **sauf** pour les éléments shadcn (`[data-slot]`) ;
+  - `src/styles/leaflet.css` : surcharges de Leaflet, **hors couche** (sinon elles perdraient
+    contre `leaflet.css`, lui aussi hors couche).
+- **Tokens** : noms shadcn. **Attention : `--accent` = fond de sélection** (l'ancien
+  `--selected`), le vert principal est **`--primary`** ; **`--muted-foreground`** = texte
+  discret (l'ancien `--muted`), `--muted` = fond discret. `--input` = contour des champs
+  (contraste 3:1), distinct de `--border` (séparateurs). Contrastes vérifiés par
+  `docs/recette/contrastes.mjs`.
+- **Dossiers** : `src/components/ui/` = composants shadcn, ajoutés **uniquement par le CLI**
+  (`npx shadcn@latest add …` dans le conteneur ; retouches minimes et commentées) ;
+  `src/components/` = composants métier, qui composent les `ui/` sans redéfinir leur style de
+  base.
+- **`cn()`** (`src/lib/utils.ts`, réexporte le paquet `cn` de shadcn) pour combiner des classes
+  conditionnelles ou accepter un `className` ; pas de gabarits `${…}` à la main. Seule
+  exception d'interface dans `src/lib/` (fonctions pures).
+- **Extraire un composant** dès qu'une combinaison de classes revient 3 fois ou porte un sens
+  (ex. `MapControl` pour les contrôles flottants sur la carte).
+- **`@apply`** interdit dans les composants ; toléré dans les CSS dédiés (Leaflet) pour du DOM
+  qu'on ne contrôle pas.
+- **Pas de couleur en dur** dans une classe (`bg-[#…]`) : un token. Couleurs de **données** en
+  `style` en ligne. Valeurs arbitraires (`p-[7px]`) à éviter : si une valeur revient, en faire
+  un token.
+- **Mobile** : un seul point de rupture, `max-md:` (< 768 px) / `md:`.
+- **Ordre des classes** (pas de Prettier) : position, boîte, espacement, typographie, couleurs,
+  états, puis variantes `max-md:` et `dark:`. `dark:` seulement pour une vraie exception (les
+  tokens changent seuls avec `data-theme`).
+- **Dépendances** : `shadcn` (CLI + `shadcn/tailwind.css`) en devDependency ; `radix-ui`,
+  `lucide-react`, `cn`, `class-variance-authority`, `tw-animate-css` ; police Geist
+  (`@fontsource-variable/geist`) installée, **branchée au lot 1**.
