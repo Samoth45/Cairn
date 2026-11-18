@@ -1,6 +1,6 @@
 # Migration de l'interface vers Tailwind CSS v4 + shadcn/ui
 
-Statut : à faire (spec validée le 18/11/2026, décisions en §9 ; lots à lancer un par un)
+Statut : en cours (spec validée le 18/11/2026, décisions en §9) — lot 0 fait le 19/11/2026
 
 Source : `docs/BACKLOG-spec-migration-ui.md`. Cette spec ne migre rien : elle sert de feuille de
 route. Chaque lot du §5 est une tâche autonome, exécutable par Claude Code dans une session
@@ -638,6 +638,51 @@ déployable. **Démarrage de chaque lot** :
   - après, seules les couleurs corrigées diffèrent, avec un tableau « avant → après » des
     valeurs et des rapports de contraste ;
   - le build passe et `vercel build` passe.
+
+**Résultat du lot 0 (réalisé le 19/11/2026, branche `ui/lot-0-base`)**
+- **Captures** : base Tailwind + shadcn = **0 différence sur 20** par rapport à « avant ».
+  L'outil est reproductible : deux passages du même code donnent 0 différence.
+- **Compatibilité avec le preflight** : on n'a pas eu à lister les éléments un par un. Le haut
+  de `legacy.css` applique `all: revert` aux éléments que le preflight remet à zéro (titres,
+  paragraphes, listes, tableaux, champs, boutons…), avec une spécificité nulle (`:where`) et
+  **sauf** pour les composants shadcn (`:not([data-slot])`). Les styles du navigateur
+  reviennent ainsi pour l'ancienne interface, et toute règle de `legacy.css` l'emporte.
+- **Leaflet** : rien de cassé, captures identiques. La règle de sécurité
+  `max-width: none` sur `.leaflet-container img, svg` est en place.
+- **`shadcn init`** avec `-t vite -b radix -p nova` (preset Nova = Radix, Lucide, Geist).
+  Retouches :
+  - ses couleurs grises par défaut sont remplacées par nos tokens ;
+  - son bloc `.dark`, ses tokens graphiques et sidebar sont retirés ;
+  - son `button.tsx` est retiré (prévu au lot 1) ;
+  - la CLI `shadcn` est passée en **devDependency** : elle ne sert qu'à fournir
+    `shadcn/tailwind.css` au build, et elle entraîne environ 250 paquets.
+  - `cn()` vient du paquet officiel `cn` (dépôt shadcn-ui/cn), qui remplace `clsx` +
+    `tailwind-merge`.
+  - La police Geist est installée mais pas branchée (lot 1).
+- **Contrastes (Q11)** : 12 couples sous le seuil, tous corrigés (`docs/recette/contrastes.mjs`
+  : 0 sous le seuil).
+
+  | Token | Clair (avant → après) | Sombre (avant → après) |
+  | --- | --- | --- |
+  | `--muted-foreground` | #6b7378 → #666d72 (4,27 → 4,64:1 au pire) | inchangé (4,85:1) |
+  | `--faint` | #9aa0a6 → #6b6f73 (2,42 → 4,63:1) | #6f787e → #858c91 (3,49 → 4,61:1) |
+  | `--night-foreground` | #8a8f99 → #676b72 (2,80 → 4,64:1) | #6f767f → #7f858d (3,73 → 4,60:1) |
+  | `--input` (nouveau, contour des champs) | = `--border` #e2e0d8 → #8c8b86 (1,21 → 3,13:1) | #343c42 → #6a7074 (1,40 → 3,11:1) |
+
+  `--border` (séparateurs, décoratifs) ne change pas. Les 4 règles de champs de `legacy.css`
+  passent de `var(--border)` à `var(--input)`. Effet sur les captures : moins de 0,3 % des
+  pixels sur la plupart des vues (0,7 % au plus, Paramètres mobile).
+- **Mesures** :
+
+  | | Avant | Après le lot 0 |
+  | --- | --- | --- |
+  | JS de l'app (gzip) | 127,71 kB | 127,72 kB (budget Q12 : +0,01 kB sur 30) |
+  | CSS de l'app | 22,19 kB (5,34 gzip) | 40,25 kB (9,08 gzip) : preflight, tokens, utilitaires |
+  | CSS Leaflet | 15,09 kB | 15,09 kB |
+  | Lignes de CSS maison | 1 804 | 1 679 (`legacy.css`) + 82 (`leaflet.css`) + 189 (`index.css`) |
+
+- **`npm audit`** : l'alerte picomatch a disparu. Il reste 4 « moderate » sur `minimatch`,
+  tirées par la CLI `shadcn` (devDependency, rien dans le site), cf. `docs/deploiement.md`.
 
 ### Lot 1 — Police Geist, boutons, icônes et pastilles (M)
 - **Fichiers** : `package.json` (`@fontsource-variable/geist`), `src/main.tsx` (import de la

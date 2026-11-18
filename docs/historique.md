@@ -117,3 +117,10 @@ par fonctionnalité validée.
   `leaflet`). Build 5× plus rapide, JS −11 kB. CSS Leaflet dans un fichier à part, chargé avant
   le nôtre. Contrôlés : headless sur le build, hot reload sous Docker, `vercel build`, image
   nginx. esbuild n'est plus installé.
+- [x] **Migration UI — lot 0** (19/11/2026) — base Tailwind CSS v4 + shadcn/ui (Radix, preset
+  Nova) sans changement visible (captures 0 différence sur 20), puis contrastes corrigés
+  (`--muted-foreground`, `--faint`, `--night-foreground`, nouveau `--input` pour les contours
+  de champs). Ancienne feuille dans `src/styles/legacy.css` (couche `legacy`), tokens shadcn
+  dans `src/index.css`, surcharges Leaflet dans `src/styles/leaflet.css`. Outil de recette
+  visuelle `docs/recette/` (build, météo rejouée, horloge figée). Spec :
+  `docs/specs/migration-ui.md`.

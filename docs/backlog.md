@@ -35,6 +35,7 @@ dexie-react-hooks 4, TypeScript 6.0, Vite 8). Il ne reste que :
 ## Migration de l'interface vers Tailwind CSS v4 + shadcn/ui
 
 **Spec : `docs/specs/migration-ui.md`** (rédigée et tranchée le 18/11/2026).
+**Avancement : lot 0 fait le 19/11/2026** (base Tailwind + shadcn, contrastes) ; prochain : lot 1.
 
 - **Objectif** : remplacer `src/styles.css` (1 804 lignes) par Tailwind v4 et des composants
   shadcn/ui (Radix), sans changer le fonctionnement.
@@ -45,14 +46,3 @@ dexie-react-hooks 4, TypeScript 6.0, Vite 8). Il ne reste que :
   l'utilisateur.
 - À traiter **un lot à la fois, sur demande** : « implémente le lot N de
   docs/specs/migration-ui.md ».
-
-## npm audit : picomatch (GHSA-fc5q-39xc-vjpf)
-
-Signalé le 17/11/2026 : 11 vulnérabilités « high » qui viennent toutes de picomatch (ReDoS sur
-les extglobs, **toutes versions** touchées). Il est tiré par Vite (`tinyglobby`, `fdir`) et par
-`typescript-eslint`, seulement au développement et au build : il n'est pas livré dans le bundle.
-
-- Aucun correctif pour l'instant. **Ne pas** lancer `npm audit fix --force` : il rétrograderait
-  Vite en 6.2.7.
-- À faire quand une version corrigée de picomatch sort : mettre à jour (au besoin avec un
-  `overrides` dans `package.json`), vérifier `npm audit`, puis `/verifier`.
