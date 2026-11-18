@@ -1,6 +1,6 @@
 # Migration de l'interface vers Tailwind CSS v4 + shadcn/ui
 
-Statut : en cours (spec validée le 18/11/2026, décisions en §9) — lot 0 fait le 19/11/2026
+Statut : en cours (spec validée le 18/11/2026, décisions en §9) — lots 0 et 1 faits le 19/11/2026
 
 Source : `docs/BACKLOG-spec-migration-ui.md`. Cette spec ne migre rien : elle sert de feuille de
 route. Chaque lot du §5 est une tâche autonome, exécutable par Claude Code dans une session
@@ -698,6 +698,45 @@ déployable. **Démarrage de chaque lot** :
      `aria-label` et les `title` actuels.
 - **CSS supprimé** : 496-509, 803-810, 901-948, 1196-1199, 1444-1457.
 - **Composants shadcn** : `button`, `badge`.
+
+**Résultat du lot 1 (réalisé le 19/11/2026, branche `ui/lot-1-police-boutons`)**
+- **Police Geist** : `@font-face` maison dans `src/index.css`, qui ne garde que le sous-ensemble
+  latin du paquet (29,4 kB ; italique 31 kB, chargée seulement si affichée). Appliquée aussi
+  aux infobulles et contrôles de Leaflet (avant : Helvetica). Captures : pas de nouvelle
+  troncature ; les jours de la vue Météo mobile tiennent même sur une ligne. L'espace fine des
+  milliers (U+202F) est absente de Geist et vient de la police de repli, comme avant.
+- **Boutons** : variantes shadcn retouchées (repères « Cairn » dans `ui/button.tsx`) :
+  `default` vert et gras avec `--primary-hover`, `outline` = ancien `.btn`, `ghost` = ancien
+  `.icon-btn`, nouvelle taille `inline` pour les boutons-liens, `lg` à 40 px. Composant
+  `IconButton` (28 px, 32 px sur mobile). Pastilles : variantes `muted` (compteur) et
+  `warning` (inversion) ; `--badge-bg` / `--badge-border` fusionnés dans `--warning-*` (Q2).
+- **Icônes Lucide** : `Moon`/`Sun`, `Settings`, `X`, `Pencil`, `Download`, `Trash2`,
+  `ChevronLeft`/`ChevronRight`, `Thermometer` (tableau météo), `Mountain` (bouton « Profil »).
+  Gardés en texte : le ▲ du sommet (même symbole que la carte et le profil), les emojis météo
+  et les onglets de vue (lot 6).
+- **Hors des fichiers prévus** : les boutons de `Toasts`, `ErrorBoundary`, `SummaryView` et
+  `WeatherView` sont migrés aussi, pour pouvoir supprimer `.btn` et `.icon-btn`. Règle ESLint
+  `react-refresh/only-export-components` coupée pour `src/components/ui/`.
+- **Écarts visibles (Q2)** : boutons icônes un peu plus larges (le nom des tracés se coupe une
+  lettre plus tôt) ; boutons de la fenêtre Paramètres tous à 32 px (« Enregistrer » faisait
+  40 px) ; « Voir les 3 points » en 14 px (12,8 avant) ; contour de focus visible au clavier.
+- **Correction pendant la recette** : les boutons shadcn ont une hauteur fixe et ne passent pas à
+  la ligne ; « Télécharger le GPX (altitudes corrigées) » débordait sur PC. Ce bouton a une
+  hauteur libre et autorise le retour à la ligne.
+- **Mesures** :
+
+  | | Après le lot 0 | Après le lot 1 |
+  | --- | --- | --- |
+  | JS de l'app (gzip) | 127,72 kB | 143,62 kB (budget Q12 : **+15,9 kB sur 30**) |
+  | CSS de l'app | 40,25 kB (9,08 gzip) | 50,75 kB (10,71 gzip) |
+  | Police | — | 29,4 kB (+ 31 kB d'italique si affichée) |
+  | Lignes de CSS maison | 1 679 + 82 + 189 | 1 542 (`legacy.css`) + 88 + 207 |
+
+  La hausse du JS vient surtout du paquet `cn` (environ 10,8 kB gzip, installé au lot 0 mais
+  utilisé pour la première fois), puis de Lucide, `Slot` de Radix et cva. Alternatives
+  mesurées : `clsx` + `tailwind-merge` 8,5 kB, `cn build` (tables compilées par un plugin
+  Vite) 7,8 kB ; gain trop faible pour en changer. **À trancher avant le lot 2** : les
+  composants restants (Dialog, Select, Tabs…) devraient ajouter 20 à 25 kB, au-delà du budget.
 
 ### Lot 2 — Fenêtre Paramètres et champs (M)
 - **Fichiers** : `SettingsDialog.tsx`.
