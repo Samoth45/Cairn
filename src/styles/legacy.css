@@ -16,7 +16,7 @@
 }
 
 :root {
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: --theme(--font-sans); /* Geist, cf. src/index.css */
   color: var(--foreground);
   background: var(--background);
   -webkit-font-smoothing: antialiased;
