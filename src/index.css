@@ -192,6 +192,34 @@
   --font-heading: var(--font-sans);
 }
 
+/* Échelle des superpositions (spec §3.1) : toujours au-dessus des contrôles de Leaflet
+   (z-index 800 à 1000). Le z-50 par défaut de shadcn passerait sous la carte. */
+@utility z-map-control {
+  z-index: 1000;
+}
+@utility z-map-tabs {
+  z-index: 1001;
+}
+@utility z-backdrop {
+  z-index: 1050;
+}
+@utility z-sidebar {
+  z-index: 1100;
+}
+@utility z-toast {
+  z-index: 2500;
+}
+@utility z-dropzone {
+  z-index: 3000;
+}
+@utility z-modal {
+  z-index: 4000;
+}
+/* Menus et popovers éventuels : au-dessus de la carte et de la fenêtre Paramètres. */
+@utility z-popover {
+  z-index: 4100;
+}
+
 /* Base des composants shadcn/ui. Sans effet sur l'ancienne interface : la couche legacy,
    plus loin dans l'ordre, fixe elle-même bordures, couleurs et police. */
 @layer base {
