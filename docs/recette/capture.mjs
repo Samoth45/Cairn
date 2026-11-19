@@ -197,7 +197,7 @@ async function scenario(browser, vpName, theme) {
   await sleep(300);
   await openDrawer(page, vp);
   await page.click('button[aria-label="Paramètres"]');
-  await page.waitForSelector('.modal', { timeout: 5000 });
+  await page.waitForSelector('.modal, [role="dialog"]', { timeout: 5000 }); // .modal avant le lot 2
   await sleep(400);
   await shot(page, `${tag}-5-parametres`);
 
