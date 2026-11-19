@@ -827,70 +827,6 @@ button {
   display: none;
 }
 
-/* ---------- Glisser-déposer ---------- */
-.dropzone {
-  position: fixed;
-  inset: 0;
-  z-index: 3000;
-  background: rgba(47, 111, 79, 0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-}
-
-.dropzone-box {
-  padding: 32px 48px;
-  border: 3px dashed var(--primary);
-  border-radius: 16px;
-  background: var(--overlay-glass);
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: var(--primary);
-}
-
-/* ---------- Notifications ---------- */
-.toasts {
-  position: fixed;
-  right: 12px;
-  top: 64px;
-  z-index: 2500;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-width: min(420px, calc(100vw - 24px));
-}
-
-.toast {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  background: var(--card);
-  border-left: 4px solid var(--primary);
-  border-radius: 8px;
-  padding: 10px 10px 10px 14px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
-  font-size: 0.9rem;
-}
-
-.toast.error {
-  border-left-color: var(--destructive);
-}
-
-.toast-body {
-  flex: 1;
-  min-width: 0;
-}
-
-.toast ul {
-  margin: 6px 0 0;
-  padding-left: 18px;
-  color: var(--muted-foreground);
-  max-height: 30vh;
-  overflow-y: auto;
-  overflow-wrap: anywhere;
-}
-
 /* ---------- États globaux ---------- */
 .loading,
 .fatal {
@@ -942,13 +878,6 @@ button {
 
   .track-item {
     padding: 8px;
-  }
-
-  .toasts {
-    left: 12px;
-    right: 12px;
-    top: 60px;
-    max-width: none;
   }
 }
 
