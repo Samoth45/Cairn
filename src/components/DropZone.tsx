@@ -52,8 +52,10 @@ export function DropZone({ onFiles }: { onFiles: (files: File[]) => void }) {
 
   if (!active) return null;
   return (
-    <div className="dropzone" aria-hidden="true">
-      <div className="dropzone-box">Déposez vos fichiers GPX ici</div>
+    <div className="pointer-events-none fixed inset-0 z-dropzone flex items-center justify-center bg-primary/25" aria-hidden="true">
+      <div className="rounded-2xl border-3 border-dashed border-primary bg-overlay-glass px-12 py-8 text-lg font-semibold text-primary">
+        Déposez vos fichiers GPX ici
+      </div>
     </div>
   );
 }

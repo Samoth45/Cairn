@@ -121,9 +121,9 @@ Panneau latéral fixe ≥ 768 px, tiroir + bouton flottant en dessous.
 
 ## Styles : Tailwind CSS v4 + shadcn/ui (migration en cours)
 
-Migration par lots, cf. `docs/specs/migration-ui.md` (lots 0 à 2 faits : base, police
-Geist, boutons, pastilles, icônes, fenêtre Paramètres). Recette visuelle : `docs/recette/` (captures avant/après
-sur le build).
+Migration par lots, cf. `docs/specs/migration-ui.md` (lots 0 à 3 faits : base, police
+Geist, boutons, pastilles, icônes, fenêtre Paramètres, notifications, zone de dépôt).
+Recette visuelle : `docs/recette/` (captures avant/après sur le build).
 
 - **Fichiers CSS** :
   - `src/index.css` : entrée ; ordre des couches `theme, base, legacy, components, utilities` ;

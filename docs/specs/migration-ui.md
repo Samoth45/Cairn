@@ -1,6 +1,6 @@
 # Migration de l'interface vers Tailwind CSS v4 + shadcn/ui
 
-Statut : en cours (spec validée le 18/11/2026, décisions en §9) — lots 0 à 2 faits le 19/11/2026
+Statut : en cours (spec validée le 18/11/2026, décisions en §9) — lots 0 à 3 faits le 19/11/2026
 
 Source : `docs/BACKLOG-spec-migration-ui.md`. Cette spec ne migre rien : elle sert de feuille de
 route. Chaque lot du §5 est une tâche autonome, exécutable par Claude Code dans une session
@@ -793,6 +793,27 @@ déployable. **Démarrage de chaque lot** :
   - échelle `z-*` (§3.1).
 - **CSS supprimé** : 971-1033, 1096-1101.
 - **Composants shadcn** : aucun.
+
+**Résultat du lot 3 (réalisé le 19/11/2026, branche `ui/lot-3-superpositions`)**
+- **Notifications** (`Toasts.tsx`) : même fonctionnement (succès / erreur, liste d'erreurs
+  défilante au-delà de 30 % de l'écran, fermeture, toute la largeur sur mobile), en
+  utilitaires Tailwind : `z-toast`, `shadow-overlay`, bordure gauche `border-primary` ou
+  `border-destructive`. Pas de Sonner (Q6).
+- **Zone de dépôt** (`DropZone.tsx`) : `z-dropzone`, voile `bg-primary/25`, cadre pointillé.
+- **Écarts visibles (Q2)** : texte des notifications 14 px (14,4 avant), d'où une
+  notification un peu plus étroite ; titre de la zone de dépôt 18 px (19,2 avant), arrondi
+  18 px (16 avant) ; en sombre, le voile prend le vert du thème sombre (avant : le vert du
+  thème clair, codé en dur).
+- **Recette** : 6 captures sur 20 diffèrent (notification « 2 tracés importés », 0,08 à
+  0,17 % des pixels). Sonde headless sur le build : 25 fichiers invalides → liste de 25
+  erreurs qui défile, bordure rouge, fermeture ; glisser simulé → voile au-dessus de la carte.
+- **Mesures** :
+
+  | | Après le lot 2 | Après le lot 3 |
+  | --- | --- | --- |
+  | JS de l'app (gzip) | 162,87 kB | 163,14 kB = 144,20 + 18,94 (`radix`) ; budget : **+35,4 kB sur 50** |
+  | CSS de l'app | 60,07 kB (12,33 gzip) | 60,45 kB (12,38 gzip) |
+  | Lignes de `legacy.css` | 1 448 | 1 377 |
 
 ### Lot 4 — Barre latérale, liste des tracés, tiroir et problèmes mobiles (L)
 - **Prérequis (Q7)** : le propriétaire a ajouté au backlog la liste des problèmes de

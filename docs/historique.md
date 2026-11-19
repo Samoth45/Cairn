@@ -136,3 +136,6 @@ par fonctionnalité validée.
   le même jour). Focus sur la fenêtre à l'ouverture (pas de clavier sur mobile) et rendu au
   bouton ⚙ à la fermeture. Échelle `z-*` en utilitaires, chunk `radix` à part. JS +19,3 kB
   gzip (total +35,2 sur 50). Spec : `docs/specs/migration-ui.md`.
+- [x] **Migration UI — lot 3** (19/11/2026) — notifications (maison, pas de Sonner) et zone de
+  dépôt en Tailwind, même fonctionnement ; échelle `z-toast` / `z-dropzone`. Voile de dépôt
+  au vert du thème sombre en mode sombre. JS +0,3 kB gzip. Spec : `docs/specs/migration-ui.md`.
