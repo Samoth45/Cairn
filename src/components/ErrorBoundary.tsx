@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { Button } from '@/components/ui/button';
 
 interface State {
   error: Error | null;
@@ -22,9 +23,9 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
           <h1>Cairn a rencontré un problème</h1>
           <p>Vos tracés sont conservés. Rechargez la page pour continuer.</p>
           <pre>{this.state.error.message}</pre>
-          <button type="button" className="btn primary" onClick={() => window.location.reload()}>
+          <Button size="lg" onClick={() => window.location.reload()}>
             Recharger
-          </button>
+          </Button>
         </div>
       );
     }

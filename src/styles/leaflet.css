@@ -10,6 +10,12 @@
   max-height: none;
 }
 
+/* Infobulles et contrôles de la carte dans la police de l'app (Geist) plutôt que la
+   Helvetica de Leaflet ; la taille (12 px) ne change pas. */
+.leaflet-container {
+  font-family: --theme(--font-sans);
+}
+
 /* ---------- Infobulle des points météo ---------- */
 .leaflet-tooltip.wx-tooltip-wrap {
   padding: 6px 9px;

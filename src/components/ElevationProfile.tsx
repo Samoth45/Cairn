@@ -5,6 +5,8 @@ import { niceStep, ticks } from '../lib/ticks';
 import { formatKm, formatMeters, formatNumber, formatSlope } from '../lib/format';
 import { eleAt, SLOPE_CLASSES, slopeAt, slopeClassIndex, slopeRuns } from '../lib/slope';
 import { setHoverPoint } from '../hooks/useHoverPoint';
+import { X } from 'lucide-react';
+import { IconButton } from './IconButton';
 
 const M = { top: 12, right: 14, bottom: 22, left: 48 };
 
@@ -134,9 +136,9 @@ export function ElevationProfile({ name, color, profile, placeholder, onClose }:
             </strong>
           </span>
         )}
-        <button type="button" className="icon-btn" onClick={onClose} aria-label="Masquer le profil" title="Masquer le profil">
-          ✕
-        </button>
+        <IconButton onClick={onClose} aria-label="Masquer le profil" title="Masquer le profil">
+          <X />
+        </IconButton>
       </header>
       <div className="profile-chart" ref={boxRef}>
         {placeholder || !chart ? (

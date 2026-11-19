@@ -121,8 +121,9 @@ Panneau latéral fixe ≥ 768 px, tiroir + bouton flottant en dessous.
 
 ## Styles : Tailwind CSS v4 + shadcn/ui (migration en cours)
 
-Migration par lots, cf. `docs/specs/migration-ui.md` (lot 0 fait : base en place, aucun
-composant migré). Recette visuelle : `docs/recette/` (captures avant/après sur le build).
+Migration par lots, cf. `docs/specs/migration-ui.md` (lots 0 et 1 faits : base, police
+Geist, boutons, pastilles, icônes). Recette visuelle : `docs/recette/` (captures avant/après
+sur le build).
 
 - **Fichiers CSS** :
   - `src/index.css` : entrée ; ordre des couches `theme, base, legacy, components, utilities` ;
@@ -158,4 +159,23 @@ composant migré). Recette visuelle : `docs/recette/` (captures avant/après sur
   tokens changent seuls avec `data-theme`).
 - **Dépendances** : `shadcn` (CLI + `shadcn/tailwind.css`) en devDependency ; `radix-ui`,
   `lucide-react`, `cn`, `class-variance-authority`, `tw-animate-css` ; police Geist
-  (`@fontsource-variable/geist`) installée, **branchée au lot 1**.
+  (`@fontsource-variable/geist`).
+- **Police Geist** : `@font-face` dans `src/index.css` (sous-ensemble **latin** seulement, pris
+  dans le paquet), `--font-sans` ; `legacy.css` et `leaflet.css` (infobulles de la carte) la
+  reprennent par `--theme(--font-sans)`. L'espace fine des milliers (U+202F) n'est pas dans
+  Geist : elle vient de la police de repli, c'est normal.
+- **Boutons** (`ui/button.tsx`, retouché, repères « Cairn ») : `default` = bouton principal
+  (vert, gras, survol `--primary-hover`) ; `outline` = bouton neutre (ancien `.btn`) ; `ghost`
+  = bouton icône discret ; `link` + taille **`inline`** = bouton-lien dans le texte (taille et
+  graisse du texte autour, aligné à gauche) ; taille `lg` = 40 px (« Importer des GPX »). Les
+  boutons ont une **hauteur fixe et pas de retour à la ligne** : pour un libellé long, ajouter
+  `h-auto min-h-8 py-1.5 whitespace-normal` (ex. « Télécharger le GPX (altitudes corrigées) »).
+- **`IconButton`** (`src/components/IconButton.tsx`) : bouton icône (ghost, 28 px, 32 px sur
+  mobile) ; toujours un `aria-label`, l'icône Lucide en enfant (taille 16 px par défaut, déjà
+  `aria-hidden`). Suppression : `className="hover:text-destructive"`.
+- **Pastilles** (`ui/badge.tsx`) : variantes ajoutées `muted` (compteur de tracés) et
+  `warning` (« Inversion probable », tokens `--warning-*`).
+- **Icônes** : Lucide, importées une par une (`import { X } from 'lucide-react'`). Les emojis
+  et symboles de **données** restent du texte (météo, ▲ du sommet, onglets de vue jusqu'au lot 6).
+- **Lint** : la règle `react-refresh/only-export-components` est coupée pour
+  `src/components/ui/` (les fichiers shadcn exportent aussi leurs variantes cva).

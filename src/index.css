@@ -11,6 +11,28 @@
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 
+/* Police Geist (licence OFL), hébergée avec le site : fichiers variables du paquet
+   @fontsource-variable/geist, sous-ensemble latin seulement (interface en français ; œ, €,
+   guillemets et espaces fines compris). Repli sur la police système pendant le chargement. */
+@font-face {
+  font-family: 'Geist Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('@fontsource-variable/geist/files/geist-latin-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304,
+    U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Geist Variable';
+  font-style: italic;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('@fontsource-variable/geist/files/geist-latin-wght-italic.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304,
+    U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 /* Mode sombre piloté par <html data-theme="dark"> (script d'index.html + useTheme), pas par
    la classe .dark par défaut de shadcn. */
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
@@ -46,8 +68,6 @@
   --warning: #fff8e6;
   --warning-border: #f3e0b0;
   --warning-foreground: #8a5300;
-  --badge-bg: #fff1d6;
-  --badge-border: #f0c674;
   --info: #e8f1fb;
   --info-border: #2f6fb3;
   --info-foreground: #1f4f8a;
@@ -92,8 +112,6 @@
   --warning: #362f1e;
   --warning-border: #5e4e28;
   --warning-foreground: #f0c674;
-  --badge-bg: #3a2d12;
-  --badge-border: #7a5a1c;
   --info: #1b2c3f;
   --info-border: #5b9bdc;
   --info-foreground: #9cc4f0;
@@ -169,8 +187,8 @@
   --shadow-overlay: 0 4px 16px rgb(0 0 0 / 0.18);
   --shadow-modal: 0 10px 40px rgb(0 0 0 / 0.3);
 
-  /* Police système jusqu'au lot 1, qui passe à Geist (@fontsource-variable/geist). */
-  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  /* Geist (cf. @font-face plus haut), puis la pile système d'avant en repli. */
+  --font-sans: 'Geist Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-heading: var(--font-sans);
 }
 

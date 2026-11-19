@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { ChevronLeft, ChevronRight, Thermometer } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { IconButton } from './IconButton';
 import type { WeatherModel } from '../types';
 import type { WeatherState } from '../hooks/useWeather';
 import { MODEL_LABELS } from '../services/weather';
@@ -71,17 +74,18 @@ export function WeatherPanel({
             </>
           )}
         </p>
-        <button type="button" className="btn small" onClick={refresh} disabled={loading || (!forecast && !error)}>
+        <Button variant="outline" size="sm" onClick={refresh} disabled={loading || (!forecast && !error)}>
           {loading ? 'Chargement…' : 'Actualiser'}
-        </button>
+        </Button>
       </header>
 
       {sun && <SunBlock sun={sun} durationHours={durationHours} />}
 
       {onOpenTable && !waitingForElevation && (
-        <button type="button" className="btn weather-open-table" onClick={onOpenTable}>
-          🌡 Tableau météo par altitude
-        </button>
+        <Button variant="outline" className="mb-2 w-full font-semibold" onClick={onOpenTable}>
+          <Thermometer />
+          Tableau météo par altitude
+        </Button>
       )}
 
       {waitingForElevation ? (
@@ -89,35 +93,29 @@ export function WeatherPanel({
       ) : error ? (
         <p className="weather-error">
           Prévision indisponible : {error}.{' '}
-          <button type="button" className="link-btn" onClick={refresh}>
+          <Button variant="link" size="inline" onClick={refresh}>
             Réessayer
-          </button>
+          </Button>
         </p>
       ) : !data || index === null ? (
         loading && <p className="weather-info spinner-text">Récupération de la prévision…</p>
       ) : (
         <>
           <div className="weather-nav">
-            <button type="button" className="icon-btn" onClick={() => go(index - 1)} disabled={index <= 0} aria-label="Heure précédente">
-              ‹
-            </button>
+            <IconButton onClick={() => go(index - 1)} disabled={index <= 0} aria-label="Heure précédente">
+              <ChevronLeft />
+            </IconButton>
             <span className={`weather-hour${night ? ' night' : ''}`}>
               {formatForecastHour(data.times[index])}
               {night && <span className="night-tag"> · 🌙 nuit</span>}
             </span>
-            <button
-              type="button"
-              className="icon-btn"
-              onClick={() => go(index + 1)}
-              disabled={index >= data.times.length - 1}
-              aria-label="Heure suivante"
-            >
-              ›
-            </button>
+            <IconButton onClick={() => go(index + 1)} disabled={index >= data.times.length - 1} aria-label="Heure suivante">
+              <ChevronRight />
+            </IconButton>
             {index !== nowIndex && (
-              <button type="button" className="link-btn" onClick={() => onSelectHour(null)}>
+              <Button variant="link" size="inline" onClick={() => onSelectHour(null)}>
                 maintenant
-              </button>
+              </Button>
             )}
           </div>
 
@@ -178,9 +176,15 @@ export function WeatherPanel({
             </tbody>
           </table>
           {hasIntermediate && (
-            <button type="button" className="link-btn weather-more" onClick={() => setShowAll((v) => !v)} aria-expanded={showAll}>
+            <Button
+              variant="link"
+              size="inline"
+              className="mt-1.5 flex w-full justify-center text-sm"
+              onClick={() => setShowAll((v) => !v)}
+              aria-expanded={showAll}
+            >
               {showAll ? 'Points clés seulement' : `Voir les ${forecast.points.length} points`}
-            </button>
+            </Button>
           )}
 
           {model !== 'best_match' && !data.primary[index] && (

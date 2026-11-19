@@ -16,4 +16,10 @@ export default defineConfig(
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     },
   },
+  {
+    // Composants shadcn/ui (ajoutés par le CLI) : ils exportent aussi leurs variantes cva
+    // (buttonVariants…), sans effet sur le rechargement à chaud en pratique.
+    files: ['src/components/ui/**/*.tsx'],
+    rules: { 'react-refresh/only-export-components': 'off' },
+  },
 );

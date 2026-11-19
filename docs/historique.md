@@ -124,3 +124,9 @@ par fonctionnalité validée.
   dans `src/index.css`, surcharges Leaflet dans `src/styles/leaflet.css`. Outil de recette
   visuelle `docs/recette/` (build, météo rejouée, horloge figée). Spec :
   `docs/specs/migration-ui.md`.
+- [x] **Migration UI — lot 1** (19/11/2026) — police Geist (sous-ensemble latin, hébergée avec
+  le site, aussi dans les infobulles de la carte) ; boutons et pastilles shadcn (`Button`,
+  `Badge`, nouveau `IconButton`) à la place de `.btn`, `.icon-btn`, `.link-btn`, `.badge`,
+  `.count` ; icônes Lucide à la place des caractères ☾ ☀ ⚙ ✕ ✎ ⬇ 🗑 ‹ › 🌡 ⛰. JS +15,9 kB gzip
+  (paquet `cn` surtout). Correction en recette : libellé long du bouton de téléchargement qui
+  débordait. Spec : `docs/specs/migration-ui.md`.

@@ -2,6 +2,10 @@ import { useRef, type ReactNode } from 'react';
 import type { Track } from '../types';
 import { TrackItem } from './TrackItem';
 import { CairnLogo } from './CairnLogo';
+import { IconButton } from './IconButton';
+import { Moon, Settings, Sun, X } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 interface Props {
   open: boolean;
@@ -31,27 +35,25 @@ export function Sidebar(p: Props) {
       <header className="sidebar-header">
         <CairnLogo />
         <h1>Cairn</h1>
-        <button
-          type="button"
-          className="icon-btn"
+        <IconButton
           onClick={p.onToggleTheme}
           aria-label={p.theme === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre'}
           title={p.theme === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre'}
         >
-          {p.theme === 'dark' ? '☀' : '☾'}
-        </button>
-        <button type="button" className="icon-btn" onClick={p.onOpenSettings} aria-label="Paramètres" title="Paramètres">
-          ⚙
-        </button>
-        <button type="button" className="icon-btn close-panel" onClick={p.onClose} aria-label="Fermer le panneau">
-          ✕
-        </button>
+          {p.theme === 'dark' ? <Sun /> : <Moon />}
+        </IconButton>
+        <IconButton onClick={p.onOpenSettings} aria-label="Paramètres" title="Paramètres">
+          <Settings />
+        </IconButton>
+        <IconButton className="md:hidden" onClick={p.onClose} aria-label="Fermer le panneau">
+          <X />
+        </IconButton>
       </header>
 
       <div className="sidebar-actions">
-        <button type="button" className="btn primary" onClick={() => gpxInput.current?.click()}>
+        <Button size="lg" className="w-full" onClick={() => gpxInput.current?.click()}>
           Importer des GPX
-        </button>
+        </Button>
         <input
           ref={gpxInput}
           type="file"
@@ -71,7 +73,7 @@ export function Sidebar(p: Props) {
 
       <div className="track-list-header">
         <span>Tracés</span>
-        <span className="count">{p.tracks.length}</span>
+        <Badge variant="muted">{p.tracks.length}</Badge>
       </div>
 
       {p.tracks.length === 0 ? (
