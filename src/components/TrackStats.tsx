@@ -1,6 +1,8 @@
 import { Download } from 'lucide-react';
 import type { DinSpeeds, Track } from '../types';
 import { Button } from '@/components/ui/button';
+import type { ReactNode } from 'react';
+import { LABEL_CAPS } from './classes';
 import type { TrackStats as Stats } from '../lib/stats';
 import type { ElevationStatus } from '../hooks/useElevationFetcher';
 import { dinDurationHours } from '../lib/din';
@@ -21,44 +23,26 @@ export function TrackStats({ track, stats, din, elevationStatus, onRetryElevatio
   const duration = hasEle ? dinDurationHours(stats.distanceM / 1000, stats.ascentM ?? 0, stats.descentM ?? 0, din) : NaN;
 
   return (
-    <section className="stats" aria-label="Statistiques du tracé sélectionné">
-      <dl className="stats-grid">
-        <div>
-          <dt>Distance</dt>
-          <dd>{formatKm(stats.distanceM)}</dd>
-        </div>
-        <div>
-          <dt>Durée estimée</dt>
-          <dd title="Méthode DIN 33466 (vitesses réglables dans les paramètres)">{formatDuration(duration)}</dd>
-        </div>
-        <div>
-          <dt>Dénivelé +</dt>
-          <dd>{formatMeters(stats.ascentM)}</dd>
-        </div>
-        <div>
-          <dt>Dénivelé −</dt>
-          <dd>{formatMeters(stats.descentM)}</dd>
-        </div>
-        <div>
-          <dt>Altitude min</dt>
-          <dd>{formatMeters(stats.minEle)}</dd>
-        </div>
-        <div>
-          <dt>Altitude max</dt>
-          <dd>{formatMeters(stats.maxEle)}</dd>
-        </div>
-        <div>
-          <dt title="Pente maximale sur 100 m">Pente max ↗</dt>
-          <dd>{formatSlope(stats.maxSlopeUpPct, false)}</dd>
-        </div>
-        <div>
-          <dt title="Pente maximale sur 100 m">Pente max ↘</dt>
-          <dd>{formatSlope(stats.maxSlopeDownPct, false)}</dd>
-        </div>
+    <section className="leading-tight" aria-label="Statistiques du tracé sélectionné">
+      <dl className="m-0 grid grid-cols-2 gap-x-3 gap-y-1.5 max-md:grid-cols-3">
+        <Stat label="Distance">{formatKm(stats.distanceM)}</Stat>
+        <Stat label="Durée estimée" valueTitle="Méthode DIN 33466 (vitesses réglables dans les paramètres)">
+          {formatDuration(duration)}
+        </Stat>
+        <Stat label="Dénivelé +">{formatMeters(stats.ascentM)}</Stat>
+        <Stat label="Dénivelé −">{formatMeters(stats.descentM)}</Stat>
+        <Stat label="Altitude min">{formatMeters(stats.minEle)}</Stat>
+        <Stat label="Altitude max">{formatMeters(stats.maxEle)}</Stat>
+        <Stat label="Pente max ↗" labelTitle="Pente maximale sur 100 m">
+          {formatSlope(stats.maxSlopeUpPct, false)}
+        </Stat>
+        <Stat label="Pente max ↘" labelTitle="Pente maximale sur 100 m">
+          {formatSlope(stats.maxSlopeDownPct, false)}
+        </Stat>
       </dl>
 
-      <div className="stats-summit">
-        <span className="stats-label">Point culminant</span>
+      <div className="mt-2 flex flex-col gap-0.5 text-sm/tight">
+        <span className={LABEL_CAPS}>Point culminant</span>
         {stats.summit ? (
           <Button variant="link" size="inline" onClick={onShowSummit} title="Centrer la carte sur le point culminant">
             ▲ {formatMeters(stats.summit.ele)} · {formatCoords(stats.summit.lat, stats.summit.lon)}
@@ -68,7 +52,7 @@ export function TrackStats({ track, stats, din, elevationStatus, onRetryElevatio
         )}
       </div>
 
-      <p className="stats-source">
+      <p className="mt-2 mb-0 text-xs text-muted-foreground">
         {elevationStatus === 'loading' ? (
           <span className="spinner-text">Récupération des altitudes…</span>
         ) : elevationStatus === 'error' ? (
@@ -91,5 +75,19 @@ export function TrackStats({ track, stats, din, elevationStatus, onRetryElevatio
         Télécharger le GPX{track.elevationSource === 'dem' ? ' (altitudes corrigées)' : ''}
       </Button>
     </section>
+  );
+}
+
+/** Une statistique : libellé en capitales, valeur en gras (chiffres alignés). */
+function Stat({ label, labelTitle, valueTitle, children }: { label: string; labelTitle?: string; valueTitle?: string; children: ReactNode }) {
+  return (
+    <div>
+      <dt className={LABEL_CAPS} title={labelTitle}>
+        {label}
+      </dt>
+      <dd className="m-0 text-base/tight font-semibold tabular-nums" title={valueTitle}>
+        {children}
+      </dd>
+    </div>
   );
 }
