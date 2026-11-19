@@ -121,8 +121,9 @@ Panneau latéral fixe ≥ 768 px, tiroir + bouton flottant en dessous.
 
 ## Styles : Tailwind CSS v4 + shadcn/ui (migration en cours)
 
-Migration par lots, cf. `docs/specs/migration-ui.md` (lots 0 à 3 faits : base, police
-Geist, boutons, pastilles, icônes, fenêtre Paramètres, notifications, zone de dépôt).
+Migration par lots, cf. `docs/specs/migration-ui.md` (lots 0 à 3 et 5 faits : base,
+police Geist, boutons, pastilles, icônes, fenêtre Paramètres, notifications, zone de dépôt,
+panneau du tracé).
 Recette visuelle : `docs/recette/` (captures avant/après sur le build).
 
 - **Fichiers CSS** :
@@ -196,5 +197,18 @@ Recette visuelle : `docs/recette/` (captures avant/après sur le build).
 - **`fieldset` / `legend` / `p` hors shadcn** : le bloc de compatibilité de `legacy.css` leur
   rend les styles du navigateur (bordure `groove`, marges) ; les utilitaires gagnent, mais
   préciser `border-solid`, `m-0`, `min-w-0`.
+- **Hauteur de ligne** : `text-sm`, `text-base`… imposent une hauteur de ligne (1,43 ; 1,5)
+  plus grande que le `normal` de l'ancienne feuille. Dans les blocs denses (stats, tableaux),
+  la resserrer : `text-sm/tight`, `text-base/tight`, `leading-tight`.
+- **Bordures d'éléments hors shadcn** (`h2`, `p`, `fieldset`…) : le bloc de compatibilité leur
+  rend la bordure `medium` du navigateur ; pour un liseré d'un côté, `border-0 border-l-4
+  border-solid`.
+- **Classes partagées** : `src/components/classes.ts` (`LABEL_CAPS` = petit libellé en
+  capitales, `SUB_LINE` = seconde ligne discrète). Y ajouter toute combinaison qui revient.
+- **Onglets** (`ui/tabs.tsx`) : variante `pill` (fond carte, contour, onglet actif vert),
+  utilisée par le panneau du tracé. Contenus gardés montés : `forceMount` +
+  `data-[state=inactive]:hidden`. **Alert** : variante `warning` ; `role="note"` pour une
+  simple information (sinon annoncée à chaque rendu). **Table** : sans survol si les lignes ne
+  sont pas cliquables (`hover:bg-transparent`).
 - **Chunk `radix`** (`vite.config.ts`) : primitives Radix et leurs dépendances (focus, blocage
   du défilement) à part, comme Leaflet. Y ajouter toute nouvelle dépendance de ce type.

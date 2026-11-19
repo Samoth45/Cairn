@@ -35,11 +35,12 @@ dexie-react-hooks 4, TypeScript 6.0, Vite 8). Il ne reste que :
 ## Migration de l'interface vers Tailwind CSS v4 + shadcn/ui
 
 **Spec : `docs/specs/migration-ui.md`** (rédigée et tranchée le 18/11/2026).
-**Avancement : lots 0 à 3 faits le 19/11/2026** (base Tailwind + shadcn, contrastes ; police
-Geist, boutons, pastilles, icônes Lucide ; fenêtre Paramètres ; notifications et zone de
-dépôt) ; prochain : lot 4 (attend la liste des problèmes mobiles ci-dessous), sinon les lots 5
-à 8 peuvent passer avant. Budget JS : 35,4 kB gzip consommés sur **50** (relevé de 30 à 50 le 19/11/2026 ; Select de Radix remplacé
-par le `<select>` natif au lot 2, cf. spec Q12, Q5).
+**Avancement : lots 0 à 3 et 5 faits le 19/11/2026** (base Tailwind + shadcn, contrastes ;
+police Geist, boutons, pastilles, icônes Lucide ; fenêtre Paramètres ; notifications et zone
+de dépôt ; panneau du tracé) ; reste : lot 4 (attend la liste des problèmes mobiles
+ci-dessous), lots 6 à 8, puis 9. Budget JS : 37,4 kB gzip consommés sur **50** (relevé de 30
+à 50 le 19/11/2026 ; Select de Radix remplacé par le `<select>` natif au lot 2, cf. spec Q12,
+Q5).
 
 - **Objectif** : remplacer `src/styles.css` (1 804 lignes) par Tailwind v4 et des composants
   shadcn/ui (Radix), sans changer le fonctionnement.
