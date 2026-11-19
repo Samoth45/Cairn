@@ -144,3 +144,8 @@ par fonctionnalité validée.
   tableau des points en Table, bloc soleil en Alert `warning`, libellés en capitales
   factorisés (`src/components/classes.ts`). JS +2,0 kB gzip (total +37,4 sur 50). Spec :
   `docs/specs/migration-ui.md`.
+- [x] **Migration UI — lot 6** (19/11/2026) — onglets Carte / Météo / Meilleur jour en Tabs de
+  Radix (icônes Lucide, activation au clavier par Entrée), panneau de coloration (Card, listes
+  natives, champ d'heure ; élargi à 320 px), profil altimétrique et infobulles de la carte en
+  Tailwind, bouton « Profil » en Button. Vérifié sur le build (infobulles, survol du profil).
+  JS +1,0 kB gzip (total +38,4 sur 50). Spec : `docs/specs/migration-ui.md`.
