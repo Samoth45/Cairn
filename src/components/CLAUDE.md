@@ -121,8 +121,8 @@ Panneau latéral fixe ≥ 768 px, tiroir + bouton flottant en dessous.
 
 ## Styles : Tailwind CSS v4 + shadcn/ui (migration en cours)
 
-Migration par lots, cf. `docs/specs/migration-ui.md` (lots 0 et 1 faits : base, police
-Geist, boutons, pastilles, icônes). Recette visuelle : `docs/recette/` (captures avant/après
+Migration par lots, cf. `docs/specs/migration-ui.md` (lots 0 à 2 faits : base, police
+Geist, boutons, pastilles, icônes, fenêtre Paramètres). Recette visuelle : `docs/recette/` (captures avant/après
 sur le build).
 
 - **Fichiers CSS** :
@@ -179,3 +179,22 @@ sur le build).
   et symboles de **données** restent du texte (météo, ▲ du sommet, onglets de vue jusqu'au lot 6).
 - **Lint** : la règle `react-refresh/only-export-components` est coupée pour
   `src/components/ui/` (les fichiers shadcn exportent aussi leurs variantes cva).
+- **Superpositions** : utilitaires `z-map-control` (1000), `z-map-tabs`, `z-backdrop`,
+  `z-sidebar`, `z-toast`, `z-dropzone`, `z-modal` (4000), `z-popover` (4100), déclarés par
+  `@utility` dans `src/index.css`. **Jamais le `z-50` de shadcn** : il passe sous les contrôles
+  de Leaflet (800 à 1000) ; le remplacer dans le fichier `ui/` (cf. `dialog.tsx`).
+- **Listes déroulantes** : `<select>` natif stylé (`ui/native-select.tsx`), **pas le Select de
+  Radix** (15,7 kB gzip, écarté au lot 2, spec Q5). Sur mobile : menu du téléphone.
+- **Champs** (`Input`, `NativeSelect`) : fond `bg-card` (retouché ; `--input` est la couleur du
+  contour, pas un fond) et texte 16 px sur mobile (pas de zoom automatique sur iPhone).
+- **Fenêtre (`Dialog`)** : montée par le parent seulement quand elle est ouverte (`open`
+  toujours vrai, `onOpenChange(false)` → fermer) ; c'est ce qui remet les brouillons à zéro.
+  Sans `DialogTrigger`, Radix ne rend pas le focus au bouton d'ouverture : mémoriser
+  `document.activeElement` à l'ouverture et le refocaliser dans `onCloseAutoFocus` ; mettre le
+  focus sur la fenêtre (et non le 1er champ) dans `onOpenAutoFocus`, sinon le clavier s'ouvre
+  sur mobile. Modèle : `SettingsDialog.tsx`.
+- **`fieldset` / `legend` / `p` hors shadcn** : le bloc de compatibilité de `legacy.css` leur
+  rend les styles du navigateur (bordure `groove`, marges) ; les utilitaires gagnent, mais
+  préciser `border-solid`, `m-0`, `min-w-0`.
+- **Chunk `radix`** (`vite.config.ts`) : primitives Radix et leurs dépendances (focus, blocage
+  du défilement) à part, comme Leaflet. Y ajouter toute nouvelle dépendance de ce type.

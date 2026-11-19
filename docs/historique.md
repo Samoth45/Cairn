@@ -130,3 +130,9 @@ par fonctionnalité validée.
   `.count` ; icônes Lucide à la place des caractères ☾ ☀ ⚙ ✕ ✎ ⬇ 🗑 ‹ › 🌡 ⛰. JS +15,9 kB gzip
   (paquet `cn` surtout). Correction en recette : libellé long du bouton de téléchargement qui
   débordait. Spec : `docs/specs/migration-ui.md`.
+- [x] **Migration UI — lot 2** (19/11/2026) — fenêtre Paramètres en Dialog shadcn (Radix) :
+  champs Input, thème en boutons radio, liste du modèle météo en `<select>` natif stylé (le
+  Select de Radix, essayé, coûtait 15,7 kB gzip et dépassait le budget, relevé de 30 à 50 kB
+  le même jour). Focus sur la fenêtre à l'ouverture (pas de clavier sur mobile) et rendu au
+  bouton ⚙ à la fermeture. Échelle `z-*` en utilitaires, chunk `radix` à part. JS +19,3 kB
+  gzip (total +35,2 sur 50). Spec : `docs/specs/migration-ui.md`.

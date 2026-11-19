@@ -1,6 +1,6 @@
 # Migration de l'interface vers Tailwind CSS v4 + shadcn/ui
 
-Statut : en cours (spec validée le 18/11/2026, décisions en §9) — lots 0 et 1 faits le 19/11/2026
+Statut : en cours (spec validée le 18/11/2026, décisions en §9) — lots 0 à 2 faits le 19/11/2026
 
 Source : `docs/BACKLOG-spec-migration-ui.md`. Cette spec ne migre rien : elle sert de feuille de
 route. Chaque lot du §5 est une tâche autonome, exécutable par Claude Code dans une session
@@ -312,7 +312,7 @@ des `outline-*` Tailwind. Elles restent liées aux couleurs.
 | `z-toast` | 2500 | 998 |
 | `z-dropzone` | 3000 | 975 |
 | `z-modal` | 4000 | 1580 |
-| `z-popover` | 4100 | nouveau : menus Select de Radix (au-dessus de la carte **et** de la fenêtre Paramètres) |
+| `z-popover` | 4100 | nouveau : menus et popovers éventuels (au-dessus de la carte **et** de la fenêtre Paramètres) ; inutilisé depuis le choix du `<select>` natif (Q5) |
 
 Ces valeurs doivent rester **au-dessus de 1000**, car les contrôles de Leaflet sont à
 `z-index` 800-1000. Le `z-index: 2` de la colonne figée (558) reste local.
@@ -466,10 +466,9 @@ luminosité change.
 | `.link-btn` (1444-1457), `.weather-more` | **Button** `variant="link"` | |
 | Onglets Carte / Météo / Meilleur jour (`.view-tabs`, `App.tsx`) | **Tabs** (`TabsList` en pilule) | Ils pilotent l'affichage (`mainView`) ; les vues restent montées comme aujourd'hui. Libellés masqués sur mobile : `max-md:sr-only`. |
 | Onglets Stats / Météo du tracé (`TrackPanel.tsx`) | **Tabs** | Ils remplacent la gestion clavier maison (←/→/Début/Fin). **Garder** les `aria-label` « Stats du tracé » / « Météo du tracé ». |
-| Fenêtre Paramètres (`SettingsDialog.tsx`, 1576-1654) | **Dialog** + **Input** + **Label** + **Select** + **RadioGroup** (thème Système/Clair/Sombre) | Le comportement « appliqué à Enregistrer » ne change pas. Les `fieldset`/`legend` restent, stylés en Tailwind. |
+| Fenêtre Paramètres (`SettingsDialog.tsx`, 1576-1654) | **Dialog** + **Input** + **Label** + **NativeSelect** + **RadioGroup** (thème Système/Clair/Sombre) | Le comportement « appliqué à Enregistrer » ne change pas. Les `fieldset`/`legend` restent, stylés en Tailwind. |
 | Champs : `.field input` (1625), `.track-name-input` (892), heure de départ (`.fc-panel input`, `.sview-departure input`) | **Input** | `type="time"` et `type="number"` sont conservés. |
-| Listes déroulantes : modèle météo, variable de coloration (`.field select`, `.fc-panel select`) | **Select** (Radix, Q5) | Sur mobile, on obtient un menu stylé à la place du sélecteur natif du téléphone. Vérifier au lot 2 : l'ouverture au doigt, la fermeture et le défilement. Côté carte (lot 6), le menu s'ouvre dans un *portal* : son `z-index` doit dépasser les contrôles de Leaflet et la fenêtre Paramètres (`z-popover`,
-4100, cf. échelle §3.1). |
+| Listes déroulantes : modèle météo, variable de coloration (`.field select`, `.fc-panel select`) | **NativeSelect** (`<select>` natif stylé, Q5 révisée au lot 2) | Le menu reste celui du navigateur ou du téléphone : pas de *portal* ni de `z-index` à gérer. Le Select de Radix, essayé au lot 2, coûtait 15,7 kB gzip. |
 | Case « visible » d'un tracé (`.track-toggle`, 853) | **Checkbox** | |
 | Pastille de couleur (`.track-color`, 860-878) | *aucun équivalent* | Composant maison en Tailwind, en gardant l'`<input type="color">` invisible. |
 | Bloc du tracé sélectionné (`.track-panel`, 1105) | **Card** | |
@@ -491,7 +490,7 @@ luminosité change.
 
 ```bash
 npx shadcn@latest add button badge input label checkbox card tabs dialog \
-  radio-group select table alert toggle-group separator
+  radio-group native-select table alert toggle-group separator
 # au lot 4, selon la liste des problèmes mobiles (Q7) : sheet
 # facultatif : tooltip
 ```
@@ -727,7 +726,7 @@ déployable. **Démarrage de chaque lot** :
 
   | | Après le lot 0 | Après le lot 1 |
   | --- | --- | --- |
-  | JS de l'app (gzip) | 127,72 kB | 143,62 kB (budget Q12 : **+15,9 kB sur 30**) |
+  | JS de l'app (gzip) | 127,72 kB | 143,62 kB (budget Q12 : **+15,9 kB sur 30**, relevé ensuite à 50) |
   | CSS de l'app | 40,25 kB (9,08 gzip) | 50,75 kB (10,71 gzip) |
   | Police | — | 29,4 kB (+ 31 kB d'italique si affichée) |
   | Lignes de CSS maison | 1 679 + 82 + 189 | 1 542 (`legacy.css`) + 88 + 207 |
@@ -735,13 +734,15 @@ déployable. **Démarrage de chaque lot** :
   La hausse du JS vient surtout du paquet `cn` (environ 10,8 kB gzip, installé au lot 0 mais
   utilisé pour la première fois), puis de Lucide, `Slot` de Radix et cva. Alternatives
   mesurées : `clsx` + `tailwind-merge` 8,5 kB, `cn build` (tables compilées par un plugin
-  Vite) 7,8 kB ; gain trop faible pour en changer. **À trancher avant le lot 2** : les
-  composants restants (Dialog, Select, Tabs…) devraient ajouter 20 à 25 kB, au-delà du budget.
+  Vite) 7,8 kB ; gain trop faible pour en changer. Les composants restants (Dialog, Select,
+  Tabs…) devraient ajouter 20 à 25 kB, au-delà du budget de 30 kB : **budget relevé à +50 kB
+  gzip** le 19/11/2026 (Q12). Le Select de Radix, d'abord gardé (Q5), a été remplacé au
+  lot 2 par le `<select>` natif.
 
 ### Lot 2 — Fenêtre Paramètres et champs (M)
 - **Fichiers** : `SettingsDialog.tsx`.
 - **Travail** : Dialog, Input, Label, RadioGroup (thème), **Select de Radix** (Q5) pour le
-  modèle météo.
+  modèle météo (remplacé en cours de lot par le `<select>` natif, cf. résultat).
   - Vérifier sur mobile (390 px) : ouverture au doigt, fermeture et défilement de la liste.
   - Le menu doit s'afficher au-dessus de la fenêtre (`z-popover`).
   - **Garder** : Enregistrer, Valeurs par défaut, Annuler, Échap et le clic hors de la
@@ -749,6 +750,39 @@ déployable. **Démarrage de chaque lot** :
   - Vérifier que le focus revient bien au bouton ⚙ à la fermeture.
 - **CSS supprimé** : 1401-1413, 1576-1654.
 - **Composants shadcn** : `dialog`, `input`, `label`, `radio-group`, `select`.
+
+**Résultat du lot 2 (réalisé le 19/11/2026, branche `ui/lot-2-parametres`)**
+- **Fenêtre** : Dialog de Radix (`open` toujours vrai, montée par `App` seulement quand elle est
+  ouverte), Input, Label, RadioGroup pour le thème (Système / Clair / Sombre au lieu d'une
+  liste). `fieldset`/`legend` gardés, en Tailwind (`border-solid`, `m-0`, `min-w-0` : le
+  bloc de compatibilité de `legacy.css` leur rend les styles du navigateur).
+- **Liste du modèle météo : `<select>` natif** (`native-select` de shadcn, Q5 révisée). Le
+  Select de Radix a été implémenté puis retiré : il coûtait **15,7 kB gzip** (Radix Select,
+  `floating-ui`, popper) et menait le total à +50,8 kB.
+- **Focus** : Radix met le focus sur le 1er champ à l'ouverture (clavier ouvert sur mobile) :
+  il est mis sur la fenêtre. Radix ne rend le focus qu'à un `DialogTrigger`, que nous n'avons
+  pas : la fenêtre mémorise l'élément actif à l'ouverture (⚙) et le lui rend.
+- **Superpositions** : utilitaires `z-map-control` … `z-modal`, `z-popover` (échelle du
+  §3.1) dans `index.css` ; la fenêtre et son voile sont en `z-modal`.
+- **Retouches des fichiers shadcn** (commentées) : fond `bg-card` des champs (et non
+  `bg-input/30` en sombre, `--input` étant notre couleur de contour), voile noir 35 % sans
+  flou, `shadow-modal`, hauteur bornée avec défilement, « Close » → « Fermer », texte 16 px
+  sur mobile pour la liste (pas de zoom sur iPhone).
+- **Build** : primitives Radix et dépendances (focus, blocage du défilement) dans un chunk
+  `radix` (`vite.config.ts`), sinon le chunk de l'app dépassait 500 kB (avertissement).
+- **Recette** : sonde headless sur le build (PC et mobile) : Échap, clic dehors, focus rendu
+  à ⚙, choix du modèle, Enregistrer, Valeurs par défaut, Annuler, aucune erreur console.
+  Captures : seules les 4 vues Paramètres changent. L'outil attend désormais
+  `[role="dialog"]` (et plus `.modal`).
+- **Écarts visibles** : fenêtre de 448 px (440 avant) ; champs en 16 px sur mobile ; thème en
+  boutons radio ; liste du modèle plus large (nom complet sur PC).
+- **Mesures** :
+
+  | | Après le lot 1 | Après le lot 2 |
+  | --- | --- | --- |
+  | JS de l'app (gzip) | 143,62 kB | 162,87 kB = 143,93 (app) + 18,94 (`radix`) ; budget Q12 : **+35,2 kB sur 50** |
+  | CSS de l'app | 50,75 kB (10,71 gzip) | 60,07 kB (12,33 gzip) |
+  | Lignes de CSS maison | 1 542 + 88 + 207 | 1 448 (`legacy.css`) + 88 + 235 |
 
 ### Lot 3 — Superpositions : notifications et zone de dépôt (S)
 - **Fichiers** : `Toasts.tsx`, `DropZone.tsx`.
@@ -801,7 +835,7 @@ déployable. **Démarrage de chaque lot** :
 - **Travail** :
   - composant `MapControl`, pour le fond, l'ombre `shadow-float` et l'arrondi ;
   - Tabs principaux (icônes seules sur mobile) ;
-  - panneau de coloration (Card, **Select de Radix** dont le menu passe au-dessus de la carte,
+  - panneau de coloration (Card, **NativeSelect** (`<select>` natif, Q5),
     Input) ;
   - en-tête du profil et légende des pentes ;
   - contenu des infobulles ;
@@ -811,7 +845,7 @@ déployable. **Démarrage de chaque lot** :
   pane `cairn-markers`).
 - **CSS supprimé** : 103-203, 354-394, 1364-1399, 1415-1442, 1478-1574, 1657-1678, 1689-1724,
   1735-1738.
-- **Composants shadcn** : `tabs`, `card`, `input`, `select`.
+- **Composants shadcn** : `tabs`, `card` (`input` et `native-select` déjà ajoutés au lot 2).
 - **Vérification obligatoire sur le build** (`npm run preview`) : survol, clic sur un tracé,
   infobulles. Le mode dev se comporte autrement à cause du StrictMode.
 
@@ -969,9 +1003,9 @@ chaque lot.
 | Régressions visuelles discrètes (espacements, tailles) | Moyenne | Moyen | Captures avant/après à chaque lot ; écarts d'arrondi annoncés à l'avance (Q2) |
 | Inversion de sens des variables `--accent` / `--muted` | Moyenne | Moyen | Renommage au lot 0 dans `legacy.css`, contrôlé par capture |
 | Composants shadcn clairs en mode sombre | Forte sans variante | Moyen | `@custom-variant dark` sur `data-theme` (§3.1) |
-| Le bundle JS grossit (Radix, dont Select, et Lucide) | Certaine | Faible à moyen | **Budget de +30 kB gzip au total** par rapport au §2.2 (Q12). Mesure à chaque lot dans le compte rendu (JS gzip, avant et après le lot). Si un lot fait dépasser le budget : s'arrêter et le signaler avant de continuer. Importer les icônes Lucide une par une (jamais tout le paquet). |
+| Le bundle JS grossit (Radix, dont Select, et Lucide) | Certaine | Faible à moyen | **Budget de +50 kB gzip au total** par rapport au §2.2 (Q12 ; 30 kB au départ, relevé après le lot 1). Mesure à chaque lot dans le compte rendu (JS gzip, avant et après le lot). Si un lot fait dépasser le budget : s'arrêter et le signaler avant de continuer. Importer les icônes Lucide une par une (jamais tout le paquet). |
 | La police Geist change la largeur des textes | Certaine | Faible | Captures dédiées au lot 1 (troncatures, tableaux) ; repli sur la police système pendant le chargement |
-| Les menus Select de Radix s'ouvrent sous la carte ou sous la fenêtre | Moyenne | Moyen | `z-popover` (§3.1) ; test au lot 2 (fenêtre) et au lot 6 (carte) |
+| Les menus Select de Radix s’ouvrent sous la carte ou sous la fenêtre | Écarté | — | Select de Radix abandonné au lot 2 pour le `<select>` natif (Q5) ; `z-popover` reste dans l’échelle pour un menu futur |
 | Changement de comportement : focus, clavier, Échap, tiroir mobile | Moyenne | Moyen | Parcours 2, 6 et 8 manuels, et test au clavier |
 | Comportement différent entre le dev et le build (StrictMode, carte) | Moyenne | Fort | Recette faite **sur le build** (preview locale ou Vercel), pas sur le serveur dev |
 | Dérive du design (valeurs arbitraires, couleurs en dur qui reviennent) | Moyenne | Faible | Conventions du §3.3 dans `CLAUDE.md`, relecture en fin de lot |
@@ -1039,14 +1073,14 @@ spec y renvoie.
 | Q2 | Fidélité au pixel ou normalisation ? | **Normaliser** (§3.1) en acceptant des écarts de 1 à 2 px | Écarts annoncés dans chaque lot |
 | Q3 | Base des composants shadcn | **Radix UI** | `shadcn init` (§4) |
 | Q4 | Icônes | **Lucide** (`lucide-react`) | Lot 1 ; importées une par une |
-| Q5 | Listes déroulantes | **Select de Radix** | Lots 2 et 6, `z-popover`, test mobile |
+| Q5 | Listes déroulantes | ~~Select de Radix~~ → **`<select>` natif stylé** (`NativeSelect` de shadcn), **révisé le 19/11/2026** au lot 2 : le Select de Radix (15,7 kB gzip à lui seul) faisait dépasser le budget de 50 kB | Lots 2 et 6 ; sur mobile, menu du téléphone |
 | Q6 | Notifications | **Composant maison** en Tailwind, pas de Sonner | Lot 3 |
 | Q7 | Tiroir et problèmes mobiles | **Attendre la liste des problèmes mobiles** et l'intégrer au lot 4 | Lot 4 bloqué tant que la liste n'existe pas ; les lots 5 à 8 peuvent passer avant |
 | Q8 | Prettier et Playwright dans le projet | **Non** pour les deux | Explication ci-dessous |
 | Q9 | Police | **Geist**, hébergée avec le site (`@fontsource-variable/geist`) | §3.1, lot 1 |
 | Q10 | Météo figée pour les captures | **Réponse Open-Meteo enregistrée et rejouée** | §6, préparé au lot 0 |
 | Q11 | Contrastes insuffisants | **Corriger au lot 0** | §3.1, lot 0 (dernier commit) |
-| Q12 | Budget de poids JS | **+30 kB gzip au maximum**, mesuré à chaque lot | §7 ; arrêt et signalement en cas de dépassement |
+| Q12 | Budget de poids JS | **+50 kB gzip au maximum** (127,71 → 177,7 kB), mesuré à chaque lot. Fixé à +30 kB le 18/11/2026, **relevé le 19/11/2026** après le lot 1 (+15,9 kB, surtout le paquet `cn`) : les composants restants n'auraient pas tenu dans 30 kB. Au lot 2, le Select de Radix menait à +50,8 kB : remplacé par le `<select>` natif (Q5) plutôt que de relever encore le budget | §7 ; arrêt et signalement en cas de dépassement |
 | Q13 | Version finale | **1.1.0** | Lot 9 |
 | Q14 | Rythme | **Une branche et une PR par lot**, jamais de retour arrière sur `main` ; branches supprimées par le propriétaire à la fusion | §7 |
 | Q15 | Fichier `docs/BACKLOG-spec-migration-ui.md` | **Résumé dans `docs/backlog.md`** avec un renvoi vers cette spec, puis **supprimé une fois la spec validée** | Fait à la validation de la spec |
