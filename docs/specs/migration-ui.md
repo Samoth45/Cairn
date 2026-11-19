@@ -1,6 +1,6 @@
 # Migration de l'interface vers Tailwind CSS v4 + shadcn/ui
 
-Statut : en cours (spec validée le 18/11/2026, décisions en §9) — lots 0 à 3 faits le 19/11/2026
+Statut : en cours (spec validée le 18/11/2026, décisions en §9) — lots 0 à 3 et 5 faits le 19/11/2026
 
 Source : `docs/BACKLOG-spec-migration-ui.md`. Cette spec ne migre rien : elle sert de feuille de
 route. Chaque lot du §5 est une tâche autonome, exécutable par Claude Code dans une session
@@ -849,6 +849,39 @@ déployable. **Démarrage de chaque lot** :
   - libellés en capitales factorisés.
 - **CSS supprimé** : 1104-1195, 1201-1355, 1680-1687.
 - **Composants shadcn** : `card`, `tabs`, `table`, `alert`.
+
+**Résultat du lot 5 (réalisé le 19/11/2026, branche `ui/lot-5-panneau-trace`)**
+- **Panneau** (`TrackPanel.tsx`) : Card (retouchée à l'appel : fond `bg-background`, bordure,
+  sans `ring` ni `overflow-hidden`) ; Tabs de Radix à la place de la gestion clavier maison
+  (← → Début Fin), `aria-label` gardés, `sidePanelTab` persisté, deux contenus montés
+  (`forceMount` + `data-[state=inactive]:hidden`).
+- **Variante `pill`** ajoutée à `ui/tabs.tsx` (fond carte, contour, onglet actif vert) : à
+  réutiliser pour les onglets principaux (lot 6). Fond `bg-input/30` de l'onglet actif en
+  sombre retiré.
+- **Libellés en capitales factorisés** : `LABEL_CAPS` (et `SUB_LINE`, seconde ligne discrète)
+  dans `src/components/classes.ts` ; composants locaux `Stat` (TrackStats) et `Summary`
+  (WeatherPanel).
+- **Tableau des points** : Table de shadcn (lignes séparées comme avant, sans survol).
+- **Bloc soleil** : Alert, nouvelle variante `warning` (`--warning-*`), `role="note"` (et non
+  `alert`, qui ferait annoncer le bloc à chaque rendu).
+- **Piège rencontré** : les tailles Tailwind (`text-sm`, `text-base`) imposent une hauteur de
+  ligne (1,43 ; 1,5) plus grande que `normal` : le panneau grandissait. Hauteurs resserrées
+  (`text-sm/tight`, `text-base/tight`, `leading-tight`). Autre piège : un `h2` hors shadcn
+  garde la bordure `medium` du navigateur (bloc de compatibilité) : `border-0` avant
+  `border-l-4`.
+- **Écarts visibles (Q2)** : onglets Stats / Météo un peu plus hauts (panneau Météo +12 px
+  environ) ; titre 16 px (15,2 avant) ; bloc soleil 14 px (12,8 avant) ; statistiques un peu
+  plus compactes.
+- **Recette** : 15 captures sur 20 diffèrent (panneau latéral seulement). Sonde headless des
+  onglets : clavier, aria, deux panneaux montés, onglet retrouvé après rechargement, aucune
+  erreur console.
+- **Mesures** :
+
+  | | Après le lot 3 | Après le lot 5 |
+  | --- | --- | --- |
+  | JS de l'app (gzip) | 163,14 kB | 165,09 kB = 145,51 + 19,58 (`radix`) ; budget : **+37,4 kB sur 50** |
+  | CSS de l'app | 60,45 kB (12,38 gzip) | 72,80 kB (13,96 gzip) |
+  | Lignes de `legacy.css` | 1 377 | 1 142 |
 
 ### Lot 6 — Contrôles posés sur la carte et profil (M)
 - **Fichiers** : `App.tsx` (onglets Carte/Météo/Meilleur jour), `ForecastControl.tsx`,

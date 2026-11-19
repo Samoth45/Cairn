@@ -139,3 +139,8 @@ par fonctionnalité validée.
 - [x] **Migration UI — lot 3** (19/11/2026) — notifications (maison, pas de Sonner) et zone de
   dépôt en Tailwind, même fonctionnement ; échelle `z-toast` / `z-dropzone`. Voile de dépôt
   au vert du thème sombre en mode sombre. JS +0,3 kB gzip. Spec : `docs/specs/migration-ui.md`.
+- [x] **Migration UI — lot 5** (19/11/2026) — panneau du tracé sélectionné : Card, onglets
+  Stats / Météo en Tabs de Radix (variante « pilule », clavier et persistance inchangés),
+  tableau des points en Table, bloc soleil en Alert `warning`, libellés en capitales
+  factorisés (`src/components/classes.ts`). JS +2,0 kB gzip (total +37,4 sur 50). Spec :
+  `docs/specs/migration-ui.md`.
