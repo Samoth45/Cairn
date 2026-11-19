@@ -181,19 +181,19 @@ async function scenario(browser, vpName, theme) {
   await closeDrawer(page, vp);
 
   // Onglet Météo par altitude.
-  await page.click('.view-tabs button[aria-label="Météo"]');
+  await page.click('[aria-label="Vue"] [role="tab"][aria-label="Météo"]');
   await page.waitForSelector('.wtable', { timeout: 15000 });
   await settle(page, 800);
   await shot(page, `${tag}-3-meteo`);
 
   // Onglet Meilleur jour.
-  await page.click('.view-tabs button[aria-label="Meilleur jour"]');
+  await page.click('[aria-label="Vue"] [role="tab"][aria-label="Meilleur jour"]');
   await page.waitForSelector('.stable', { timeout: 15000 });
   await settle(page, 1500);
   await shot(page, `${tag}-4-meilleur-jour`);
 
   // Paramètres (depuis la carte).
-  await page.click('.view-tabs button[aria-label="Carte"]');
+  await page.click('[aria-label="Vue"] [role="tab"][aria-label="Carte"]');
   await sleep(300);
   await openDrawer(page, vp);
   await page.click('button[aria-label="Paramètres"]');

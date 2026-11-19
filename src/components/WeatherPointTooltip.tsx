@@ -1,3 +1,4 @@
+import { TIP } from './classes';
 import type { PointSeries } from '../services/weather';
 import type { WeatherPoint } from '../lib/weatherPoints';
 import { rolesLabel } from '../lib/weatherPoints';
@@ -20,25 +21,25 @@ interface Props {
 export function WeatherPointTooltip({ point, series, time, index, night, title }: Props) {
   const roles = rolesLabel(point.roles);
   return (
-    <div className="wx-tooltip">
-      <div className="wx-title">
+    <div className={TIP.root}>
+      <div className={TIP.title}>
         {title && `${title} · `}
         <strong>{formatMeters(point.ele)}</strong>
         {roles && ` · ${roles}`}
       </div>
       {series && time !== undefined && index !== undefined ? (
         <>
-          <div className="wx-hour">
+          <div className={TIP.hour}>
             {formatForecastHour(time)}
             {night && ' · 🌙 nuit'}
           </div>
-          <div className="wx-main">
-            <span className="wx-icon">{wmoIcon(series.weather_code[index])}</span>
+          <div className={TIP.main}>
+            <span className={TIP.icon}>{wmoIcon(series.weather_code[index])}</span>
             <span>
-              <strong className="wx-temp">{formatTemp(series.temperature_2m[index])}</strong>
-              <span className="wx-sub"> ressenti {formatTemp(series.apparent_temperature[index])}</span>
+              <strong className={TIP.temp}>{formatTemp(series.temperature_2m[index])}</strong>
+              <span className={TIP.sub}> ressenti {formatTemp(series.apparent_temperature[index])}</span>
               <br />
-              <span className="wx-sub">{wmoLabel(series.weather_code[index])}</span>
+              <span className={TIP.sub}>{wmoLabel(series.weather_code[index])}</span>
             </span>
           </div>
           <div>
@@ -50,7 +51,7 @@ export function WeatherPointTooltip({ point, series, time, index, night, title }
           </div>
         </>
       ) : (
-        <div className="wx-sub">Point de prévision météo</div>
+        <div className={TIP.sub}>Point de prévision météo</div>
       )}
     </div>
   );

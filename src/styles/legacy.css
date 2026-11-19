@@ -54,100 +54,6 @@ button {
   flex-direction: column;
 }
 
-/* ---------- Prévision le long du tracé (panneau sur la carte) ---------- */
-.fc-panel {
-  position: absolute;
-  left: 10px;
-  bottom: 24px;
-  z-index: 1000;
-  width: min(290px, calc(100% - 80px));
-  padding: 8px 10px;
-  background: var(--card-glass);
-  border-radius: 10px;
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
-  font-size: 0.8rem;
-}
-
-.fc-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.fc-label {
-  font-weight: 600;
-  flex: 1;
-}
-
-.fc-panel select,
-.fc-panel input {
-  font: inherit;
-  padding: 3px 5px;
-  border: 1px solid var(--input);
-  border-radius: 6px;
-  background: var(--card);
-}
-
-.fc-departure {
-  margin-top: 6px;
-  justify-content: space-between;
-}
-
-.fc-departure label {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--muted-foreground);
-}
-
-.fc-legend {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 2px 6px;
-  margin-top: 7px;
-  font-size: 0.7rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.fc-legend-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-}
-
-.fc-legend-item i {
-  display: inline-block;
-  width: 12px;
-  height: 8px;
-  border-radius: 2px;
-  box-shadow: 0 0 0 1px var(--swatch-outline);
-}
-
-.fc-unit {
-  color: var(--muted-foreground);
-}
-
-.fc-summary {
-  margin: 6px 0 0;
-  font-variant-numeric: tabular-nums;
-}
-
-.fc-warn {
-  color: var(--destructive);
-  font-weight: 600;
-}
-
-.fc-muted,
-.fc-hint {
-  color: var(--muted-foreground);
-}
-
-.fc-hint {
-  margin: 4px 0 0;
-  font-size: 0.7rem;
-}
-
 /* ---------- Vue « Meilleur jour » ---------- */
 .sview-departure {
   display: inline-flex;
@@ -295,42 +201,6 @@ button {
 .st-day.rel-low {
   color: var(--faint);
   font-style: italic;
-}
-
-/* ---------- Onglets Carte / Météo ---------- */
-.view-tabs {
-  position: absolute;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1001;
-  display: flex;
-  padding: 3px;
-  gap: 2px;
-  background: var(--card);
-  border-radius: 999px;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
-}
-
-.view-tabs button {
-  border: none;
-  background: none;
-  border-radius: 999px;
-  padding: 5px 14px;
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: var(--muted-foreground);
-  white-space: nowrap;
-}
-
-.view-tabs button.active {
-  background: var(--primary);
-  color: var(--primary-foreground);
-}
-
-.view-tabs button:disabled {
-  opacity: 0.45;
-  cursor: default;
 }
 
 /* ---------- Vue météo par altitude ---------- */
@@ -881,73 +751,7 @@ button {
   }
 }
 
-/* ---------- Infobulles météo de la carte (contenu ; lot 6) ---------- */
-.wx-tooltip {
-  font-size: 0.8rem;
-  line-height: 1.45;
-  font-variant-numeric: tabular-nums;
-}
-
-.wx-title {
-  font-size: 0.85rem;
-}
-
-.wx-hour {
-  color: var(--muted-foreground);
-  font-size: 0.75rem;
-  margin-bottom: 2px;
-}
-
-.wx-main {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 2px;
-}
-
-.wx-icon {
-  font-size: 1.5rem;
-  line-height: 1;
-}
-
-.wx-temp {
-  font-size: 1rem;
-}
-
-.wx-sub {
-  color: var(--muted-foreground);
-  font-size: 0.75rem;
-}
-
-/* ---------- Pentes ---------- */
-.slope-legend {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.7rem;
-  color: var(--muted-foreground);
-  white-space: nowrap;
-}
-
-.slope-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-}
-
-.slope-chip i {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 2px;
-  opacity: 0.75;
-}
-
-.slope-value {
-  border-bottom: 3px solid;
-  padding-bottom: 1px;
-}
-
+/* ---------- Indicateur de chargement (texte précédé d'un cercle qui tourne) ---------- */
 .spinner-text::before {
   content: '';
   display: inline-block;
@@ -967,163 +771,13 @@ button {
   }
 }
 
-/* ---------- Profil altimétrique ---------- */
-.profile {
-  height: 190px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  background: var(--card);
-  border-top: 1px solid var(--border);
-}
-
-.profile-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 8px 0 14px;
-  font-size: 0.85rem;
-  min-height: 30px;
-}
-
-.profile-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.profile-name {
-  flex: 1;
-  min-width: 0;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.profile-readout {
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.profile-chart {
-  flex: 1;
-  min-height: 0;
-  position: relative;
-}
-
-.profile-chart svg {
-  display: block;
-  touch-action: none;
-  cursor: crosshair;
-}
-
-.profile-chart .grid {
-  stroke: var(--border);
-  stroke-width: 1;
-}
-
-.profile-chart .axis {
-  fill: var(--muted-foreground);
-  font-size: 10.5px;
-  font-variant-numeric: tabular-nums;
-}
-
-.profile-chart .cursor {
-  stroke: var(--foreground);
-  stroke-width: 1;
-  stroke-dasharray: 3 3;
-}
-
-.profile-chart .summit-mark {
-  fill: var(--foreground);
-  stroke: var(--card);
-  stroke-width: 1.5;
-}
-
-.profile-placeholder {
-  margin: 0;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--muted-foreground);
-  font-size: 0.9rem;
-}
-
-.profile-open {
-  position: absolute;
-  left: 10px;
-  top: 10px;
-  z-index: 1000;
-  padding: 6px 14px;
-  border: none;
-  border-radius: 999px;
-  background: var(--card);
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
-  font-weight: 600;
-}
-
 @media (max-width: 767px) {
-  .profile {
-    height: 150px;
-  }
-
-  .profile-readout {
-    font-size: 0.8rem;
-  }
-
-  /* Sur mobile, la légende laisse la place à la lecture du survol. */
-  .profile-header.hovering .slope-legend,
-  .profile-header.hovering .profile-name {
-    display: none;
-  }
-
-  .profile-header.hovering .profile-readout {
-    flex: 1;
-  }
-
-  .slope-legend {
-    gap: 4px;
-    font-size: 0.65rem;
-  }
-
-  /* Onglets à droite du bouton « Cairn », sous les contrôles de la carte. */
-  .view-tabs {
-    left: auto;
-    right: 58px;
-    transform: none;
-  }
-
-  .view-tabs button {
-    padding: 5px 10px;
-  }
-
   .wview {
     padding: 58px 10px 14px;
   }
 
   .wt-cell {
     min-width: 46px;
-  }
-
-  .fc-panel {
-    bottom: 12px;
-  }
-
-  .fc-hint {
-    display: none;
-  }
-
-  /* Trois onglets à côté du bouton « Cairn » : icônes seules (libellés en aria-label). */
-  .tab-text {
-    display: none;
-  }
-
-  .view-tabs button {
-    padding: 5px 12px;
-    font-size: 1rem;
   }
 
   .st-track {
@@ -1133,10 +787,5 @@ button {
 
   .st-btn {
     min-width: 54px;
-  }
-
-  /* Sous le bouton « Cairn ». */
-  .profile-open {
-    top: 60px;
   }
 }

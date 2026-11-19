@@ -121,9 +121,9 @@ Panneau latéral fixe ≥ 768 px, tiroir + bouton flottant en dessous.
 
 ## Styles : Tailwind CSS v4 + shadcn/ui (migration en cours)
 
-Migration par lots, cf. `docs/specs/migration-ui.md` (lots 0 à 3 et 5 faits : base,
-police Geist, boutons, pastilles, icônes, fenêtre Paramètres, notifications, zone de dépôt,
-panneau du tracé).
+Migration par lots, cf. `docs/specs/migration-ui.md` (lots 0 à 3, 5 et 6 faits :
+base, police Geist, boutons, pastilles, icônes, fenêtre Paramètres, notifications, zone de
+dépôt, panneau du tracé, contrôles de la carte, profil, infobulles).
 Recette visuelle : `docs/recette/` (captures avant/après sur le build).
 
 - **Fichiers CSS** :
@@ -204,7 +204,15 @@ Recette visuelle : `docs/recette/` (captures avant/après sur le build).
   rend la bordure `medium` du navigateur ; pour un liseré d'un côté, `border-0 border-l-4
   border-solid`.
 - **Classes partagées** : `src/components/classes.ts` (`LABEL_CAPS` = petit libellé en
-  capitales, `SUB_LINE` = seconde ligne discrète). Y ajouter toute combinaison qui revient.
+  capitales, `SUB_LINE` = seconde ligne discrète, `MAP_CONTROL` = contrôle posé sur la carte,
+  `TIP` = contenu des infobulles de la carte). Y ajouter toute combinaison qui revient.
+- **Onglets principaux** (`App.tsx`) : Tabs sans `TabsContent`, `activationMode="manual"`
+  (les flèches ne changent pas de vue). Onglet désactivé avec `title` :
+  `disabled:pointer-events-auto` (sinon l'infobulle ne s'affiche pas).
+- **`NativeSelect`** : `className` va au conteneur ; `selectClassName` au `<select>` (ex.
+  `max-md:text-sm` dans le panneau de coloration, trop étroit pour du 16 px).
+- **SVG du profil** : couleurs par utilitaires (`stroke-border`, `fill-muted-foreground`…),
+  épaisseurs et pointillés en attributs (`strokeWidth`, `strokeDasharray`).
 - **Onglets** (`ui/tabs.tsx`) : variante `pill` (fond carte, contour, onglet actif vert),
   utilisée par le panneau du tracé. Contenus gardés montés : `forceMount` +
   `data-[state=inactive]:hidden`. **Alert** : variante `warning` ; `role="note"` pour une

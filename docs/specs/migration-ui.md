@@ -1,6 +1,6 @@
 # Migration de l'interface vers Tailwind CSS v4 + shadcn/ui
 
-Statut : en cours (spec validée le 18/11/2026, décisions en §9) — lots 0 à 3 et 5 faits le 19/11/2026
+Statut : en cours (spec validée le 18/11/2026, décisions en §9) — lots 0 à 3, 5 et 6 faits le 19/11/2026
 
 Source : `docs/BACKLOG-spec-migration-ui.md`. Cette spec ne migre rien : elle sert de feuille de
 route. Chaque lot du §5 est une tâche autonome, exécutable par Claude Code dans une session
@@ -902,6 +902,38 @@ déployable. **Démarrage de chaque lot** :
 - **Composants shadcn** : `tabs`, `card` (`input` et `native-select` déjà ajoutés au lot 2).
 - **Vérification obligatoire sur le build** (`npm run preview`) : survol, clic sur un tracé,
   infobulles. Le mode dev se comporte autrement à cause du StrictMode.
+
+**Résultat du lot 6 (réalisé le 19/11/2026, branche `ui/lot-6-carte-profil`)**
+- **Onglets principaux** (`App.tsx`) : Tabs de Radix, variante `pill`, sans `TabsContent` (les
+  vues restent rendues comme avant) ; icônes Lucide `Map`, `Thermometer`, `Star` (libellés
+  masqués sur mobile, `aria-label` gardés). **Activation manuelle** (`activationMode="manual"`) :
+  les flèches déplacent le focus, Entrée / Espace changent de vue (pas de reconstruction des
+  vues lourdes à chaque flèche). Onglets désactivés : `disabled:pointer-events-auto` pour garder
+  leur infobulle (`title`).
+- **`MapControl`** : réalisé en classes partagées (`MAP_CONTROL` dans
+  `src/components/classes.ts` : `absolute z-map-control bg-card shadow-float`) plutôt qu'en
+  composant, les contrôles étant des éléments différents (liste d'onglets, Card, Button).
+- **Panneau de coloration** (`ForecastControl.tsx`) : Card, NativeSelect, Input. Largeur
+  **320 px** (290 avant) et contrôles en 14 px aussi sur mobile : sinon le jour et l'heure de
+  départ étaient coupés. `native-select` accepte `selectClassName` (classes du `<select>`).
+- **Profil** (`ElevationProfile.tsx`) : en-tête, légende des pentes et SVG en utilitaires
+  (`stroke-border`, `fill-muted-foreground`, `fill-foreground stroke-card`…) ; masquage
+  mobile pendant le survol par `max-md:hidden` conditionnel. Bouton « Profil » : Button.
+- **Infobulles** (`WeatherPointTooltip`, `PassageTooltip`) : classes partagées `TIP`.
+- **Recette** : 19 captures sur 20 diffèrent (onglets du haut, panneau de la carte : 0,001 à
+  3,4 % des pixels). Sonde headless **sur le build** : infobulles du point météo et du
+  passage, lecture du profil au survol, fermeture / réouverture du profil, onglets au
+  clavier, infobulle de l'onglet désactivé, aucune erreur console. L'outil de captures vise
+  maintenant les onglets par leur rôle (`[aria-label="Vue"] [role="tab"]`).
+- **Écarts visibles (Q2)** : panneau de coloration plus large ; textes du panneau et des
+  infobulles en 14 px (12,8 avant) ; icônes Lucide dans les onglets et les listes.
+- **Mesures** :
+
+  | | Après le lot 5 | Après le lot 6 |
+  | --- | --- | --- |
+  | JS de l'app (gzip) | 165,09 kB | 166,13 kB = 146,55 + 19,58 (`radix`) ; budget : **+38,4 kB sur 50** |
+  | CSS de l'app | 72,80 kB (13,96 gzip) | 70,99 kB (13,59 gzip) |
+  | Lignes de `legacy.css` | 1 142 | 791 |
 
 ### Lot 7 — Onglet « Meilleur jour » (M)
 - **Fichiers** : `SummaryView.tsx`.

@@ -37,8 +37,12 @@ import { downloadText } from './lib/download';
 import { DropZone } from './components/DropZone';
 import { Toasts, type Toast } from './components/Toasts';
 import { CairnLogo } from './components/CairnLogo';
-import { Mountain } from 'lucide-react';
+import { Map as MapIcon, Mountain, Star, Thermometer, type LucideIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cn } from '@/lib/utils';
+import { MAP_CONTROL } from './components/classes';
 import type { FitRequest } from './components/FitBounds';
 import { trackBounds, type Bounds } from './lib/geo';
 import type { Track } from './types';
@@ -46,6 +50,13 @@ import { useTheme } from './hooks/useTheme';
 import { toggledTheme } from './lib/theme';
 
 const isMobile = () => window.matchMedia('(max-width: 767px)').matches;
+
+/** Onglets principaux ; les libellés servent aussi d'aria-label (icônes seules sur mobile). */
+const VIEW_TABS: Array<{ id: 'map' | 'weather' | 'summary'; label: string; icon: LucideIcon }> = [
+  { id: 'map', label: 'Carte', icon: MapIcon },
+  { id: 'weather', label: 'Météo', icon: Thermometer },
+  { id: 'summary', label: 'Meilleur jour', icon: Star },
+];
 
 function boundsOf(tracks: Track[]): Bounds | null {
   return trackBounds(tracks.flatMap((t) => t.segments));
@@ -369,42 +380,42 @@ export default function App() {
           <span>Cairn</span>
           <Badge variant="muted">{tracks.length}</Badge>
         </button>
-        <div className="view-tabs" role="tablist" aria-label="Vue">
-          <button
-            type="button"
-            role="tab"
-            aria-label="Carte"
-            aria-selected={view === 'map'}
-            className={view === 'map' ? 'active' : ''}
-            onClick={() => setMainView('map')}
+        {/* Onglets principaux (Tabs de Radix, sans TabsContent : les vues sont rendues plus bas).
+            Activation manuelle (Entrée / Espace) : les flèches ne changent pas de vue à chaque
+            pas. Centrés en haut ; sur mobile, à droite du bouton « Cairn », icônes seules. */}
+        <Tabs value={view} onValueChange={(v) => setMainView(v as typeof mainView)} activationMode="manual" className="contents">
+          <TabsList
+            variant="pill"
+            aria-label="Vue"
+            className={cn(
+              MAP_CONTROL,
+              'top-2.5 left-1/2 z-map-tabs w-auto -translate-x-1/2 border-0 max-md:right-14.5 max-md:left-auto max-md:translate-x-0',
+            )}
           >
-            🗺 <span className="tab-text">Carte</span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-label="Météo"
-            aria-selected={view === 'weather'}
-            className={view === 'weather' ? 'active' : ''}
-            onClick={() => setMainView('weather')}
-            disabled={!selectedTrack}
-            title={selectedTrack ? 'Météo par altitude du tracé sélectionné' : 'Sélectionnez un tracé'}
-          >
-            🌡 <span className="tab-text">Météo</span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-label="Meilleur jour"
-            aria-selected={view === 'summary'}
-            className={view === 'summary' ? 'active' : ''}
-            onClick={() => setMainView('summary')}
-            disabled={tracks.length === 0}
-            title="Comparer les tracés jour par jour (score « meilleur jour »)"
-          >
-            ★ <span className="tab-text">Meilleur jour</span>
-          </button>
-        </div>
+            {VIEW_TABS.map((t) => (
+              <TabsTrigger
+                key={t.id}
+                value={t.id}
+                aria-label={t.label}
+                disabled={t.id === 'weather' ? !selectedTrack : t.id === 'summary' ? tracks.length === 0 : false}
+                title={
+                  t.id === 'weather'
+                    ? selectedTrack
+                      ? 'Météo par altitude du tracé sélectionné'
+                      : 'Sélectionnez un tracé'
+                    : t.id === 'summary'
+                      ? 'Comparer les tracés jour par jour (score « meilleur jour »)'
+                      : undefined
+                }
+                // Infobulle (title) visible même désactivé ; pas de clic possible (bouton désactivé).
+                className="px-3.5 py-1 disabled:pointer-events-auto disabled:cursor-default max-md:px-3 max-md:py-1.5"
+              >
+                <t.icon />
+                <span className="max-md:hidden">{t.label}</span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
 
         {view === 'summary' && (
           <SummaryView
@@ -470,14 +481,15 @@ export default function App() {
             />
           )}
           {showProfile && !settings.showProfile && (
-            <button
-              type="button"
-              className="profile-open inline-flex items-center gap-1.5"
+            // En haut à gauche ; sur mobile, sous le bouton « Cairn ».
+            <Button
+              variant="ghost"
+              className={cn(MAP_CONTROL, 'top-2.5 left-2.5 h-auto rounded-full px-3.5 py-1.5 font-semibold text-foreground max-md:top-15')}
               onClick={() => void setSettings({ showProfile: true })}
             >
-              <Mountain className="size-4" />
+              <Mountain />
               Profil
-            </button>
+            </Button>
           )}
         </div>
         {view === 'map' && showProfile && settings.showProfile && selectedTrack && analysis && (
