@@ -1,6 +1,6 @@
 # Migration de l'interface vers Tailwind CSS v4 + shadcn/ui
 
-Statut : en cours (spec validée le 18/11/2026, décisions en §9) — lots 0 à 3, 5 et 6 faits le 19/11/2026
+Statut : en cours (spec validée le 18/11/2026, décisions en §9) — lots 0 à 3 et 5 à 7 faits (19-20/11/2026)
 
 Source : `docs/BACKLOG-spec-migration-ui.md`. Cette spec ne migre rien : elle sert de feuille de
 route. Chaque lot du §5 est une tâche autonome, exécutable par Claude Code dans une session
@@ -947,6 +947,37 @@ déployable. **Démarrage de chaque lot** :
   - clic sur une case vers l'onglet Météo (comportement inchangé).
 - **CSS supprimé** : 205-352, 1726-1733.
 - **Composants shadcn** : `table`, `alert`, `input`.
+
+**Résultat du lot 7 (réalisé le 20/11/2026, branche `ui/lot-7-meilleur-jour`)**
+- **Tableau** (`SummaryView.tsx`) : Table de shadcn dans un cadre arrondi (`border`,
+  `rounded-lg`, `bg-card`), `border-separate` et bordures sur les cellules (pas de bordure de
+  ligne, dernière ligne sans bordure basse). `aria-label="Scores par jour"` (l'outil de
+  captures l'attend à la place de `.stable`).
+- **Cases de score** : boutons en utilitaires, couleur du score en style en ligne (donnée) ;
+  meilleur jour `inset-ring-2 inset-ring-gold` + étoile `text-gold` ; fiabilité moyenne
+  `opacity-80`, faible `opacity-45 saturate-50` ; contour au survol (`enabled:hover:outline`)
+  et **au focus clavier** (nouveau).
+- **En-têtes de jours** : fiabilité moyenne en `text-muted-foreground`, faible en
+  `text-faint italic` + « peu fiable ».
+- **Avertissement** : Alert `warning`, `role="note"`. **Heure de départ** : Input
+  (`shrink-0`, 14 px sur mobile : sinon l'heure était coupée).
+- **Laissé au lot 8** : en-tête, légende et notes gardent les classes `wview-*`, partagées
+  avec la vue Météo.
+- **Écart visible** : la **colonne des tracés est entièrement figée** au défilement
+  horizontal (avant, seul l'en-tête « Tracé » l'était) ; en-têtes de jours 14 px (12,8 avant),
+  avertissement 14 px (13,1 avant).
+- **Recette** : par rapport aux captures finales du lot 6, seules les 4 vues « Meilleur jour »
+  changent (la comparaison avec les captures « avant » du lot montrait aussi la notification
+  « 2 tracés importés » capturée à un autre moment de son apparition : aléa de l'outil). Sonde
+  headless sur le build (mobile) : clic sur une case → onglet Météo, colonne figée, aucune
+  erreur console.
+- **Mesures** :
+
+  | | Après le lot 6 | Après le lot 7 |
+  | --- | --- | --- |
+  | JS de l'app (gzip) | 166,13 kB | 166,48 kB = 146,90 + 19,58 (`radix`) ; budget : **+38,8 kB sur 50** |
+  | CSS de l'app | 70,99 kB (13,59 gzip) | 71,63 kB (13,64 gzip) |
+  | Lignes de `legacy.css` | 791 | 633 |
 
 ### Lot 8 — Onglet « Météo » par altitude (L)
 - **Fichiers** : `WeatherView.tsx`.
