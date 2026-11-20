@@ -128,3 +128,11 @@ par fonctionnalité validée.
   mobile : au backlog) ; 9 suppression de `legacy.css`. Budget JS : +42,0 kB gzip sur 50.
   Détail et décisions : `docs/specs/migration-ui.md` (version courte), texte intégral dans
   `docs/archives/`.
+- [x] **Nettoyage pour réduire le contexte de l'agent** (20/11/2026) — spec de migration
+  archivée (`docs/archives/`, 90 → 5 ko pour la version courte), conventions de
+  `src/components/CLAUDE.md` regroupées (17 → 15 ko), `CLAUDE.md` racine allégé (12,0 →
+  10,5 ko, lu à chaque session), captures de recette 177 → 3 Mo, 10 branches fusionnées
+  supprimées. `/verifier` passe par `scripts/verifier.sh` (un conteneur, sortie courte),
+  lanceur de sondes `run.sh sonde`, lecture interdite des gros fichiers générés
+  (`.claude/settings.json`). Commande **`/nettoyer`** pour les prochains passages (audit,
+  propositions, application après validation).
