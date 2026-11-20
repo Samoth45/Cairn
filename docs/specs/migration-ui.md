@@ -1,6 +1,6 @@
 # Migration de l'interface vers Tailwind CSS v4 + shadcn/ui
 
-Statut : en cours (spec validée le 18/11/2026, décisions en §9) — lots 0 à 8 faits (19-20/11/2026)
+Statut : **terminée** (spec validée le 18/11/2026, décisions en §9) — lots 0 à 9 faits (19-20/11/2026), version 1.1.0
 
 Source : `docs/BACKLOG-spec-migration-ui.md`. Cette spec ne migre rien : elle sert de feuille de
 route. Chaque lot du §5 est une tâche autonome, exécutable par Claude Code dans une session
@@ -113,26 +113,26 @@ Rien de visuel dans ces dossiers, donc rien n'y est concerné par la migration.
 
 | Métrique | Avant | Après (§10) |
 | --- | --- | --- |
-| Feuilles CSS maison | 1 (`src/styles.css`) | |
-| Lignes de CSS maison | 1 804 | |
-| Règles / sélecteurs / déclarations | 262 / 275 / 959 | |
-| Classes CSS distinctes | 187 | |
-| Variables de couleur (`:root`) | 32, redéfinies en sombre (44-77) | |
-| Couleurs littérales distinctes | 66 (61 dans les variables, 5 en dur : 976, 1013, 1581, 1771, 1791) | |
-| Valeurs d'espacement distinctes | 22 | |
-| Tailles de police distinctes | 20 | |
-| Rayons d'angle distincts | 9 | |
-| Ombres distinctes | 13 | |
-| Niveaux de superposition (`z-index`) | 8 | |
-| Media queries | 2, **même point de rupture** `max-width: 767px` (1056 et 1656) | |
-| `!important` | 4 | |
-| `style={{…}}` dans le JSX | 14 (7 fichiers) | |
-| Build : CSS maison | 22,19 kB (5,34 kB gzip) | |
-| Build : CSS Leaflet | 15,09 kB (6,36 kB gzip) | |
-| Build : JS de l'app | 397,55 kB (127,71 kB gzip) | |
-| Build : JS Leaflet | 167,42 kB (49,36 kB gzip) | |
-| Build : runtime | 0,59 kB | |
-| Dépendances UI | 0 | |
+| Feuilles CSS maison | 1 (`src/styles.css`) | 2 : `src/index.css` (Tailwind, tokens, base) et `src/styles/leaflet.css` |
+| Lignes de CSS maison | 1 804 | 333 (245 + 88) |
+| Règles / sélecteurs / déclarations | 262 / 275 / 959 | 23 / 30 / 179 (dont ~140 déclarations de tokens) |
+| Classes CSS distinctes | 187 | 14, toutes de Leaflet (`leaflet.css`) ; le reste en utilitaires |
+| Variables de couleur (`:root`) | 32, redéfinies en sombre (44-77) | 38 tokens (noms shadcn + Cairn), redéfinis en sombre |
+| Couleurs littérales distinctes | 66 (61 dans les variables, 5 en dur : 976, 1013, 1581, 1771, 1791) | 65 : 62 dans les tokens, 3 dans `leaflet.css` (ombre, thème sombre de Leaflet) ; 0 en dur dans les classes |
+| Valeurs d'espacement distinctes | 22 | échelle de Tailwind |
+| Tailles de police distinctes | 20 | échelle de Tailwind + `text-2xs` |
+| Rayons d'angle distincts | 9 | échelle de shadcn (`--radius`) |
+| Ombres distinctes | 13 | 4 tokens (`float`, `drawer`, `overlay`, `modal`) + celles de shadcn |
+| Niveaux de superposition (`z-index`) | 8 | 8 utilitaires nommés (`z-map-control` … `z-popover`) |
+| Media queries | 2, **même point de rupture** `max-width: 767px` (1056 et 1656) | 0 dans les CSS ; un seul point de rupture, `max-md:` / `md:` |
+| `!important` | 4 | 0 |
+| `style={{…}}` dans le JSX | 14 (7 fichiers) | 14 : 13 couleurs ou dimensions de données (8 fichiers) + 1 dans `ui/toggle-group` |
+| Build : CSS maison | 22,19 kB (5,34 kB gzip) | 75,22 kB (13,33 kB gzip), Tailwind et shadcn compris |
+| Build : CSS Leaflet | 15,09 kB (6,36 kB gzip) | 15,09 kB (6,36 kB gzip) |
+| Build : JS de l'app | 397,55 kB (127,71 kB gzip) | 456,71 kB (148,62 kB gzip) + chunk `radix` 66,87 kB (21,12 kB gzip) = **169,74 kB gzip, +42,0 kB** (budget 50) |
+| Build : JS Leaflet | 167,42 kB (49,36 kB gzip) | 167,43 kB (49,36 kB gzip) |
+| Build : runtime | 0,59 kB | 0,59 kB |
+| Dépendances UI | 0 | 6 + 3 de développement (cf. §10) |
 
 Le build tourne sans aucune modification de configuration.
 
@@ -1072,6 +1072,25 @@ déployable. **Démarrage de chaque lot** :
     le propriétaire au moment de pousser sur `main`.
 - **Composants shadcn** : aucun.
 
+**Résultat du lot 9 (réalisé le 20/11/2026, branche `ui/lot-9-nettoyage`)**
+- **`legacy.css` supprimé**, couche `legacy` retirée, avec son bloc de compatibilité
+  (`all: revert`). Classes sans style : déjà retirées aux lots 5, 7 et 8.
+- **Migré** : mise en page (`App.tsx`, `MapView.tsx`), écrans de chargement et d'erreur
+  (`FULL_SCREEN_MESSAGE`), cercle de chargement (`SPINNER`, `animate-spin`), dans
+  `classes.ts`.
+- **Retombées du preflight** une fois le bloc retiré, corrigées :
+  - **hauteur de ligne** : le preflight impose 1,5 sur `html` (en dur, `--default-line-height`
+    sans effet) ; tout se décalait de quelques pixels → `leading-[normal]` sur `html` dans la
+    couche `base` ;
+  - **curseur** : Tailwind v4 laisse le curseur par défaut sur les boutons → règle `cursor:
+    pointer` dans la couche `base` ;
+  - **marges** : message « Aucun tracé », message d'attente des vues, écran d'erreur.
+- **Recette** : les 24 captures sont **identiques au pixel près** à celles du lot 4.
+- **Version 1.1.0** (`package.json` + lockfile). `npm audit` : 4 failles modérées dans le CLI
+  `shadcn` (dépendance de développement, hors du site).
+- **Mesures** : §2.2 et §10 remplis. JS : **+42,0 kB gzip sur 50** ; CSS maison : 1 804 →
+  333 lignes.
+
 ---
 
 ## 6. Vérification et recette (story 3.3)
@@ -1301,12 +1320,12 @@ On reprend exactement le tableau du §2.2 et on remplit la colonne « Après ».
 
 | Métrique supplémentaire | Avant | Après |
 | --- | --- | --- |
-| Lignes de CSS restantes (`index.css` + `styles/*.css`) | 1 804 | |
-| Composants `ui/` (shadcn) | 0 | |
-| Valeurs arbitraires `[…]` dans le JSX | 0 | |
-| Couleurs en dur dans le JSX (hors couleurs de données) | 0 | |
-| Dépendances UI ajoutées (et poids gzip) | — | |
-| Temps de build | 0,6 s | |
+| Lignes de CSS restantes (`index.css` + `styles/*.css`) | 1 804 | 333 |
+| Composants `ui/` (shadcn) | 0 | 14 : alert, badge, button, card, checkbox, dialog, input, label, native-select, radio-group, table, tabs, toggle, toggle-group |
+| Valeurs arbitraires `[…]` dans le JSX | 0 | 10 dans les composants de Cairn (hors `ui/` et variantes `data-[…]`) : largeurs `min()` du panneau de coloration et du tiroir, 2 ombres internes (liserés de sélection), 2 grilles, `max-h-[30vh]`, `min-h-[1em]`, `min-w-[9.5em]`, `align-[-1px]` |
+| Couleurs en dur dans le JSX (hors couleurs de données) | 0 | 0 dans les classes (le logo SVG et les tracés Leaflet gardent leurs couleurs, comme avant) |
+| Dépendances UI ajoutées (et poids gzip) | — | `radix-ui`, `lucide-react`, `cn`, `class-variance-authority`, `tw-animate-css`, `@fontsource-variable/geist` (polices 29,4 + 31 kB, chargées à part) ; en développement `tailwindcss`, `@tailwindcss/vite`, `shadcn`. JS : +42,0 kB gzip au total |
+| Temps de build | 0,6 s | 1,5 s |
 
 Méthode : le même script d'analyse que pour le §2.2, appliqué aux CSS restants, et
 `npm run build` sans changement de configuration.

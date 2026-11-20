@@ -165,3 +165,10 @@ par fonctionnalité validée.
   tard). Tiroir actuel conservé (pas de Sheet), case de visibilité en Checkbox de shadcn,
   renommage en Input, contour au focus clavier sur la pastille de couleur. `legacy.css` :
   291 → 106 lignes. JS +1,3 kB gzip (total +41,9 sur 50). Spec : `docs/specs/migration-ui.md`.
+- [x] **Migration UI — lot 9, fin de la migration** (20/11/2026) — `legacy.css` et sa couche
+  supprimés ; mise en page, écrans de chargement / d'erreur et cercle de chargement en
+  Tailwind ; hauteur de ligne `normal` et main sur les boutons rétablies dans la couche
+  `base`. Captures identiques au pixel près au lot précédent. Bilan : CSS maison 1 804 → 333
+  lignes (tokens et Leaflet), 14 composants shadcn, JS +42,0 kB gzip (budget 50). README
+  (choix techniques, badges, difficulté résolue). **Version 1.1.0.** Spec :
+  `docs/specs/migration-ui.md`.

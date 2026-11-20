@@ -14,8 +14,9 @@ statistiques, météo détaillée par altitude pour choisir le meilleur jour / h
   pngquant + oxipng dans un conteneur jetable). Le garder à jour quand une fonctionnalité
   visible ou un choix technique qu'il cite change.
 - `docs/backlog.md` — idées en attente (simplification des GPX denses, montées de version
-  majeure en attente : TypeScript 7, bloqué par `typescript-eslint` ; migration UI Tailwind v4 +
-  shadcn/ui en 10 lots, spec `docs/specs/migration-ui.md`, lots 0 à 8 faits).
+  majeure en attente : TypeScript 7, bloqué par `typescript-eslint` ; problèmes de l'interface
+  mobile, liste à compléter). Migration UI Tailwind v4 + shadcn/ui **terminée** (10 lots,
+  version 1.1.0, spec `docs/specs/migration-ui.md`).
 - `docs/recette/` — recette visuelle de la migration UI : captures avant/après du build
   (conteneur jetable, météo rejouée, horloge figée) et mesure des contrastes ; mode d'emploi
   dans son `README.md`.
@@ -101,8 +102,8 @@ fake-indexeddb, ESLint 10 (`defineConfig` ; config `recommended` complète de Re
 Compiler comprises, cf. `src/components/CLAUDE.md`).
 Graphiques : **SVG maison** (pas de recharts), cf. `ElevationProfile.tsx` ; garder ce choix.
 Styles : **Tailwind CSS v4** (`@tailwindcss/vite`) + **shadcn/ui** (Radix, preset Nova, icônes
-Lucide), migration en cours par lots (`docs/specs/migration-ui.md`) ; conventions et pièges
-dans `src/components/CLAUDE.md`. Alias `@` → `src` (Vite + `tsconfig.json` + `tsconfig.app.json`).
+Lucide, police Geist), tout en utilitaires dans le JSX (migration terminée au 20/11/2026,
+`docs/specs/migration-ui.md`) ; conventions et pièges dans `src/components/CLAUDE.md`. Alias `@` → `src` (Vite + `tsconfig.json` + `tsconfig.app.json`).
 
 ## Architecture
 
@@ -134,9 +135,9 @@ src/
   services/           elevation.ts, weather.ts, weatherCache.ts — détail dans src/services/CLAUDE.md
   components/         UI et carte — détail dans src/components/CLAUDE.md ; ui/ = composants
                       shadcn (ajoutés par le CLI, components.json)
-  index.css           entrée CSS : couches, Tailwind, tokens clair/sombre, @theme
-  styles/             legacy.css (ancienne feuille, couche « legacy », vidée lot par lot),
-                      leaflet.css (surcharges Leaflet, hors couche)
+  index.css           entrée CSS : Tailwind, police, tokens clair/sombre, @theme, échelle des
+                      superpositions (z-*), base (hauteur de ligne, curseur des boutons)
+  styles/leaflet.css  surcharges Leaflet, hors couche (seul CSS maison avec index.css)
   App.tsx             orchestration : sélection, analyse mémoïsée du tracé sélectionné, zoom
                       (fitRequest avec nonce), toasts, tiroir mobile, profil, paramètres, durée DIN,
                       heure météo affichée (hourSelection) partagée panneau ↔ infobulles carte
