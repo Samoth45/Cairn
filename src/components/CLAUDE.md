@@ -121,9 +121,10 @@ Panneau latéral fixe ≥ 768 px, tiroir + bouton flottant en dessous.
 
 ## Styles : Tailwind CSS v4 + shadcn/ui (migration en cours)
 
-Migration par lots, cf. `docs/specs/migration-ui.md` (lots 0 à 3 et 5 à 7 faits :
+Migration par lots, cf. `docs/specs/migration-ui.md` (lots 0 à 3 et 5 à 8 faits :
 base, police Geist, boutons, pastilles, icônes, fenêtre Paramètres, notifications, zone de
-dépôt, panneau du tracé, contrôles de la carte, profil, infobulles, onglet « Meilleur jour »).
+dépôt, panneau du tracé, contrôles de la carte, profil, infobulles, onglets « Meilleur jour »
+et « Météo »).
 Recette visuelle : `docs/recette/` (captures avant/après sur le build).
 
 - **Fichiers CSS** :
@@ -215,6 +216,16 @@ Recette visuelle : `docs/recette/` (captures avant/après sur le build).
   cellules `sticky` perdent leurs bordures en `border-collapse`), bordures sur les cellules et
   non sur les lignes, cellule figée `sticky left-0 z-2 bg-card`. Un `Input` dans une ligne
   flexible : `shrink-0` (son `min-w-0` le laisse sinon rétrécir et couper la valeur).
+  Tableau météo (`WeatherView.tsx`) : même principe ; états cumulables d'une case (heure
+  affichée, nuit, alerte) combinés par `cn()` dans l'ordre de priorité, la dernière classe
+  de fond l'emportant (`headState`).
+- **Vues plein écran** (Météo, Meilleur jour) : habillage commun dans `ViewShell.tsx`
+  (`ViewSection`, `ViewHeader`, `ViewPlaceholder`, `ViewFooter` = légende + notes) ; toute
+  nouvelle vue de ce type le reprend.
+- **Choix exclusif en boutons** (jours de la Météo) : ToggleGroup `type="single"`, variante
+  Cairn `chip` (`ui/toggle.tsx`) ; ignorer la valeur vide dans `onValueChange` (re-clic sur
+  l'élément actif). **Alert** : variantes `destructive` (retouchée : fond teinté, texte
+  normal) et `info` pour les alertes météo.
 - **SVG du profil** : couleurs par utilitaires (`stroke-border`, `fill-muted-foreground`…),
   épaisseurs et pointillés en attributs (`strokeWidth`, `strokeDasharray`).
 - **Onglets** (`ui/tabs.tsx`) : variante `pill` (fond carte, contour, onglet actif vert),

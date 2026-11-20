@@ -154,3 +154,9 @@ par fonctionnalité validée.
   atténuée, contour de focus au clavier), avertissement en Alert, heure de départ en Input.
   Colonne des tracés désormais entièrement figée au défilement. JS +0,35 kB gzip (total +38,8
   sur 50). Spec : `docs/specs/migration-ui.md`.
+- [x] **Migration UI — lot 8** (20/11/2026) — onglet « Météo » par altitude : jours en
+  ToggleGroup de Radix (nouveau : choix au clavier), alertes en Alert (`destructive`, `info`),
+  tableau en Table de shadcn avec cases en Tailwind (nuit, heure affichée, alertes, jauge de
+  nuages inchangées), en-tête / légende / notes partagés avec « Meilleur jour »
+  (`ViewShell.tsx`). `legacy.css` : 633 → 291 lignes. JS +1,8 kB gzip (total +40,6 sur 50).
+  Spec : `docs/specs/migration-ui.md`.

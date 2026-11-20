@@ -1,6 +1,6 @@
 # Migration de l'interface vers Tailwind CSS v4 + shadcn/ui
 
-Statut : en cours (spec validée le 18/11/2026, décisions en §9) — lots 0 à 3 et 5 à 7 faits (19-20/11/2026)
+Statut : en cours (spec validée le 18/11/2026, décisions en §9) — lots 0 à 3 et 5 à 8 faits (19-20/11/2026)
 
 Source : `docs/BACKLOG-spec-migration-ui.md`. Cette spec ne migre rien : elle sert de feuille de
 route. Chaque lot du §5 est une tâche autonome, exécutable par Claude Code dans une session
@@ -993,6 +993,39 @@ déployable. **Démarrage de chaque lot** :
 - **Composants shadcn** : `toggle-group`, `alert`, `badge`.
 - **Risque** : élevé, c'est le cœur métier. Faire des captures par jour, de jour et de nuit,
   dans les 2 thèmes.
+
+**Résultat du lot 8 (réalisé le 20/11/2026, branche `ui/lot-8-meteo`)**
+- **Jours** : ToggleGroup de Radix (`type="single"`, `aria-label="Jour"`), variante Cairn
+  `chip` ajoutée à `ui/toggle.tsx` (contour, fond `accent` et liseré vert pour le jour
+  affiché). Re-cliquer le jour affiché ne le désélectionne pas (valeur vide ignorée).
+  **Nouveau** : navigation au clavier (flèches, puis Espace ou Entrée).
+- **Alertes** : Alert `role="note"`, liseré gauche ; variantes retouchées dans
+  `ui/alert.tsx` : `destructive` (fond `destructive-muted`, texte normal, au lieu du texte
+  rouge de shadcn, inutilisé ailleurs) et `info` ajoutée (isotherme sous le sommet).
+- **Tableau** : Table de shadcn dans un cadre arrondi, `border-separate`, colonne des
+  libellés figée, `aria-label="Météo par altitude et par heure"` (l'outil de captures l'attend
+  à la place de `.wtable`). Priorités de fond des cases d'en-tête reprises de l'ancienne
+  feuille (heure affichée > nuit > alerte d'isotherme) par `cn()` (fonction `headState`).
+  Cases : couleur en ligne (donnée), nuit `brightness-88 saturate-35`, alerte
+  `inset-ring-2 inset-ring-destructive`, heure affichée `outline-primary`.
+- **Habillage partagé** : `src/components/ViewShell.tsx` (`ViewSection`, `ViewHeader`,
+  `ViewPlaceholder`, `ViewFooter` avec légende et notes), utilisé par la Météo et par
+  « Meilleur jour » : plus aucune classe `wview-*`. Classes sans style retirées au passage
+  (`wday-name`, `wt-col`, `wt-arrow`, `muted`).
+- **Écarts visibles** (mineurs) : tailles Tailwind (titre 20 px au lieu de 19,2, sous-titre
+  14 au lieu de 14,4, température des cases 16 au lieu de 16,8) ; lignes d'en-tête du
+  tableau ~2 px plus serrées.
+- **Recette** : capture ajoutée à l'outil (Météo au 3e jour, `3-meteo-jour3`). 12 captures sur
+  24 diffèrent, toutes Météo et Meilleur jour ; « Heure » décentré corrigé à la comparaison.
+  Sonde headless sur le build (mobile) : jour à la souris et au clavier, re-clic sans effet,
+  clic sur une heure, colonne figée, aucune erreur console.
+- **Mesures** :
+
+  | | Après le lot 7 | Après le lot 8 |
+  | --- | --- | --- |
+  | JS de l'app (gzip) | 166,48 kB | 168,26 kB = 147,98 + 20,28 (`radix`) ; budget : **+40,6 kB sur 50** |
+  | CSS de l'app | 71,63 kB (13,64 gzip) | 74,48 kB (13,65 gzip) |
+  | Lignes de `legacy.css` | 633 | 291 |
 
 ### Lot 9 — Nettoyage final (S)
 - **Fichiers** : `src/styles/legacy.css` (supprimé), `src/index.css`, `src/main.tsx`,

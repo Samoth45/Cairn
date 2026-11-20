@@ -182,9 +182,13 @@ async function scenario(browser, vpName, theme) {
 
   // Onglet Météo par altitude.
   await page.click('[aria-label="Vue"] [role="tab"][aria-label="Météo"]');
-  await page.waitForSelector('.wtable', { timeout: 15000 });
+  await page.waitForSelector('.wtable, table[aria-label="Météo par altitude et par heure"]', { timeout: 15000 }); // .wtable avant le lot 8
   await settle(page, 800);
   await shot(page, `${tag}-3-meteo`);
+  // Même vue, 3e jour de la prévision (lot 8 : boutons des jours, alertes, nuit).
+  await page.click('[aria-label="Jour"] > :nth-child(3)');
+  await settle(page, 600);
+  await shot(page, `${tag}-3-meteo-jour3`);
 
   // Onglet Meilleur jour.
   await page.click('[aria-label="Vue"] [role="tab"][aria-label="Meilleur jour"]');
