@@ -188,7 +188,7 @@ async function scenario(browser, vpName, theme) {
 
   // Onglet Meilleur jour.
   await page.click('[aria-label="Vue"] [role="tab"][aria-label="Meilleur jour"]');
-  await page.waitForSelector('.stable', { timeout: 15000 });
+  await page.waitForSelector('.stable, table[aria-label="Scores par jour"]', { timeout: 15000 }); // .stable avant le lot 7
   await settle(page, 1500);
   await shot(page, `${tag}-4-meilleur-jour`);
 

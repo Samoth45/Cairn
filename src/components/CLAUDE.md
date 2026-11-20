@@ -121,9 +121,9 @@ Panneau latéral fixe ≥ 768 px, tiroir + bouton flottant en dessous.
 
 ## Styles : Tailwind CSS v4 + shadcn/ui (migration en cours)
 
-Migration par lots, cf. `docs/specs/migration-ui.md` (lots 0 à 3, 5 et 6 faits :
+Migration par lots, cf. `docs/specs/migration-ui.md` (lots 0 à 3 et 5 à 7 faits :
 base, police Geist, boutons, pastilles, icônes, fenêtre Paramètres, notifications, zone de
-dépôt, panneau du tracé, contrôles de la carte, profil, infobulles).
+dépôt, panneau du tracé, contrôles de la carte, profil, infobulles, onglet « Meilleur jour »).
 Recette visuelle : `docs/recette/` (captures avant/après sur le build).
 
 - **Fichiers CSS** :
@@ -211,6 +211,10 @@ Recette visuelle : `docs/recette/` (captures avant/après sur le build).
   `disabled:pointer-events-auto` (sinon l'infobulle ne s'affiche pas).
 - **`NativeSelect`** : `className` va au conteneur ; `selectClassName` au `<select>` (ex.
   `max-md:text-sm` dans le panneau de coloration, trop étroit pour du 16 px).
+- **Tableau à colonne figée** (`SummaryView.tsx`) : `border-separate border-spacing-0` (les
+  cellules `sticky` perdent leurs bordures en `border-collapse`), bordures sur les cellules et
+  non sur les lignes, cellule figée `sticky left-0 z-2 bg-card`. Un `Input` dans une ligne
+  flexible : `shrink-0` (son `min-w-0` le laisse sinon rétrécir et couper la valeur).
 - **SVG du profil** : couleurs par utilitaires (`stroke-border`, `fill-muted-foreground`…),
   épaisseurs et pointillés en attributs (`strokeWidth`, `strokeDasharray`).
 - **Onglets** (`ui/tabs.tsx`) : variante `pill` (fond carte, contour, onglet actif vert),

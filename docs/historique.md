@@ -149,3 +149,8 @@ par fonctionnalité validée.
   natives, champ d'heure ; élargi à 320 px), profil altimétrique et infobulles de la carte en
   Tailwind, bouton « Profil » en Button. Vérifié sur le build (infobulles, survol du profil).
   JS +1,0 kB gzip (total +38,4 sur 50). Spec : `docs/specs/migration-ui.md`.
+- [x] **Migration UI — lot 7** (20/11/2026) — onglet « Meilleur jour » : Table de shadcn, cases
+  de score en boutons Tailwind (couleur de donnée en ligne, étoile et contour doré, fiabilité
+  atténuée, contour de focus au clavier), avertissement en Alert, heure de départ en Input.
+  Colonne des tracés désormais entièrement figée au défilement. JS +0,35 kB gzip (total +38,8
+  sur 50). Spec : `docs/specs/migration-ui.md`.

@@ -15,7 +15,7 @@ statistiques, météo détaillée par altitude pour choisir le meilleur jour / h
   visible ou un choix technique qu'il cite change.
 - `docs/backlog.md` — idées en attente (simplification des GPX denses, montées de version
   majeure en attente : TypeScript 7, bloqué par `typescript-eslint` ; migration UI Tailwind v4 +
-  shadcn/ui en 10 lots, spec `docs/specs/migration-ui.md`, lots 0 à 3, 5 et 6 faits).
+  shadcn/ui en 10 lots, spec `docs/specs/migration-ui.md`, lots 0 à 3 et 5 à 7 faits).
 - `docs/recette/` — recette visuelle de la migration UI : captures avant/après du build
   (conteneur jetable, météo rejouée, horloge figée) et mesure des contrastes ; mode d'emploi
   dans son `README.md`.
