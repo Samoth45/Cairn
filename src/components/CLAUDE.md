@@ -121,10 +121,10 @@ Panneau latéral fixe ≥ 768 px, tiroir + bouton flottant en dessous.
 
 ## Styles : Tailwind CSS v4 + shadcn/ui (migration en cours)
 
-Migration par lots, cf. `docs/specs/migration-ui.md` (lots 0 à 3 et 5 à 8 faits :
+Migration par lots, cf. `docs/specs/migration-ui.md` (lots 0 à 8 faits :
 base, police Geist, boutons, pastilles, icônes, fenêtre Paramètres, notifications, zone de
 dépôt, panneau du tracé, contrôles de la carte, profil, infobulles, onglets « Meilleur jour »
-et « Météo »).
+et « Météo », panneau latéral et tiroir ; reste le lot 9, nettoyage final).
 Recette visuelle : `docs/recette/` (captures avant/après sur le build).
 
 - **Fichiers CSS** :
@@ -226,6 +226,12 @@ Recette visuelle : `docs/recette/` (captures avant/après sur le build).
   Cairn `chip` (`ui/toggle.tsx`) ; ignorer la valeur vide dans `onValueChange` (re-clic sur
   l'élément actif). **Alert** : variantes `destructive` (retouchée : fond teinté, texte
   normal) et `info` pour les alertes météo.
+- **Tiroir mobile** (`Sidebar.tsx`) : pas de Sheet ; `aside` avec `data-open`, glissement
+  par `max-md:-translate-x-full` / `max-md:data-[open=true]:translate-x-0`, ombre
+  `shadow-drawer`. Fond grisé et bouton « Cairn » dans `App.tsx` (`md:hidden`). L'outil de
+  captures repère le tiroir par `aside[aria-label="Tracés"]`.
+- **Checkbox** (`ui/checkbox.tsx`, retouchée comme `radio-group` : fond `bg-card`) :
+  `onCheckedChange={(v) => …(v === true)}` (la valeur peut être `'indeterminate'`).
 - **SVG du profil** : couleurs par utilitaires (`stroke-border`, `fill-muted-foreground`…),
   épaisseurs et pointillés en attributs (`strokeWidth`, `strokeDasharray`).
 - **Onglets** (`ui/tabs.tsx`) : variante `pill` (fond carte, contour, onglet actif vert),

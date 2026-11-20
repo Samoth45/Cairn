@@ -160,3 +160,8 @@ par fonctionnalité validée.
   nuages inchangées), en-tête / légende / notes partagés avec « Meilleur jour »
   (`ViewShell.tsx`). `legacy.css` : 633 → 291 lignes. JS +1,8 kB gzip (total +40,6 sur 50).
   Spec : `docs/specs/migration-ui.md`.
+- [x] **Migration UI — lot 4** (20/11/2026) — panneau latéral, liste des tracés et tiroir
+  mobile en Tailwind, sans correction mobile (décision du propriétaire : spec à part plus
+  tard). Tiroir actuel conservé (pas de Sheet), case de visibilité en Checkbox de shadcn,
+  renommage en Input, contour au focus clavier sur la pastille de couleur. `legacy.css` :
+  291 → 106 lignes. JS +1,3 kB gzip (total +41,9 sur 50). Spec : `docs/specs/migration-ui.md`.
