@@ -8,10 +8,13 @@ const alertVariants = cva(
     variants: {
       variant: {
         default: "bg-card text-card-foreground",
-        destructive:
-          "bg-card text-destructive *:data-[slot=alert-description]:text-destructive/90 *:[svg]:text-current",
-        // Cairn (lot 5 de docs/specs/migration-ui.md) : encadré d'avertissement (bloc soleil).
+        // Cairn (lot 8 de docs/specs/migration-ui.md) : alerte météo sur fond teinté (ancien
+        // .walert), au lieu du texte rouge de shadcn.
+        destructive: "border-destructive bg-destructive-muted text-foreground",
+        // Cairn (lot 5) : encadré d'avertissement (bloc soleil).
         warning: "border-warning-border bg-warning text-foreground",
+        // Cairn (lot 8) : information (isotherme sous le sommet, ancien .walert-freezing).
+        info: "border-info-border bg-info text-foreground",
       },
     },
     defaultVariants: {

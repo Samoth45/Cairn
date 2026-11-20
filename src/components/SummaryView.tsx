@@ -19,6 +19,7 @@ import {
   type DayScore,
 } from '../lib/score';
 import { formatDuration } from '../lib/format';
+import { ViewFooter, ViewHeader, ViewPlaceholder, ViewSection } from './ViewShell';
 
 interface Props {
   entries: TrackForecastEntry[];
@@ -81,30 +82,24 @@ export function SummaryView(p: Props) {
   );
 
   return (
-    // En-tête, légende et notes : classes `wview-*` partagées avec la vue Météo (lot 8).
-    <section className="wview">
-      <header className="wview-header">
-        <div className="wview-title">
-          <h2>Meilleur jour</h2>
-          <span className="wview-track">Score de 0 à 100 par tracé, sur la durée de la rando</span>
-        </div>
-        <div className="wview-meta">
-          <label className="inline-flex items-center gap-1">
-            Départ à
-            <Input
-              type="time"
-              step={900}
-              value={p.departureTime}
-              onChange={(e) => e.target.value && p.onDepartureTime(e.target.value)}
-              className="h-7 w-auto shrink-0 px-1.5 text-foreground max-md:text-sm"
-            />
-          </label>
-          <span>{MODEL_LABELS[p.model]}</span>
-          <Button variant="outline" size="sm" onClick={p.onRefresh} disabled={p.loading}>
-            {p.loading ? 'Chargement…' : 'Actualiser'}
-          </Button>
-        </div>
-      </header>
+    // Habillage (en-tête, légende, notes) partagé avec la vue Météo : ViewShell.tsx.
+    <ViewSection>
+      <ViewHeader title="Meilleur jour" subtitle="Score de 0 à 100 par tracé, sur la durée de la rando">
+        <label className="inline-flex items-center gap-1">
+          Départ à
+          <Input
+            type="time"
+            step={900}
+            value={p.departureTime}
+            onChange={(e) => e.target.value && p.onDepartureTime(e.target.value)}
+            className="h-7 w-auto shrink-0 px-1.5 text-foreground max-md:text-sm"
+          />
+        </label>
+        <span>{MODEL_LABELS[p.model]}</span>
+        <Button variant="outline" size="sm" onClick={p.onRefresh} disabled={p.loading}>
+          {p.loading ? 'Chargement…' : 'Actualiser'}
+        </Button>
+      </ViewHeader>
 
       <Alert variant="warning" role="note" className="mb-2.5 block rounded-md px-2.5 py-1.75 text-sm/snug">
         ⚠ La fiabilité des prévisions baisse fortement au-delà de 3 à 5 jours : les jours lointains sont atténués et
@@ -112,7 +107,7 @@ export function SummaryView(p: Props) {
       </Alert>
 
       {p.entries.length === 0 ? (
-        <p className="wview-placeholder">Importez des tracés pour comparer les jours.</p>
+        <ViewPlaceholder>Importez des tracés pour comparer les jours.</ViewPlaceholder>
       ) : (
         // Table de shadcn (elle défile horizontalement) dans un cadre arrondi. Bordures sur les
         // cellules (border-separate, pour la colonne figée) : pas de bordure de ligne.
@@ -179,24 +174,15 @@ export function SummaryView(p: Props) {
         </div>
       )}
 
-      <footer className="wview-footer">
-        <div className="temp-legend" aria-label="Échelle des scores">
-          {[0, 20, 40, 60, 80, 100].map((s) => {
-            const c = scoreColor(s);
-            return (
-              <span key={s} style={{ background: c.bg, color: c.fg }}>
-                {s}
-              </span>
-            );
-          })}
-        </div>
-        <p className="wview-notes">
-          Le score part de 100 et retire des points pour la pluie et l’orage (là où vous serez, à l’heure où vous y
-          passerez), les rafales et la nébulosité au sommet, et le froid extrême (ressenti). Poids réglables dans ⚙
-          Paramètres. Survolez une case pour le détail, cliquez pour ouvrir la météo de ce jour.
-        </p>
-      </footer>
-    </section>
+      <ViewFooter
+        legendLabel="Échelle des scores"
+        legend={[0, 20, 40, 60, 80, 100].map((s) => ({ key: s, label: String(s), ...scoreColor(s) }))}
+      >
+        Le score part de 100 et retire des points pour la pluie et l’orage (là où vous serez, à l’heure où vous y
+        passerez), les rafales et la nébulosité au sommet, et le froid extrême (ressenti). Poids réglables dans ⚙
+        Paramètres. Survolez une case pour le détail, cliquez pour ouvrir la météo de ce jour.
+      </ViewFooter>
+    </ViewSection>
   );
 }
 
