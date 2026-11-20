@@ -2,7 +2,7 @@ import { Download } from 'lucide-react';
 import type { DinSpeeds, Track } from '../types';
 import { Button } from '@/components/ui/button';
 import type { ReactNode } from 'react';
-import { LABEL_CAPS } from './classes';
+import { LABEL_CAPS, SPINNER } from './classes';
 import type { TrackStats as Stats } from '../lib/stats';
 import type { ElevationStatus } from '../hooks/useElevationFetcher';
 import { dinDurationHours } from '../lib/din';
@@ -54,7 +54,10 @@ export function TrackStats({ track, stats, din, elevationStatus, onRetryElevatio
 
       <p className="mt-2 mb-0 text-xs text-muted-foreground">
         {elevationStatus === 'loading' ? (
-          <span className="spinner-text">Récupération des altitudes…</span>
+          <span>
+            <span className={SPINNER} aria-hidden="true" />
+            Récupération des altitudes…
+          </span>
         ) : elevationStatus === 'error' ? (
           <>
             Altitudes indisponibles.{' '}

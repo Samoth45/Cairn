@@ -1,11 +1,7 @@
-/* Entrée CSS de Cairn : Tailwind CSS v4 + tokens (shadcn/ui), cf. docs/specs/migration-ui.md.
-   Couches : l'ancienne feuille (legacy) passe après le preflight (base) mais avant les
-   utilitaires Tailwind, qui l'emportent donc dès qu'un composant migré les utilise.
+/* Entrée CSS de Cairn : Tailwind CSS v4 + tokens (shadcn/ui). Toute l'interface est en
+   utilitaires dans les composants (migration terminée, cf. docs/specs/migration-ui.md).
    Les surcharges de Leaflet restent hors couche (src/styles/leaflet.css). */
-@layer theme, base, legacy, components, utilities;
-
 @import 'tailwindcss';
-@import './styles/legacy.css' layer(legacy);
 @import './styles/leaflet.css';
 /* Animations et variantes (data-open…) utilisées par les composants shadcn/ui (preset Nova). */
 @import 'tw-animate-css';
@@ -221,16 +217,29 @@
   z-index: 4100;
 }
 
-/* Base des composants shadcn/ui. Sans effet sur l'ancienne interface : la couche legacy,
-   plus loin dans l'ordre, fixe elle-même bordures, couleurs et police. */
+/* Base (après le preflight de Tailwind) : bordures et contour de focus de shadcn, police,
+   couleurs. L'application occupe tout l'écran sans défilement de page : chaque zone (panneau,
+   vues) défile elle-même. */
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+  /* Hauteur de ligne `normal` comme avant la migration (le preflight impose 1,5) ; les
+     utilitaires de taille (text-sm…) fixent la leur. */
+  html {
+    @apply font-sans leading-[normal] antialiased;
+  }
   body {
     @apply bg-background text-foreground;
   }
-  html {
-    @apply font-sans;
+  html,
+  body,
+  #root {
+    @apply h-full overflow-hidden;
+  }
+  /* Tailwind v4 laisse le curseur par défaut sur les boutons : on garde la main. */
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
   }
 }

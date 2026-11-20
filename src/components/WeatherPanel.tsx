@@ -5,7 +5,7 @@ import { IconButton } from './IconButton';
 import { Alert } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
-import { LABEL_CAPS, SUB_LINE } from './classes';
+import { LABEL_CAPS, SPINNER, SUB_LINE } from './classes';
 import type { WeatherModel } from '../types';
 import type { WeatherState } from '../hooks/useWeather';
 import { MODEL_LABELS } from '../services/weather';
@@ -109,7 +109,12 @@ export function WeatherPanel({
           </Button>
         </p>
       ) : !data || index === null ? (
-        loading && <p className={cn(INFO, 'spinner-text')}>Récupération de la prévision…</p>
+        loading && (
+          <p className={INFO}>
+            <span className={SPINNER} aria-hidden="true" />
+            Récupération de la prévision…
+          </p>
+        )
       ) : (
         <>
           <div className="mb-1.5 flex items-center gap-1">
