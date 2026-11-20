@@ -14,6 +14,8 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)
 ![Leaflet](https://img.shields.io/badge/Leaflet-1.9-199900?logo=leaflet&logoColor=white)
+![Tailwind CSS 4](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
+![shadcn/ui](https://img.shields.io/badge/shadcn%2Fui-Radix-000000?logo=shadcnui&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-dev-2496ED?logo=docker&logoColor=white)
 ![Node 26](https://img.shields.io/badge/Node-26-5FA04E?logo=nodedotjs&logoColor=white)
 
@@ -91,6 +93,7 @@ modèle » d'Open-Meteo), tout en français.
 | **Points météo choisis par altitude** puis interpolation en altitude et en temps | En montagne, c'est l'altitude qui fait varier la météo, plus que la distance. Le tracé est colorié tronçon par tronçon à partir de ces quelques points. |
 | **Durée DIN 33466** recalée par tronçons | Norme des clubs alpins (temps horizontal et vertical combinés) ; appliquée par tronçons de 100 m pour obtenir l'heure de passage en chaque point. |
 | **Soleil calculé localement** (formules astronomiques) | Fonctionne pour n'importe quel jour, sans réseau, avant même l'arrivée de la météo ; écart ≤ 2 min avec l'API. |
+| **Tailwind CSS v4 + shadcn/ui** (Radix), thème clair et sombre par tokens | Composants accessibles (clavier, focus, lecteurs d'écran) sans les réécrire ; styles au plus près du JSX, couleurs centralisées et contrastes mesurés. Listes déroulantes natives plutôt que le Select de Radix (15,7 kB gzip) : menu du téléphone sur mobile. |
 | **Graphiques en SVG écrits à la main** | Profil et légendes sur mesure (couleurs de pente, survol synchronisé avec la carte) sans dépendance lourde. |
 | **Identifiant d'un tracé = empreinte de ses coordonnées** | Réimporter le même fichier ne crée pas de doublon. |
 | **Docker pour le développement**, Vercel construit depuis les sources | Même environnement sur Windows, macOS et Linux sans rien installer d'autre ; le déploiement n'en dépend pas. |
@@ -143,6 +146,13 @@ modèle de secours.
 tard (après le premier affichage). Une copie dans `localStorage`, lue par un petit script
 avant le rendu de React, applique le bon thème dès la première image.
 
+**Remplacer 1 800 lignes de CSS sans rien casser.** La migration vers Tailwind CSS et
+shadcn/ui s'est faite en 10 lots, chacun sur sa branche et déployé en préversion. L'ancienne
+feuille vivait dans une couche CSS à part, vidée lot par lot. À chaque lot, 24 captures
+(6 vues × 2 thèmes × 2 largeurs, météo rejouée et horloge figée) étaient comparées au pixel
+près avec les précédentes, avec un budget de poids JavaScript fixé d'avance. Au dernier lot,
+les captures sont restées identiques au pixel près.
+
 ## Méthode : développement 100 % agentique avec Claude Code
 
 C'est l'objectif principal du projet : **je n'ai pas écrit une ligne de code.** Tout le code,
@@ -190,8 +200,10 @@ flowchart LR
 
 ### En chiffres
 
-Une semaine (du 11 au 17 novembre 2026), 6 étapes de cahier des charges puis une demi-douzaine d'évolutions,
-environ 5 300 lignes de TypeScript, 115 tests unitaires, 4 fichiers `CLAUDE.md`.
+Dix jours (du 11 au 20 novembre 2026) : 6 étapes de cahier des charges, une demi-douzaine
+d'évolutions, puis la migration de l'interface vers Tailwind CSS et shadcn/ui en 10 lots.
+Environ 7 000 lignes de TypeScript (hors composants shadcn générés), 115 tests unitaires,
+4 fichiers `CLAUDE.md`.
 
 <details>
 <summary><strong>Développement local</strong></summary>

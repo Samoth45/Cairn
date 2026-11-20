@@ -153,3 +153,6 @@ vite.config.ts.timestamp-*
 
 # Instructions Claude Code propres à chaque poste (non versionnées)
 CLAUDE.local.md
+
+# Captures de recette visuelle (docs/recette/run.sh)
+docs/recette/captures/

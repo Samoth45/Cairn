@@ -1,0 +1,88 @@
+/* Surcharges de Leaflet, hors couche CSS (src/index.css) : elles doivent l'emporter sur
+   leaflet/dist/leaflet.css, lui aussi hors couche, comme avant la migration. À garder en CSS
+   dédié (docs/specs/migration-ui.md, §2.4). */
+
+/* Le preflight de Tailwind borne la taille des images et SVG (max-width: 100 %) : Leaflet les
+   positionne lui-même (tuiles, icônes, calques). */
+.leaflet-container img,
+.leaflet-container svg {
+  max-width: none;
+  max-height: none;
+}
+
+/* Infobulles et contrôles de la carte dans la police de l'app (Geist) plutôt que la
+   Helvetica de Leaflet ; la taille (12 px) ne change pas. */
+.leaflet-container {
+  font-family: --theme(--font-sans);
+}
+
+/* ---------- Infobulle des points météo ---------- */
+.leaflet-tooltip.wx-tooltip-wrap {
+  padding: 6px 9px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+/* ---------- Mode sombre : contrôles et infobulles Leaflet ---------- */
+/* Seule l'interface posée sur la carte change ; les tuiles restent intactes. */
+[data-theme='dark'] .leaflet-bar a,
+[data-theme='dark'] .leaflet-control-layers,
+[data-theme='dark'] .leaflet-tooltip {
+  background: var(--card);
+  color: var(--foreground);
+  border-color: var(--border);
+}
+
+[data-theme='dark'] .leaflet-bar a:hover,
+[data-theme='dark'] .leaflet-bar a:focus {
+  background: var(--border);
+}
+
+[data-theme='dark'] .leaflet-bar a.leaflet-disabled {
+  background: var(--gauge);
+  color: var(--faint);
+}
+
+[data-theme='dark'] .leaflet-control-layers-toggle {
+  /* Icône Leaflet sombre sur fond clair : inversée pour rester visible. */
+  filter: invert(1) hue-rotate(180deg);
+}
+
+[data-theme='dark'] .leaflet-control-layers-separator {
+  border-top-color: var(--border);
+}
+
+[data-theme='dark'] .leaflet-tooltip {
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme='dark'] .leaflet-tooltip-top::before {
+  border-top-color: var(--card);
+}
+
+[data-theme='dark'] .leaflet-tooltip-bottom::before {
+  border-bottom-color: var(--card);
+}
+
+[data-theme='dark'] .leaflet-tooltip-left::before {
+  border-left-color: var(--card);
+}
+
+[data-theme='dark'] .leaflet-tooltip-right::before {
+  border-right-color: var(--card);
+}
+
+[data-theme='dark'] .leaflet-control-attribution {
+  background: rgba(30, 36, 40, 0.8);
+  color: var(--muted-foreground);
+}
+
+[data-theme='dark'] .leaflet-control-attribution a {
+  color: var(--primary);
+}
+
+[data-theme='dark'] .leaflet-control-scale-line {
+  background: rgba(30, 36, 40, 0.7);
+  color: var(--foreground);
+  border-color: var(--foreground);
+}

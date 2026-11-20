@@ -32,13 +32,13 @@ dexie-react-hooks 4, TypeScript 6.0, Vite 8). Il ne reste que :
   résumera à changer la version quand `typescript-eslint` l'acceptera. Surveiller ses notes de
   version.
 
-## npm audit : picomatch (GHSA-fc5q-39xc-vjpf)
+## Problèmes de l'interface mobile
 
-Signalé le 17/11/2026 : 11 vulnérabilités « high » qui viennent toutes de picomatch (ReDoS sur
-les extglobs, **toutes versions** touchées). Il est tiré par Vite (`tinyglobby`, `fdir`) et par
-`typescript-eslint`, seulement au développement et au build : il n'est pas livré dans le bundle.
+Sortis de la migration de l'interface vers Tailwind CSS + shadcn/ui (terminée le 20/11/2026,
+`docs/specs/migration-ui.md` ; le lot 4 a migré le panneau et le tiroir sans correction
+mobile, décision du propriétaire).
 
-- Aucun correctif pour l'instant. **Ne pas** lancer `npm audit fix --force` : il rétrograderait
-  Vite en 6.2.7.
-- À faire quand une version corrigée de picomatch sort : mettre à jour (au besoin avec un
-  `overrides` dans `package.json`), vérifier `npm audit`, puis `/verifier`.
+- **Liste à ajouter ici par l'utilisateur**, puis spec à part.
+- Piste : tiroir en **Sheet** de shadcn (piège du focus, Échap, animation) si un problème le
+  demande ; la Dialog de Radix est déjà dans le chunk `radix`, le coût serait faible.
+- Recette sur un vrai téléphone avec la preview Vercel.

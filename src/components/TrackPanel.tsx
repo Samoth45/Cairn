@@ -1,5 +1,7 @@
-import { useRef, type KeyboardEvent, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import type { SidePanelTab, Track } from '../types';
+import { Card } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface Props {
   track: Track;
@@ -16,64 +18,39 @@ const TABS: Array<{ id: SidePanelTab; text: string; label: string }> = [
 ];
 
 /**
- * Panneau du tracé sélectionné (barre latérale) : nom du tracé puis onglets Stats | Météo.
- * Les deux contenus restent montés (l'inactif est masqué) pour conserver leur état.
+ * Panneau du tracé sélectionné (barre latérale) : nom du tracé puis onglets Stats | Météo
+ * (Tabs de Radix : flèches ← →, Début, Fin). L'onglet choisi est persisté (`sidePanelTab`).
+ * Les deux contenus restent montés (`forceMount`, l'inactif est masqué) pour garder leur état.
  */
 export function TrackPanel({ track, tab, onTabChange, stats, weather }: Props) {
-  const refs = useRef<Partial<Record<SidePanelTab, HTMLButtonElement | null>>>({});
-
-  // Flèches ← → (et Début / Fin) : passer à l'autre onglet et lui donner le focus.
-  const onKeyDown = (e: KeyboardEvent) => {
-    const i = TABS.findIndex((t) => t.id === tab);
-    let next: number;
-    if (e.key === 'ArrowRight') next = (i + 1) % TABS.length;
-    else if (e.key === 'ArrowLeft') next = (i - 1 + TABS.length) % TABS.length;
-    else if (e.key === 'Home') next = 0;
-    else if (e.key === 'End') next = TABS.length - 1;
-    else return;
-    e.preventDefault();
-    onTabChange(TABS[next].id);
-    refs.current[TABS[next].id]?.focus();
-  };
-
   return (
-    <section className="track-panel" aria-label="Tracé sélectionné">
-      <h2 className="track-panel-title" style={{ borderColor: track.color }} title={track.name}>
+    <Card
+      size="sm"
+      aria-label="Tracé sélectionné"
+      className="mx-3 mb-2.5 gap-0 overflow-visible rounded-lg border bg-background px-3 py-2.5 ring-0"
+      role="region"
+    >
+      <h2
+        className="m-0 mb-2 truncate border-0 border-l-4 border-solid pl-2 text-base/tight font-bold"
+        style={{ borderColor: track.color }}
+        title={track.name}
+      >
         {track.name}
       </h2>
-      <div className="track-panel-tabs" role="tablist" aria-label="Détails du tracé" onKeyDown={onKeyDown}>
+      <Tabs value={tab} onValueChange={(v) => onTabChange(v as SidePanelTab)} className="gap-2.5">
+        <TabsList variant="pill" aria-label="Détails du tracé">
+          {TABS.map((t) => (
+            <TabsTrigger key={t.id} value={t.id} aria-label={t.label}>
+              {t.text}
+            </TabsTrigger>
+          ))}
+        </TabsList>
         {TABS.map((t) => (
-          <button
-            key={t.id}
-            ref={(el) => {
-              refs.current[t.id] = el;
-            }}
-            type="button"
-            role="tab"
-            id={`track-tab-${t.id}`}
-            aria-label={t.label}
-            aria-selected={tab === t.id}
-            aria-controls={`track-tabpanel-${t.id}`}
-            tabIndex={tab === t.id ? 0 : -1}
-            className={tab === t.id ? 'active' : ''}
-            onClick={() => onTabChange(t.id)}
-          >
-            {t.text}
-          </button>
+          <TabsContent key={t.id} value={t.id} forceMount className="data-[state=inactive]:hidden">
+            {t.id === 'stats' ? stats : weather}
+          </TabsContent>
         ))}
-      </div>
-      {TABS.map((t) => (
-        <div
-          key={t.id}
-          role="tabpanel"
-          id={`track-tabpanel-${t.id}`}
-          aria-labelledby={`track-tab-${t.id}`}
-          className="track-panel-body"
-          hidden={tab !== t.id}
-        >
-          {t.id === 'stats' ? stats : weather}
-        </div>
-      ))}
-    </section>
+      </Tabs>
+    </Card>
   );
 }

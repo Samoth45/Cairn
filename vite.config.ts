@@ -1,9 +1,15 @@
 /// <reference types="vitest/config" />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
+  // Alias `@` → src (exigé par shadcn/ui ; aussi déclaré dans tsconfig.json et tsconfig.app.json).
+  // `/src` est résolu depuis la racine du projet par Vite (dev, build et Vitest).
+  resolve: {
+    alias: { '@': '/src' },
+  },
   server: {
     host: '0.0.0.0',
     port: 5173,
@@ -17,7 +23,15 @@ export default defineConfig({
         // Leaflet et react-leaflet dans un chunk à part (mis en cache indépendamment du code de
         // l'app). Vite 8 / Rolldown : remplace l'ancien `manualChunks` objet, qui n'existe plus.
         codeSplitting: {
-          groups: [{ name: 'leaflet', test: /node_modules[\\/](react-)?leaflet[\\/]/ }],
+          groups: [
+            { name: 'leaflet', test: /node_modules[\\/](react-)?leaflet[\\/]/ },
+            // Primitives shadcn/ui (Radix et ses dépendances de positionnement / focus) : chunk à
+            // part depuis le lot 2 de la migration UI, sinon le chunk de l'app dépasse 500 kB.
+            {
+              name: 'radix',
+              test: /node_modules[\\/](@radix-ui|radix-ui|@floating-ui|react-remove-scroll(-bar)?|react-style-singleton|use-callback-ref|use-sidecar|aria-hidden)[\\/]/,
+            },
+          ],
         },
       },
     },

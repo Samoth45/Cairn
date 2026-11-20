@@ -117,3 +117,58 @@ par fonctionnalité validée.
   `leaflet`). Build 5× plus rapide, JS −11 kB. CSS Leaflet dans un fichier à part, chargé avant
   le nôtre. Contrôlés : headless sur le build, hot reload sous Docker, `vercel build`, image
   nginx. esbuild n'est plus installé.
+- [x] **Migration UI — lot 0** (19/11/2026) — base Tailwind CSS v4 + shadcn/ui (Radix, preset
+  Nova) sans changement visible (captures 0 différence sur 20), puis contrastes corrigés
+  (`--muted-foreground`, `--faint`, `--night-foreground`, nouveau `--input` pour les contours
+  de champs). Ancienne feuille dans `src/styles/legacy.css` (couche `legacy`), tokens shadcn
+  dans `src/index.css`, surcharges Leaflet dans `src/styles/leaflet.css`. Outil de recette
+  visuelle `docs/recette/` (build, météo rejouée, horloge figée). Spec :
+  `docs/specs/migration-ui.md`.
+- [x] **Migration UI — lot 1** (19/11/2026) — police Geist (sous-ensemble latin, hébergée avec
+  le site, aussi dans les infobulles de la carte) ; boutons et pastilles shadcn (`Button`,
+  `Badge`, nouveau `IconButton`) à la place de `.btn`, `.icon-btn`, `.link-btn`, `.badge`,
+  `.count` ; icônes Lucide à la place des caractères ☾ ☀ ⚙ ✕ ✎ ⬇ 🗑 ‹ › 🌡 ⛰. JS +15,9 kB gzip
+  (paquet `cn` surtout). Correction en recette : libellé long du bouton de téléchargement qui
+  débordait. Spec : `docs/specs/migration-ui.md`.
+- [x] **Migration UI — lot 2** (19/11/2026) — fenêtre Paramètres en Dialog shadcn (Radix) :
+  champs Input, thème en boutons radio, liste du modèle météo en `<select>` natif stylé (le
+  Select de Radix, essayé, coûtait 15,7 kB gzip et dépassait le budget, relevé de 30 à 50 kB
+  le même jour). Focus sur la fenêtre à l'ouverture (pas de clavier sur mobile) et rendu au
+  bouton ⚙ à la fermeture. Échelle `z-*` en utilitaires, chunk `radix` à part. JS +19,3 kB
+  gzip (total +35,2 sur 50). Spec : `docs/specs/migration-ui.md`.
+- [x] **Migration UI — lot 3** (19/11/2026) — notifications (maison, pas de Sonner) et zone de
+  dépôt en Tailwind, même fonctionnement ; échelle `z-toast` / `z-dropzone`. Voile de dépôt
+  au vert du thème sombre en mode sombre. JS +0,3 kB gzip. Spec : `docs/specs/migration-ui.md`.
+- [x] **Migration UI — lot 5** (19/11/2026) — panneau du tracé sélectionné : Card, onglets
+  Stats / Météo en Tabs de Radix (variante « pilule », clavier et persistance inchangés),
+  tableau des points en Table, bloc soleil en Alert `warning`, libellés en capitales
+  factorisés (`src/components/classes.ts`). JS +2,0 kB gzip (total +37,4 sur 50). Spec :
+  `docs/specs/migration-ui.md`.
+- [x] **Migration UI — lot 6** (19/11/2026) — onglets Carte / Météo / Meilleur jour en Tabs de
+  Radix (icônes Lucide, activation au clavier par Entrée), panneau de coloration (Card, listes
+  natives, champ d'heure ; élargi à 320 px), profil altimétrique et infobulles de la carte en
+  Tailwind, bouton « Profil » en Button. Vérifié sur le build (infobulles, survol du profil).
+  JS +1,0 kB gzip (total +38,4 sur 50). Spec : `docs/specs/migration-ui.md`.
+- [x] **Migration UI — lot 7** (20/11/2026) — onglet « Meilleur jour » : Table de shadcn, cases
+  de score en boutons Tailwind (couleur de donnée en ligne, étoile et contour doré, fiabilité
+  atténuée, contour de focus au clavier), avertissement en Alert, heure de départ en Input.
+  Colonne des tracés désormais entièrement figée au défilement. JS +0,35 kB gzip (total +38,8
+  sur 50). Spec : `docs/specs/migration-ui.md`.
+- [x] **Migration UI — lot 8** (20/11/2026) — onglet « Météo » par altitude : jours en
+  ToggleGroup de Radix (nouveau : choix au clavier), alertes en Alert (`destructive`, `info`),
+  tableau en Table de shadcn avec cases en Tailwind (nuit, heure affichée, alertes, jauge de
+  nuages inchangées), en-tête / légende / notes partagés avec « Meilleur jour »
+  (`ViewShell.tsx`). `legacy.css` : 633 → 291 lignes. JS +1,8 kB gzip (total +40,6 sur 50).
+  Spec : `docs/specs/migration-ui.md`.
+- [x] **Migration UI — lot 4** (20/11/2026) — panneau latéral, liste des tracés et tiroir
+  mobile en Tailwind, sans correction mobile (décision du propriétaire : spec à part plus
+  tard). Tiroir actuel conservé (pas de Sheet), case de visibilité en Checkbox de shadcn,
+  renommage en Input, contour au focus clavier sur la pastille de couleur. `legacy.css` :
+  291 → 106 lignes. JS +1,3 kB gzip (total +41,9 sur 50). Spec : `docs/specs/migration-ui.md`.
+- [x] **Migration UI — lot 9, fin de la migration** (20/11/2026) — `legacy.css` et sa couche
+  supprimés ; mise en page, écrans de chargement / d'erreur et cercle de chargement en
+  Tailwind ; hauteur de ligne `normal` et main sur les boutons rétablies dans la couche
+  `base`. Captures identiques au pixel près au lot précédent. Bilan : CSS maison 1 804 → 333
+  lignes (tokens et Leaflet), 14 composants shadcn, JS +42,0 kB gzip (budget 50). README
+  (choix techniques, badges, difficulté résolue). **Version 1.1.0.** Spec :
+  `docs/specs/migration-ui.md`.

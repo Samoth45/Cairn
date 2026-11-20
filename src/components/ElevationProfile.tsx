@@ -5,6 +5,9 @@ import { niceStep, ticks } from '../lib/ticks';
 import { formatKm, formatMeters, formatNumber, formatSlope } from '../lib/format';
 import { eleAt, SLOPE_CLASSES, slopeAt, slopeClassIndex, slopeRuns } from '../lib/slope';
 import { setHoverPoint } from '../hooks/useHoverPoint';
+import { X } from 'lucide-react';
+import { IconButton } from './IconButton';
+import { cn } from '@/lib/utils';
 
 const M = { top: 12, right: 14, bottom: 22, left: 48 };
 
@@ -107,26 +110,30 @@ export function ElevationProfile({ name, color, profile, placeholder, onClose }:
   const hoveredSlope = hovered ? slopeAt(points, hovered.d) : null;
 
   return (
-    <section className="profile" aria-label="Profil altimétrique">
-      <header className={`profile-header${hovered ? ' hovering' : ''}`}>
-        <span className="profile-dot" style={{ background: color }} />
-        <span className="profile-name">{name}</span>
+    <section className="flex h-47.5 shrink-0 flex-col border-t bg-card max-md:h-37.5" aria-label="Profil altimétrique">
+      <header className="flex min-h-7.5 items-center gap-2 pt-1 pr-2 pl-3.5 text-sm">
+        <span className="size-2.5 shrink-0 rounded-full" style={{ background: color }} />
+        {/* Sur mobile, le nom et la légende laissent la place à la lecture du survol. */}
+        <span className={cn('min-w-0 flex-1 truncate font-semibold', hovered && 'max-md:hidden')}>{name}</span>
         {chart && !placeholder && (
-          <span className="slope-legend" title="Pente (en %, calculée sur 100 m)">
+          <span
+            className={cn('flex items-center gap-1.5 text-2xs whitespace-nowrap text-muted-foreground max-md:gap-1', hovered && 'max-md:hidden')}
+            title="Pente (en %, calculée sur 100 m)"
+          >
             {SLOPE_CLASSES.map((c) => (
-              <span key={c.label} className="slope-chip">
-                <i style={{ background: c.color }} />
+              <span key={c.label} className="inline-flex items-center gap-1">
+                <i className="inline-block size-2.5 rounded-xs opacity-75" style={{ background: c.color }} />
                 {c.label}
               </span>
             ))}
-            <span className="slope-unit">%</span>
+            <span>%</span>
           </span>
         )}
         {hovered && (
-          <span className="profile-readout">
+          <span className={cn('whitespace-nowrap tabular-nums max-md:text-sm', hovered && 'max-md:flex-1')}>
             {formatKm(hovered.d)} · <strong>{formatMeters(hovered.ele)}</strong> ·{' '}
             <strong
-              className="slope-value"
+              className="border-0 border-b-3 border-solid pb-px"
               style={{ borderColor: SLOPE_CLASSES[slopeClassIndex(hoveredSlope ?? 0)].color }}
               title="Pente sur 100 m"
             >
@@ -134,37 +141,37 @@ export function ElevationProfile({ name, color, profile, placeholder, onClose }:
             </strong>
           </span>
         )}
-        <button type="button" className="icon-btn" onClick={onClose} aria-label="Masquer le profil" title="Masquer le profil">
-          ✕
-        </button>
+        <IconButton onClick={onClose} aria-label="Masquer le profil" title="Masquer le profil">
+          <X />
+        </IconButton>
       </header>
-      <div className="profile-chart" ref={boxRef}>
+      <div className="relative min-h-0 flex-1" ref={boxRef}>
         {placeholder || !chart ? (
-          <p className="profile-placeholder">{placeholder ?? (size.w ? 'Pas d’altitude pour ce tracé' : '')}</p>
+          <p className="m-0 flex h-full items-center justify-center text-sm text-muted-foreground">{placeholder ?? (size.w ? 'Pas d’altitude pour ce tracé' : '')}</p>
         ) : (
-          <svg width={size.w} height={size.h} onPointerMove={onMove} onPointerDown={onMove} onPointerLeave={onLeave} role="img">
+          <svg className="block cursor-crosshair touch-none" width={size.w} height={size.h} onPointerMove={onMove} onPointerDown={onMove} onPointerLeave={onLeave} role="img">
             {chart.slopePaths.map((d, i) => d && <path key={i} d={d} fill={SLOPE_CLASSES[i].color} fillOpacity={0.55} />)}
             {chart.eTicks.map((e) => (
               <g key={`e${e}`}>
-                <line className="grid" x1={M.left} x2={M.left + chart.innerW} y1={chart.y(e)} y2={chart.y(e)} />
-                <text className="axis" x={M.left - 6} y={chart.y(e)} textAnchor="end" dominantBaseline="middle">
+                <line className="stroke-border" strokeWidth={1} x1={M.left} x2={M.left + chart.innerW} y1={chart.y(e)} y2={chart.y(e)} />
+                <text className="fill-muted-foreground text-2xs tabular-nums" x={M.left - 6} y={chart.y(e)} textAnchor="end" dominantBaseline="middle">
                   {formatNumber(e)}
                 </text>
               </g>
             ))}
             {chart.dTicks.map((d) => (
-              <text key={`d${d}`} className="axis" x={chart.x(d)} y={M.top + chart.innerH + 15} textAnchor="middle">
+              <text key={`d${d}`} className="fill-muted-foreground text-2xs tabular-nums" x={chart.x(d)} y={M.top + chart.innerH + 15} textAnchor="middle">
                 {formatNumber(d / 1000, chart.dStep < 1000 ? 1 : 0)}
                 {d === 0 ? ' km' : ''}
               </text>
             ))}
             <path d={chart.line} fill="none" stroke={color} strokeWidth={2} strokeLinejoin="round" />
             <g transform={`translate(${chart.x(chart.summit.d)},${chart.y(chart.summit.ele)})`}>
-              <path d="M0,-9 L5,-1 L-5,-1 Z" className="summit-mark" />
+              <path d="M0,-9 L5,-1 L-5,-1 Z" className="fill-foreground stroke-card" strokeWidth={1.5} />
             </g>
             {hovered && (
               <g>
-                <line className="cursor" x1={chart.x(hovered.d)} x2={chart.x(hovered.d)} y1={M.top} y2={M.top + chart.innerH} />
+                <line className="stroke-foreground" strokeWidth={1} strokeDasharray="3 3" x1={chart.x(hovered.d)} x2={chart.x(hovered.d)} y1={M.top} y2={M.top + chart.innerH} />
                 <circle cx={chart.x(hovered.d)} cy={chart.y(hovered.ele)} r={4.5} fill="#fff" stroke={color} strokeWidth={2.5} />
               </g>
             )}
