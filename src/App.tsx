@@ -372,10 +372,16 @@ export default function App() {
         onDelete={(id) => void deleteTrack(id)}
         onDownload={handleDownloadGpx}
       />
-      {panelOpen && <div className="backdrop" onClick={() => setPanelOpen(false)} />}
+      {/* Mobile : fond grisé sous le tiroir ouvert (un clic le ferme), bouton d'ouverture. */}
+      {panelOpen && <div className="fixed inset-0 z-backdrop bg-black/30 md:hidden" onClick={() => setPanelOpen(false)} />}
 
       <main className="map-wrap">
-        <button type="button" className="panel-toggle" onClick={() => setPanelOpen(true)} aria-label="Ouvrir la liste des tracés">
+        <button
+          type="button"
+          className={cn(MAP_CONTROL, 'top-2.5 left-2.5 flex items-center gap-2 rounded-full border-0 py-1.5 pr-3 pl-2 font-semibold md:hidden')}
+          onClick={() => setPanelOpen(true)}
+          aria-label="Ouvrir la liste des tracés"
+        >
           <CairnLogo size={22} />
           <span>Cairn</span>
           <Badge variant="muted">{tracks.length}</Badge>

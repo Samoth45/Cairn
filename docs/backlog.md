@@ -35,11 +35,11 @@ dexie-react-hooks 4, TypeScript 6.0, Vite 8). Il ne reste que :
 ## Migration de l'interface vers Tailwind CSS v4 + shadcn/ui
 
 **Spec : `docs/specs/migration-ui.md`** (rédigée et tranchée le 18/11/2026).
-**Avancement : lots 0 à 3 et 5 à 8 faits (19-20/11/2026)** (base Tailwind + shadcn,
+**Avancement : lots 0 à 8 faits (19-20/11/2026)** (base Tailwind + shadcn,
 contrastes ; police Geist, boutons, pastilles, icônes Lucide ; fenêtre Paramètres ;
 notifications et zone de dépôt ; panneau du tracé ; contrôles de la carte, profil,
-infobulles ; onglets « Meilleur jour » et « Météo ») ; reste : lot 4 (attend la liste des
-problèmes mobiles ci-dessous), puis 9. Budget JS : 40,6 kB gzip consommés sur **50** (relevé de 30
+infobulles ; onglets « Meilleur jour » et « Météo » ; panneau latéral et tiroir) ; reste : lot
+9 (nettoyage final, 1.1.0). Budget JS : 41,9 kB gzip consommés sur **50** (relevé de 30
 à 50 le 19/11/2026 ; Select de Radix remplacé par le `<select>` natif au lot 2, cf. spec Q12,
 Q5).
 
@@ -48,7 +48,8 @@ Q5).
 - **Changements visibles voulus** : la police Geist et des contrastes corrigés.
 - **Plan** : 10 lots (0 à 9), une branche et une PR par lot vers `develop`, recette sur la
   preview Vercel, version 1.1.0 à la fin.
-- **Prérequis du lot 4** : la liste des problèmes de l'interface mobile, à ajouter ici par
-  l'utilisateur.
+- **Problèmes de l'interface mobile** : sortis de la migration (le lot 4 l'a faite sans
+  correction mobile, décision du 20/11/2026). Liste à ajouter ici par l'utilisateur, puis spec
+  à part (tiroir en Sheet de shadcn à envisager si un problème le demande : focus, Échap).
 - À traiter **un lot à la fois, sur demande** : « implémente le lot N de
   docs/specs/migration-ui.md ».

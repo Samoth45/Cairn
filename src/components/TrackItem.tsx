@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { Download, Pencil, Trash2 } from 'lucide-react';
 import type { Track } from '../types';
 import { IconButton } from './IconButton';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 interface Props {
   track: Track;
@@ -33,28 +36,39 @@ export function TrackItem({ track, selected, onSelect, onRename, onColor, onTogg
   };
 
   return (
-    <li className={`track-item${selected ? ' selected' : ''}${track.visible ? '' : ' hidden-track'}`}>
-      <input
-        type="checkbox"
-        className="track-toggle"
+    // Tracé sélectionné : fond `accent` et liseré vert à gauche (pas de survol par-dessus).
+    <li
+      className={cn(
+        'flex items-center gap-2 rounded-lg px-2 py-1.5 max-md:p-2',
+        selected ? 'bg-accent shadow-[inset_3px_0_0_var(--primary)]' : 'hover:bg-background',
+      )}
+    >
+      <Checkbox
         checked={track.visible}
-        onChange={(e) => onToggle(e.target.checked)}
+        onCheckedChange={(v) => onToggle(v === true)}
         title={track.visible ? 'Masquer le tracé' : 'Afficher le tracé'}
         aria-label={track.visible ? `Masquer ${track.name}` : `Afficher ${track.name}`}
+        className="size-4.5"
       />
-      <label className="track-color" title="Changer la couleur" style={{ background: track.color }}>
+      {/* Pastille de couleur : le sélecteur natif, invisible, la recouvre. */}
+      <label
+        className="relative size-4.5 shrink-0 cursor-pointer rounded-full border-2 border-card ring-1 ring-border has-focus-visible:ring-2 has-focus-visible:ring-ring"
+        title="Changer la couleur"
+        style={{ background: track.color }}
+      >
         <input
           type="color"
           value={track.color}
           onChange={(e) => onColor(e.target.value)}
           aria-label={`Couleur de ${track.name}`}
+          className="absolute inset-0 m-0 size-full cursor-pointer p-0 opacity-0"
         />
       </label>
 
       {editing ? (
-        <input
+        <Input
           ref={inputRef}
-          className="track-name-input"
+          className="h-8 min-w-0 flex-1 border-primary px-1.5"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onBlur={commit}
@@ -67,7 +81,10 @@ export function TrackItem({ track, selected, onSelect, onRename, onColor, onTogg
       ) : (
         <button
           type="button"
-          className="track-name"
+          className={cn(
+            'min-w-0 flex-1 truncate border-0 bg-transparent px-0.5 py-1.5 text-left',
+            !track.visible && 'text-muted-foreground',
+          )}
           onClick={onSelect}
           onDoubleClick={startEdit}
           title={`${track.name}\n${track.fileName}\n(double-clic pour renommer)`}

@@ -1,6 +1,6 @@
 # Migration de l'interface vers Tailwind CSS v4 + shadcn/ui
 
-Statut : en cours (spec validée le 18/11/2026, décisions en §9) — lots 0 à 3 et 5 à 8 faits (19-20/11/2026)
+Statut : en cours (spec validée le 18/11/2026, décisions en §9) — lots 0 à 8 faits (19-20/11/2026)
 
 Source : `docs/BACKLOG-spec-migration-ui.md`. Cette spec ne migre rien : elle sert de feuille de
 route. Chaque lot du §5 est une tâche autonome, exécutable par Claude Code dans une session
@@ -836,6 +836,36 @@ déployable. **Démarrage de chaque lot** :
 - **Composants shadcn** : `checkbox`, `input`, `separator` (+ `sheet` selon le point 2).
 - **Risque** : élevé sur mobile (focus, fermeture au choix d'un tracé, défilement). Recette sur
   un vrai téléphone avec la preview Vercel.
+
+**Résultat du lot 4 (réalisé le 20/11/2026, branche `ui/lot-4-barre-laterale`)**
+- **Q7 révisée** : la liste des problèmes mobiles n'existant pas, le propriétaire a choisi de
+  **migrer sans correction mobile** ; les problèmes mobiles feront l'objet d'une spec à part
+  (backlog). Pas d'annexe (point 1).
+- **Tiroir (point 2)** : **tiroir actuel retouché**, pas le Sheet (rien ne demande encore le
+  piège du focus ni Échap). `aside` avec `data-open`, glissement `max-md:-translate-x-full` →
+  `data-[open=true]:translate-x-0`, ombre `shadow-drawer` (nouveau token), fond grisé
+  `bg-black/30 z-backdrop`, bouton « Cairn » en `MAP_CONTROL` (`md:hidden`). Fonctionnement
+  inchangé (fermeture au fond grisé et au choix d'un tracé).
+- **Liste** : Checkbox de shadcn (retouchée : fond `bg-card`, sans `bg-input/30` en sombre)
+  au lieu de la case native ; pastille de couleur maison (sélecteur natif invisible par-dessus,
+  **contour au focus clavier**, nouveau) ; renommage en Input (`border-primary`) ; sélection
+  `bg-accent` + liseré `inset 3px` vert, pas de survol sur la ligne sélectionnée ; nom grisé
+  si le tracé est masqué. Separator non ajouté (bordures suffisantes).
+- **Outil de captures** : sélecteurs du tiroir et de la liste par `aside[aria-label="Tracés"]`
+  (anciennes classes gardées en repli).
+- **Écarts visibles** : case à cocher shadcn (le nom du tracé se décale d'environ 7 px, sans
+  les marges de la case native) ; titre « Cairn » 20 px (21,6 avant), « TRACÉS » 12 px (12,8).
+- **Recette** : par rapport aux captures finales du lot 8, différences de quelques pixels
+  seulement (liste, titre ; « Heure » centré du lot 8 sur mobile). Sonde headless sur le
+  build : tiroir (ouverture, fond grisé, fermeture au choix d'un tracé), visibilité,
+  renommage (Entrée, Échap), sélection, panneau fixe sur PC, aucune erreur console.
+- **Mesures** :
+
+  | | Après le lot 8 | Après le lot 4 |
+  | --- | --- | --- |
+  | JS de l'app (gzip) | 168,26 kB | 169,58 kB = 148,46 + 21,12 (`radix`) ; budget : **+41,9 kB sur 50** |
+  | CSS de l'app | 74,48 kB (13,65 gzip) | 75,43 kB (13,56 gzip) |
+  | Lignes de `legacy.css` | 291 | 106 |
 
 ### Lot 5 — Panneau du tracé : Stats et Météo (M)
 - **Fichiers** : `TrackPanel.tsx`, `TrackStats.tsx`, `WeatherPanel.tsx`.
