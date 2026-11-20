@@ -1,10 +1,15 @@
 #!/bin/sh
-# Recette visuelle de la migration UI (docs/specs/migration-ui.md, §6). À lancer depuis la
+# Recette visuelle de la migration UI (docs/specs/migration-ui.md). À lancer depuis la
 # racine du projet, sous Git Bash (Windows) ou un shell POSIX :
 #
 #   sh docs/recette/run.sh record           enregistre les réponses Open-Meteo (une fois, lot 0)
 #   sh docs/recette/run.sh capture <nom>    build + preview, puis captures dans docs/recette/captures/<nom>
 #   sh docs/recette/run.sh compare <avant> <après>   rapport dans docs/recette/captures/rapport-<avant>-<après>
+#   sh docs/recette/run.sh sonde <script.mjs>       build + preview, puis `node <script.mjs> <url>`
+#
+# Sonde : script puppeteer écrit pour une vérification ponctuelle (souvent dans le dossier
+# temporaire de l'agent, n'importe où sur le disque). Il reçoit l'URL du build en argument,
+# trouve les GPX de test dans /samples et Chromium en /usr/bin/chromium-browser.
 #
 # Rien n'est installé dans le projet : chromium, puppeteer-core, pixelmatch et pngjs vivent dans
 # un conteneur node:26-alpine jetable. Les captures sont ignorées par Git.
@@ -16,18 +21,21 @@ NET=cairn_default
 PREVIEW=cairn-recette-preview
 
 tools() {
-  # $1 : commande node à lancer dans le conteneur jetable (dossier de travail /work)
-  docker run --rm --network "$NET" \
-    -v "$ROOT/docs/recette:/recette" -v "$ROOT/samples:/samples:ro" \
+  # $1 : commande node à lancer dans le conteneur jetable (dossier de travail /work).
+  # SONDE_DIR (facultatif) : dossier du script de sonde, monté en lecture seule sur /sonde.
+  cmd=$1
+  set -- -v "$ROOT/docs/recette:/recette" -v "$ROOT/samples:/samples:ro"
+  if [ -n "$SONDE_DIR" ]; then set -- "$@" -v "$SONDE_DIR:/sonde:ro"; fi
+  docker run --rm --network "$NET" "$@" \
     node:26-alpine sh -c "apk add --no-cache chromium font-noto font-noto-symbols font-noto-emoji >/dev/null 2>&1 \
       && mkdir -p /work && cd /work && npm init -y >/dev/null \
       && npm i puppeteer-core@24 pixelmatch@7 pngjs@7 --loglevel=error >/dev/null 2>&1 \
-      && cp /recette/*.mjs . && $1"
+      && cp /recette/*.mjs . && $cmd"
 }
 
 start_preview() {
   docker rm -f "$PREVIEW" >/dev/null 2>&1 || true
-  docker compose run -d --rm --name "$PREVIEW" dev sh -c "npm run build && npm run preview" >/dev/null
+  docker compose run -d --rm --name "$PREVIEW" dev sh -c "npm run build && npm run preview" >/dev/null 2>&1
   i=0
   until docker logs "$PREVIEW" 2>&1 | grep -q "Local:"; do
     i=$((i + 1)); [ $i -gt 90 ] && { docker logs "$PREVIEW"; exit 1; }; sleep 2
@@ -53,7 +61,15 @@ case "$CMD" in
     [ -n "$3" ] || { echo "usage : run.sh compare <avant> <après>"; exit 2; }
     tools "node compare.mjs /recette/captures/$2 /recette/captures/$3 /recette/captures/rapport-$2-$3"
     ;;
+  sonde)
+    [ -f "$2" ] || { echo "usage : run.sh sonde <script.mjs>"; exit 2; }
+    # Le script est copié dans /work pour y trouver puppeteer-core (node_modules).
+    SONDE_DIR=$(cd "$(dirname "$2")" && (pwd -W 2>/dev/null || pwd))
+    NAME=$(basename "$2")
+    start_preview; trap stop_preview EXIT
+    tools "cp /sonde/$NAME ./sonde-$NAME && node sonde-$NAME $URL"
+    ;;
   *)
-    echo "usage : run.sh record | capture <nom> | compare <avant> <après>"; exit 2
+    echo "usage : run.sh record | capture <nom> | compare <avant> <après> | sonde <script.mjs>"; exit 2
     ;;
 esac
