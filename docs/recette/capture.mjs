@@ -117,17 +117,19 @@ async function shot(page, name) {
 }
 
 const isMobile = (vp) => Boolean(vp.isMobile);
+// Tiroir mobile ouvert (.sidebar.open avant le lot 4).
+const DRAWER_OPEN = '.sidebar.open, aside[data-open="true"]';
 
 async function openDrawer(page, vp) {
   if (!isMobile(vp)) return;
-  if (await page.$('.sidebar.open')) return;
-  await page.click('.panel-toggle');
+  if (await page.$(DRAWER_OPEN)) return;
+  await page.click('.panel-toggle, button[aria-label="Ouvrir la liste des tracés"]');
   await sleep(300);
 }
 
 async function closeDrawer(page, vp) {
   if (!isMobile(vp)) return;
-  if (!(await page.$('.sidebar.open'))) return;
+  if (!(await page.$(DRAWER_OPEN))) return;
   // Le tiroir couvre le centre de l'écran : cliquer sur la bande grisée visible à droite.
   await page.mouse.click(vp.width - 12, Math.round(vp.height / 2));
   await sleep(300);
@@ -143,12 +145,12 @@ async function scenario(browser, vpName, theme) {
   await page.goto(url, { waitUntil: 'networkidle2' });
   const input = await page.$('input[type="file"]');
   await input.uploadFile(path.join(SAMPLES, 'lac-exemple.gpx'), path.join(SAMPLES, 'route-sans-altitude.gpx'));
-  await page.waitForFunction(() => document.querySelectorAll('.track-list .track-item').length === 2, { timeout: 15000 });
+  await page.waitForFunction(() => document.querySelectorAll('aside[aria-label="Tracés"] li').length === 2, { timeout: 15000 });
   await settle(page, 1500); // altitudes du tracé sans altitude
 
   // Sélection du tracé « lac » (au doigt sur mobile : ouvrir le tiroir d'abord).
   await openDrawer(page, vp);
-  const items = await page.$$('.track-list .track-item .track-name');
+  const items = await page.$$('aside[aria-label="Tracés"] li button[title*="double-clic"]');
   for (const it of items) {
     const txt = await it.evaluate((e) => e.textContent);
     if (/lac/i.test(txt)) {
