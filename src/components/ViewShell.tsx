@@ -30,7 +30,7 @@ export function ViewHeader({ title, subtitle, children }: { title: string; subti
 
 /** Message à la place du contenu (attente, erreur, aucun tracé). */
 export function ViewPlaceholder({ children }: { children: ReactNode }) {
-  return <p className="py-10 text-center text-muted-foreground">{children}</p>;
+  return <p className="my-4 py-10 text-center text-muted-foreground">{children}</p>;
 }
 
 /** Bas de vue : échelle de couleurs (couleurs de données en style en ligne) puis notes. */

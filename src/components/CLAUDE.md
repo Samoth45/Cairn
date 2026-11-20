@@ -119,23 +119,23 @@ lui-même ne l'est pas). Motifs retenus pour la respecter (spec `regles-react-co
 
 Panneau latéral fixe ≥ 768 px, tiroir + bouton flottant en dessous.
 
-## Styles : Tailwind CSS v4 + shadcn/ui (migration en cours)
+## Styles : Tailwind CSS v4 + shadcn/ui
 
-Migration par lots, cf. `docs/specs/migration-ui.md` (lots 0 à 8 faits :
-base, police Geist, boutons, pastilles, icônes, fenêtre Paramètres, notifications, zone de
-dépôt, panneau du tracé, contrôles de la carte, profil, infobulles, onglets « Meilleur jour »
-et « Météo », panneau latéral et tiroir ; reste le lot 9, nettoyage final).
-Recette visuelle : `docs/recette/` (captures avant/après sur le build).
+Toute l'interface est en utilitaires dans le JSX (migration terminée le 20/11/2026, cf.
+`docs/specs/migration-ui.md`). Recette visuelle : `docs/recette/` (captures avant/après sur le
+build, à relancer pour tout changement d'interface d'ampleur).
 
-- **Fichiers CSS** :
-  - `src/index.css` : entrée ; ordre des couches `theme, base, legacy, components, utilities` ;
-    tokens (`:root` + `[data-theme='dark']`), `@theme inline`, variante `dark:` sur
-    `data-theme` (pas de classe `.dark`) ;
-  - `src/styles/legacy.css` : l'ancienne feuille, dans la couche `legacy`, que chaque lot
-    vide ; elle commence par un bloc qui rétablit les styles du navigateur effacés par le
-    preflight, **sauf** pour les éléments shadcn (`[data-slot]`) ;
+- **Fichiers CSS** (les seuls) :
+  - `src/index.css` : entrée Tailwind ; police ; tokens (`:root` + `[data-theme='dark']`),
+    `@theme inline`, variante `dark:` sur `data-theme` (pas de classe `.dark`) ; `@utility z-*` ;
+    couche `base` : hauteur de ligne `normal` sur `html` (le preflight impose 1,5, ce que les
+    composants n'attendent pas), **main sur les boutons** (Tailwind v4 laisse le curseur par
+    défaut), page sans défilement ;
   - `src/styles/leaflet.css` : surcharges de Leaflet, **hors couche** (sinon elles perdraient
     contre `leaflet.css`, lui aussi hors couche).
+- **Preflight** : les éléments HTML (`h1`, `p`, `ul`, `button`, `fieldset`…) n'ont ni marge,
+  ni bordure, ni taille de titre : tout se donne par utilitaires (`my-4`, `text-xl font-bold`,
+  `list-disc pl-4.5`…). `fieldset` : préciser `border-solid` et `min-w-0`.
 - **Tokens** : noms shadcn. **Attention : `--accent` = fond de sélection** (l'ancien
   `--selected`), le vert principal est **`--primary`** ; **`--muted-foreground`** = texte
   discret (l'ancien `--muted`), `--muted` = fond discret. `--input` = contour des champs
@@ -163,8 +163,8 @@ Recette visuelle : `docs/recette/` (captures avant/après sur le build).
   `lucide-react`, `cn`, `class-variance-authority`, `tw-animate-css` ; police Geist
   (`@fontsource-variable/geist`).
 - **Police Geist** : `@font-face` dans `src/index.css` (sous-ensemble **latin** seulement, pris
-  dans le paquet), `--font-sans` ; `legacy.css` et `leaflet.css` (infobulles de la carte) la
-  reprennent par `--theme(--font-sans)`. L'espace fine des milliers (U+202F) n'est pas dans
+  dans le paquet), `--font-sans` ; `leaflet.css` (infobulles de la carte) la reprend par
+  `--theme(--font-sans)`. L'espace fine des milliers (U+202F) n'est pas dans
   Geist : elle vient de la police de repli, c'est normal.
 - **Boutons** (`ui/button.tsx`, retouché, repères « Cairn ») : `default` = bouton principal
   (vert, gras, survol `--primary-hover`) ; `outline` = bouton neutre (ancien `.btn`) ; `ghost`
@@ -178,7 +178,7 @@ Recette visuelle : `docs/recette/` (captures avant/après sur le build).
 - **Pastilles** (`ui/badge.tsx`) : variantes ajoutées `muted` (compteur de tracés) et
   `warning` (« Inversion probable », tokens `--warning-*`).
 - **Icônes** : Lucide, importées une par une (`import { X } from 'lucide-react'`). Les emojis
-  et symboles de **données** restent du texte (météo, ▲ du sommet, onglets de vue jusqu'au lot 6).
+  et symboles de **données** restent du texte (météo, ▲ du sommet).
 - **Lint** : la règle `react-refresh/only-export-components` est coupée pour
   `src/components/ui/` (les fichiers shadcn exportent aussi leurs variantes cva).
 - **Superpositions** : utilitaires `z-map-control` (1000), `z-map-tabs`, `z-backdrop`,
@@ -195,18 +195,15 @@ Recette visuelle : `docs/recette/` (captures avant/après sur le build).
   `document.activeElement` à l'ouverture et le refocaliser dans `onCloseAutoFocus` ; mettre le
   focus sur la fenêtre (et non le 1er champ) dans `onOpenAutoFocus`, sinon le clavier s'ouvre
   sur mobile. Modèle : `SettingsDialog.tsx`.
-- **`fieldset` / `legend` / `p` hors shadcn** : le bloc de compatibilité de `legacy.css` leur
-  rend les styles du navigateur (bordure `groove`, marges) ; les utilitaires gagnent, mais
-  préciser `border-solid`, `m-0`, `min-w-0`.
 - **Hauteur de ligne** : `text-sm`, `text-base`… imposent une hauteur de ligne (1,43 ; 1,5)
-  plus grande que le `normal` de l'ancienne feuille. Dans les blocs denses (stats, tableaux),
-  la resserrer : `text-sm/tight`, `text-base/tight`, `leading-tight`.
-- **Bordures d'éléments hors shadcn** (`h2`, `p`, `fieldset`…) : le bloc de compatibilité leur
-  rend la bordure `medium` du navigateur ; pour un liseré d'un côté, `border-0 border-l-4
-  border-solid`.
+  plus grande que le `normal` de la page. Dans les blocs denses (stats, tableaux), la
+  resserrer : `text-sm/tight`, `text-base/tight`, `leading-tight`.
+- **Liseré d'un seul côté** : `border-0 border-l-4` (+ couleur), ex. titre du panneau du tracé.
 - **Classes partagées** : `src/components/classes.ts` (`LABEL_CAPS` = petit libellé en
   capitales, `SUB_LINE` = seconde ligne discrète, `MAP_CONTROL` = contrôle posé sur la carte,
-  `TIP` = contenu des infobulles de la carte). Y ajouter toute combinaison qui revient.
+  `TIP` = contenu des infobulles de la carte, `FULL_SCREEN_MESSAGE` = écrans de chargement et
+  d'erreur, `SPINNER` = cercle de chargement devant un texte). Y ajouter toute combinaison qui
+  revient.
 - **Onglets principaux** (`App.tsx`) : Tabs sans `TabsContent`, `activationMode="manual"`
   (les flèches ne changent pas de vue). Onglet désactivé avec `title` :
   `disabled:pointer-events-auto` (sinon l'infobulle ne s'affiche pas).

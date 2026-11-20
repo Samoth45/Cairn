@@ -23,3 +23,11 @@ export const TIP = {
   temp: 'text-base',
   sub: 'text-xs text-muted-foreground',
 } as const;
+
+/** Écran plein, contenu centré (chargement de l'application, erreur fatale). */
+export const FULL_SCREEN_MESSAGE =
+  'flex h-dvh flex-col items-center justify-center gap-2 p-6 text-center text-muted-foreground';
+
+/** Petit cercle qui tourne, placé devant un texte de chargement (`aria-hidden`). */
+export const SPINNER =
+  'mr-1.5 inline-block size-2.25 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent align-[-1px]';

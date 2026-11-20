@@ -170,7 +170,7 @@ export function MapView({
 
   return (
     <MapContainer
-      className="map"
+      className="absolute inset-0"
       center={FRANCE_CENTER}
       zoom={6}
       bounds={initialBounds ?? undefined}

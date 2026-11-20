@@ -42,7 +42,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
-import { MAP_CONTROL } from './components/classes';
+import { FULL_SCREEN_MESSAGE, MAP_CONTROL } from './components/classes';
 import type { FitRequest } from './components/FitBounds';
 import { trackBounds, type Bounds } from './lib/geo';
 import type { Track } from './types';
@@ -283,9 +283,9 @@ export default function App() {
 
   if (loading || !tracks || !settings) {
     return (
-      <div className="loading">
+      <div className={FULL_SCREEN_MESSAGE}>
         <CairnLogo size={48} />
-        <p>Chargement…</p>
+        <p className="m-0">Chargement…</p>
       </div>
     );
   }
@@ -316,7 +316,7 @@ export default function App() {
   const showProfile = Boolean(selectedTrack && analysis && selectedTrack.visible);
 
   return (
-    <div className="app">
+    <div className="flex h-dvh">
       <Sidebar
         open={panelOpen}
         tracks={tracks}
@@ -375,7 +375,7 @@ export default function App() {
       {/* Mobile : fond grisé sous le tiroir ouvert (un clic le ferme), bouton d'ouverture. */}
       {panelOpen && <div className="fixed inset-0 z-backdrop bg-black/30 md:hidden" onClick={() => setPanelOpen(false)} />}
 
-      <main className="map-wrap">
+      <main className="relative flex min-w-0 flex-1 flex-col">
         <button
           type="button"
           className={cn(MAP_CONTROL, 'top-2.5 left-2.5 flex items-center gap-2 rounded-full border-0 py-1.5 pr-3 pl-2 font-semibold md:hidden')}
@@ -453,7 +453,7 @@ export default function App() {
         )}
 
         {/* La carte reste montée (état, tuiles) mais est masquée dans l'onglet Météo. */}
-        <div className="map-area" hidden={view !== 'map'}>
+        <div className="relative min-h-0 flex-1" hidden={view !== 'map'}>
           <MapView
             active={view === 'map'}
             tracks={tracks}

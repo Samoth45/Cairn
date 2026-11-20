@@ -197,7 +197,7 @@ export function SettingsDialog({ din, weatherModel, scoreWeights, theme, onSave,
 }
 
 /** Bloc encadré avec titre. Le `fieldset` garde le regroupement pour les lecteurs d'écran ;
- *  `border-solid`, `m-0` et `min-w-0` remplacent les styles du navigateur (cf. legacy.css). */
+ *  bordure, marges et largeur minimale données par les utilitaires. */
 function Section({ legend, children }: { legend: string; children: ReactNode }) {
   return (
     <fieldset className="m-0 min-w-0 rounded-md border border-solid border-border px-3 pt-2 pb-1">

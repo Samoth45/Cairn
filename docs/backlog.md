@@ -32,24 +32,13 @@ dexie-react-hooks 4, TypeScript 6.0, Vite 8). Il ne reste que :
   résumera à changer la version quand `typescript-eslint` l'acceptera. Surveiller ses notes de
   version.
 
-## Migration de l'interface vers Tailwind CSS v4 + shadcn/ui
+## Problèmes de l'interface mobile
 
-**Spec : `docs/specs/migration-ui.md`** (rédigée et tranchée le 18/11/2026).
-**Avancement : lots 0 à 8 faits (19-20/11/2026)** (base Tailwind + shadcn,
-contrastes ; police Geist, boutons, pastilles, icônes Lucide ; fenêtre Paramètres ;
-notifications et zone de dépôt ; panneau du tracé ; contrôles de la carte, profil,
-infobulles ; onglets « Meilleur jour » et « Météo » ; panneau latéral et tiroir) ; reste : lot
-9 (nettoyage final, 1.1.0). Budget JS : 41,9 kB gzip consommés sur **50** (relevé de 30
-à 50 le 19/11/2026 ; Select de Radix remplacé par le `<select>` natif au lot 2, cf. spec Q12,
-Q5).
+Sortis de la migration de l'interface vers Tailwind CSS + shadcn/ui (terminée le 20/11/2026,
+`docs/specs/migration-ui.md` ; le lot 4 a migré le panneau et le tiroir sans correction
+mobile, décision du propriétaire).
 
-- **Objectif** : remplacer `src/styles.css` (1 804 lignes) par Tailwind v4 et des composants
-  shadcn/ui (Radix), sans changer le fonctionnement.
-- **Changements visibles voulus** : la police Geist et des contrastes corrigés.
-- **Plan** : 10 lots (0 à 9), une branche et une PR par lot vers `develop`, recette sur la
-  preview Vercel, version 1.1.0 à la fin.
-- **Problèmes de l'interface mobile** : sortis de la migration (le lot 4 l'a faite sans
-  correction mobile, décision du 20/11/2026). Liste à ajouter ici par l'utilisateur, puis spec
-  à part (tiroir en Sheet de shadcn à envisager si un problème le demande : focus, Échap).
-- À traiter **un lot à la fois, sur demande** : « implémente le lot N de
-  docs/specs/migration-ui.md ».
+- **Liste à ajouter ici par l'utilisateur**, puis spec à part.
+- Piste : tiroir en **Sheet** de shadcn (piège du focus, Échap, animation) si un problème le
+  demande ; la Dialog de Radix est déjà dans le chunk `radix`, le coût serait faible.
+- Recette sur un vrai téléphone avec la preview Vercel.

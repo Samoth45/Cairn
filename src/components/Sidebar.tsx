@@ -87,7 +87,7 @@ export function Sidebar(p: Props) {
       </div>
 
       {p.tracks.length === 0 ? (
-        <p className="p-4 text-sm/normal text-muted-foreground">
+        <p className="my-3.5 p-4 text-sm/normal text-muted-foreground">
           Aucun tracé pour l'instant.
           <br />
           Glissez-déposez vos fichiers GPX sur la carte ou utilisez le bouton « Importer des GPX ».
