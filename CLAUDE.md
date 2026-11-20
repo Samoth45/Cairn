@@ -16,8 +16,9 @@ statistiques, météo détaillée par altitude pour choisir le meilleur jour / h
 - `docs/backlog.md` — idées en attente (simplification des GPX denses, montées de version
   majeure en attente : TypeScript 7, bloqué par `typescript-eslint` ; problèmes de l'interface
   mobile, liste à compléter). Migration UI Tailwind v4 + shadcn/ui **terminée** (10 lots,
-  version 1.1.0, spec `docs/specs/migration-ui.md`).
-- `docs/recette/` — recette visuelle de la migration UI : captures avant/après du build
+  version 1.1.0, bilan dans `docs/specs/migration-ui.md`, texte intégral archivé dans
+  `docs/archives/` : **ne pas le lire sans raison**).
+- `docs/recette/` — recette visuelle d'une interface : captures avant/après du build
   (conteneur jetable, météo rejouée, horloge figée) et mesure des contrastes ; mode d'emploi
   dans son `README.md`.
 - `docs/deploiement.md` — détail Vercel, Node, lockfile, test du build, CI/CD (mise en place des secrets Vercel).
@@ -43,21 +44,16 @@ statistiques, météo détaillée par altitude pour choisir le meilleur jour / h
 
 ## Vérification (fin de chaque étape, avant de rendre la main)
 
-Lancer **`/verifier`** (`.claude/commands/verifier.md`) : tests, lint (0 erreur, 0 warning),
-**build de production obligatoire** (Vercel échoue sur toute erreur TypeScript ou de build, même
-si le serveur dev, qui ne vérifie pas les types, fonctionne), puis contrôle du serveur dev.
-Indiquer le résultat des trois commandes dans le compte rendu.
+Lancer **`/verifier`** : tests, lint (0 erreur, 0 avertissement) et **build de production
+obligatoire** en une commande (`scripts/verifier.sh`, sortie courte), puis contrôle du serveur
+dev. Indiquer le résultat des trois étapes dans le compte rendu.
 
-**CI/CD** (`.github/workflows/ci.yml`, workflow « CI/CD ») : le job « Lint, test & build »
-rejoue la même routine sur GitHub Actions à chaque push, sans Docker (Node lu dans `.nvmrc`).
-Le lint échoue sur tout avertissement (`--max-warnings=0` dans le script). Si la CI passe, la
-CLI Vercel déploie : preview sur les PR, production sur `main` (environnements GitHub
-`preview` / `production`). Le déploiement Git automatique de Vercel est coupé
-(`vercel.json`). Les secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID` et `VERCEL_PROJECT_ID` sont créés
-par l'utilisateur. Détail : `docs/deploiement.md`.
+**CI/CD** : GitHub Actions rejoue tests, lint et build à chaque push ; si tout passe, la CLI
+Vercel déploie (preview sur les PR, production sur `main`). Détail : `docs/deploiement.md`.
 
 **Dev ≠ prod (StrictMode)** : tout comportement de carte (survol, clics, couches) doit être
-vérifié aussi sur le build (`npm run preview`). Voir `src/components/CLAUDE.md`.
+vérifié aussi sur le build : sonde puppeteer par `sh docs/recette/run.sh sonde <script.mjs>`
+(cf. `src/components/CLAUDE.md`).
 
 ## Contraintes de déploiement (à respecter dans tout le code)
 
@@ -109,27 +105,14 @@ Lucide, police Geist), tout en utilitaires dans le JSX (migration terminée au 2
 
 ```
 src/
-  types.ts            Point = [lat, lon, ele|null], Track (elevationSource?), Settings
-                      (baseLayer, selectedTrackId, showProfile, din, weatherModel, trackColoring,
-                      departureTime « HH:MM », scoreWeights, theme, sidePanelTab), DEFAULT_SETTINGS,
-                      DEFAULT_SCORE_WEIGHTS
-  db/db.ts            Dexie 'cairn' : v1 tables tracks (id, createdAt) et settings (key='app') ;
-                      v2 table weather (trackId) = CachedForecast. getSettings / updateSettings
-                      (via normalizeSettings). Nouvelle table → db.version(3)
-  hooks/
-    useTracks.ts            useLiveQuery (l'UI suit la base) + actions : import GPX, renommer,
-                            couleur, visibilité, suppression
-    useElevationFetcher.ts  récupère en arrière-plan (1 tracé à la fois) les altitudes manquantes,
-                            statut par tracé (loading/error/done) + retry
-    useWeather.ts           prévision du tracé sélectionné via weatherCache ; { forecast, loading,
-                            error, refresh } ; AbortController si le tracé change
-    useAllForecasts.ts      prévisions de tous les tracés pour l'onglet « Meilleur jour » (actif
-                            seulement onglet ouvert) : analyse + points de chaque tracé, même
-                            cache que useWeather, 2 requêtes en parallèle, refresh
-    useHoverPoint.ts        mini-store (useSyncExternalStore) de la position survolée sur le profil,
-                            pour ne pas re-rendre l'app à chaque mouvement de souris
-    useTheme.ts             thème affiché (réglage, ou préférence système suivie en direct) ;
-                            pose `<html data-theme>` et sa copie localStorage
+  types.ts            Point = [lat, lon, ele|null], Track, Settings, DEFAULT_SETTINGS
+  db/db.ts            Dexie 'cairn' : tracks, settings (v1), weather (v2) ; nouvelle table →
+                      db.version(3). getSettings / updateSettings (via normalizeSettings)
+  hooks/              useTracks (useLiveQuery : l'UI suit la base ; actions sur les tracés),
+                      useElevationFetcher (altitudes manquantes en arrière-plan), useWeather
+                      (prévision du tracé sélectionné), useAllForecasts (tous les tracés, onglet
+                      « Meilleur jour »), useHoverPoint (survol hors React), useTheme
+                      (`<html data-theme>`) ; détail en tête de chaque fichier
   lib/                fonctions pures + tests (*.test.ts) — détail dans src/lib/CLAUDE.md ;
                       utils.ts = cn() de shadcn (seule exception d'interface)
   services/           elevation.ts, weather.ts, weatherCache.ts — détail dans src/services/CLAUDE.md
@@ -142,6 +125,7 @@ src/
                       (fitRequest avec nonce), toasts, tiroir mobile, profil, paramètres, durée DIN,
                       heure météo affichée (hourSelection) partagée panneau ↔ infobulles carte
 docker/nginx.conf     fallback SPA + cache long sur /assets
+scripts/verifier.sh   tests + lint + build en un conteneur, sortie courte (commande /verifier)
 samples/              GPX fictifs pour tests manuels (trk avec ele, rte sans ele, invalide)
 ```
 

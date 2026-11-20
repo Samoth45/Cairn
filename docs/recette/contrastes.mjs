@@ -1,4 +1,4 @@
-// Contrastes WCAG 2.x des couples texte/fond de l'interface (spec migration-ui, Q11).
+// Contrastes WCAG 2.x des couples texte/fond de l'interface (décision Q11 de docs/specs/migration-ui.md).
 //   node contrastes.mjs [chemin de index.css]     (défaut : src/index.css)
 // Lit les tokens des blocs :root et :root[data-theme='dark'] de src/index.css. Seuils : 4,5:1
 // pour le texte, 3:1 pour les contours d'éléments d'interface et les symboles (étoile…).

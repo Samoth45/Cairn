@@ -1,3 +1,9 @@
+> **ARCHIVE — ne pas lire sans raison précise.** Texte intégral de la spec de migration, figé
+> à la fin du lot 9 (20/11/2026) : état des lieux, plan, résultat de chaque lot (1 400 lignes,
+> 90 ko). La version utile est `docs/specs/migration-ui.md` ; les conventions de code sont dans
+> `src/components/CLAUDE.md`. Les numéros de lignes cités concernent l'ancienne
+> `src/styles.css`, supprimée.
+
 # Migration de l'interface vers Tailwind CSS v4 + shadcn/ui
 
 Statut : **terminée** (spec validée le 18/11/2026, décisions en §9) — lots 0 à 9 faits (19-20/11/2026), version 1.1.0

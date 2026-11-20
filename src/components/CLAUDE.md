@@ -45,16 +45,17 @@ DropZone, Toasts, ErrorBoundary, CairnLogo.
 Tout comportement de carte (survol, clics, couches) doit être vérifié aussi sur le build
 (`npm run preview`).
 
-Pour mesurer sans navigateur à l'écran : un conteneur jetable `node:26-alpine` +
-`apk add chromium` + `puppeteer-core`, sur le réseau `cairn_default`, en visant l'IP des
-conteneurs (Vite refuse les noms d'hôte inconnus) ; la carte Leaflet se retrouve via l'arbre
-React (`memoizedProps.value.map`), les pixels du tracé via `getImageData` du canvas.
-**Ne rien installer dans le projet pour ça.**
+Pour mesurer sans navigateur à l'écran : écrire une sonde puppeteer (dans le dossier
+temporaire) et la lancer sur le build par **`sh docs/recette/run.sh sonde <script.mjs>`**
+(conteneur jetable, Chromium, URL du build en argument, GPX de test dans `/samples` ; mode
+d'emploi dans `docs/recette/README.md`). La carte Leaflet se retrouve via l'arbre React
+(`memoizedProps.value.map`), les pixels du tracé via `getImageData` du canvas. **Ne rien
+installer dans le projet pour ça.**
 
 ## Navigation et état partagé (App.tsx)
 
 - **Onglets** : Carte / Météo (tracé sélectionné requis) / Meilleur jour (au moins un tracé).
-  Sur mobile, icônes seules (`.tab-text` masqué, libellés en `aria-label`).
+  Sur mobile, icônes seules (libellés masqués, `aria-label` conservés).
 - **Onglets Carte / Météo** (`mainView` dans App, forcé à `map` sans tracé sélectionné) : la
   carte reste montée mais `hidden` ; `FitBounds` reçoit `active` et diffère le zoom tant que la
   carte est masquée (sinon Leaflet calcule sur une taille nulle). Le profil n'est affiché qu'en
@@ -121,120 +122,94 @@ Panneau latéral fixe ≥ 768 px, tiroir + bouton flottant en dessous.
 
 ## Styles : Tailwind CSS v4 + shadcn/ui
 
-Toute l'interface est en utilitaires dans le JSX (migration terminée le 20/11/2026, cf.
+Toute l'interface est en utilitaires dans le JSX (migration terminée le 20/11/2026, bilan dans
 `docs/specs/migration-ui.md`). Recette visuelle : `docs/recette/` (captures avant/après sur le
 build, à relancer pour tout changement d'interface d'ampleur).
 
-- **Fichiers CSS** (les seuls) :
-  - `src/index.css` : entrée Tailwind ; police ; tokens (`:root` + `[data-theme='dark']`),
-    `@theme inline`, variante `dark:` sur `data-theme` (pas de classe `.dark`) ; `@utility z-*` ;
-    couche `base` : hauteur de ligne `normal` sur `html` (le preflight impose 1,5, ce que les
-    composants n'attendent pas), **main sur les boutons** (Tailwind v4 laisse le curseur par
-    défaut), page sans défilement ;
-  - `src/styles/leaflet.css` : surcharges de Leaflet, **hors couche** (sinon elles perdraient
-    contre `leaflet.css`, lui aussi hors couche).
-- **Preflight** : les éléments HTML (`h1`, `p`, `ul`, `button`, `fieldset`…) n'ont ni marge,
-  ni bordure, ni taille de titre : tout se donne par utilitaires (`my-4`, `text-xl font-bold`,
-  `list-disc pl-4.5`…). `fieldset` : préciser `border-solid` et `min-w-0`.
-- **Tokens** : noms shadcn. **Attention : `--accent` = fond de sélection** (l'ancien
-  `--selected`), le vert principal est **`--primary`** ; **`--muted-foreground`** = texte
-  discret (l'ancien `--muted`), `--muted` = fond discret. `--input` = contour des champs
-  (contraste 3:1), distinct de `--border` (séparateurs). Contrastes vérifiés par
-  `docs/recette/contrastes.mjs`.
-- **Dossiers** : `src/components/ui/` = composants shadcn, ajoutés **uniquement par le CLI**
-  (`npx shadcn@latest add …` dans le conteneur ; retouches minimes et commentées) ;
-  `src/components/` = composants métier, qui composent les `ui/` sans redéfinir leur style de
-  base.
-- **`cn()`** (`src/lib/utils.ts`, réexporte le paquet `cn` de shadcn) pour combiner des classes
-  conditionnelles ou accepter un `className` ; pas de gabarits `${…}` à la main. Seule
-  exception d'interface dans `src/lib/` (fonctions pures).
-- **Extraire un composant** dès qu'une combinaison de classes revient 3 fois ou porte un sens
-  (ex. `MapControl` pour les contrôles flottants sur la carte).
-- **`@apply`** interdit dans les composants ; toléré dans les CSS dédiés (Leaflet) pour du DOM
-  qu'on ne contrôle pas.
-- **Pas de couleur en dur** dans une classe (`bg-[#…]`) : un token. Couleurs de **données** en
-  `style` en ligne. Valeurs arbitraires (`p-[7px]`) à éviter : si une valeur revient, en faire
-  un token.
+**Fichiers CSS** (les seuls)
+- `src/index.css` : entrée Tailwind, police Geist (`@font-face`, sous-ensemble latin),
+  tokens (`:root` + `[data-theme='dark']`), `@theme inline`, variante `dark:` sur `data-theme`
+  (pas de classe `.dark`), `@utility z-*`. L'espace fine des milliers (U+202F) n'est pas dans
+  Geist : elle vient de la police de repli, c'est normal. Couche `base` : hauteur de ligne `normal` sur `html`
+  (le preflight impose 1,5), **main sur les boutons** (Tailwind v4 laisse le curseur par
+  défaut), page sans défilement.
+- `src/styles/leaflet.css` : surcharges de Leaflet, **hors couche** (sinon elles perdraient
+  contre `leaflet.css`, lui aussi hors couche) ; reprend la police par `--theme(--font-sans)`.
+
+**Règles de code**
+- **Preflight** : les éléments HTML (`h1`, `p`, `ul`, `button`, `fieldset`…) n'ont ni marge, ni
+  bordure, ni taille de titre : tout par utilitaires (`my-4`, `text-xl font-bold`…).
+  `fieldset` : `border-solid` et `min-w-0`. Liseré d'un seul côté : `border-0 border-l-4`.
+- **Hauteur de ligne** : `text-sm`, `text-base`… imposent 1,43 / 1,5, plus que le `normal` de
+  la page. Dans les blocs denses (stats, tableaux) : `text-sm/tight`, `leading-tight`.
+- **Tokens** : noms shadcn. **`--accent` = fond de sélection**, le vert principal est
+  **`--primary`** ; `--muted-foreground` = texte discret, `--muted` = fond discret ;
+  `--input` = contour des champs (contraste 3:1), pas un fond ; `--border` = séparateurs.
+  Contrastes mesurés par `docs/recette/contrastes.mjs`.
+- **Pas de couleur en dur** dans une classe : un token. Couleurs de **données** (températures,
+  scores, pentes, tracés) en `style` en ligne. Valeurs arbitraires `[…]` à éviter.
+- **`cn()`** (`src/lib/utils.ts`) pour les classes conditionnelles ; pas de gabarits `${…}`.
+  **`@apply`** interdit dans les composants (toléré dans `leaflet.css`).
 - **Mobile** : un seul point de rupture, `max-md:` (< 768 px) / `md:`.
-- **Ordre des classes** (pas de Prettier) : position, boîte, espacement, typographie, couleurs,
-  états, puis variantes `max-md:` et `dark:`. `dark:` seulement pour une vraie exception (les
-  tokens changent seuls avec `data-theme`).
-- **Dépendances** : `shadcn` (CLI + `shadcn/tailwind.css`) en devDependency ; `radix-ui`,
-  `lucide-react`, `cn`, `class-variance-authority`, `tw-animate-css` ; police Geist
-  (`@fontsource-variable/geist`).
-- **Police Geist** : `@font-face` dans `src/index.css` (sous-ensemble **latin** seulement, pris
-  dans le paquet), `--font-sans` ; `leaflet.css` (infobulles de la carte) la reprend par
-  `--theme(--font-sans)`. L'espace fine des milliers (U+202F) n'est pas dans
-  Geist : elle vient de la police de repli, c'est normal.
-- **Boutons** (`ui/button.tsx`, retouché, repères « Cairn ») : `default` = bouton principal
-  (vert, gras, survol `--primary-hover`) ; `outline` = bouton neutre (ancien `.btn`) ; `ghost`
-  = bouton icône discret ; `link` + taille **`inline`** = bouton-lien dans le texte (taille et
-  graisse du texte autour, aligné à gauche) ; taille `lg` = 40 px (« Importer des GPX »). Les
-  boutons ont une **hauteur fixe et pas de retour à la ligne** : pour un libellé long, ajouter
-  `h-auto min-h-8 py-1.5 whitespace-normal` (ex. « Télécharger le GPX (altitudes corrigées) »).
-- **`IconButton`** (`src/components/IconButton.tsx`) : bouton icône (ghost, 28 px, 32 px sur
-  mobile) ; toujours un `aria-label`, l'icône Lucide en enfant (taille 16 px par défaut, déjà
-  `aria-hidden`). Suppression : `className="hover:text-destructive"`.
-- **Pastilles** (`ui/badge.tsx`) : variantes ajoutées `muted` (compteur de tracés) et
-  `warning` (« Inversion probable », tokens `--warning-*`).
-- **Icônes** : Lucide, importées une par une (`import { X } from 'lucide-react'`). Les emojis
-  et symboles de **données** restent du texte (météo, ▲ du sommet).
-- **Lint** : la règle `react-refresh/only-export-components` est coupée pour
-  `src/components/ui/` (les fichiers shadcn exportent aussi leurs variantes cva).
-- **Superpositions** : utilitaires `z-map-control` (1000), `z-map-tabs`, `z-backdrop`,
-  `z-sidebar`, `z-toast`, `z-dropzone`, `z-modal` (4000), `z-popover` (4100), déclarés par
-  `@utility` dans `src/index.css`. **Jamais le `z-50` de shadcn** : il passe sous les contrôles
-  de Leaflet (800 à 1000) ; le remplacer dans le fichier `ui/` (cf. `dialog.tsx`).
-- **Listes déroulantes** : `<select>` natif stylé (`ui/native-select.tsx`), **pas le Select de
-  Radix** (15,7 kB gzip, écarté au lot 2, spec Q5). Sur mobile : menu du téléphone.
-- **Champs** (`Input`, `NativeSelect`) : fond `bg-card` (retouché ; `--input` est la couleur du
-  contour, pas un fond) et texte 16 px sur mobile (pas de zoom automatique sur iPhone).
-- **Fenêtre (`Dialog`)** : montée par le parent seulement quand elle est ouverte (`open`
-  toujours vrai, `onOpenChange(false)` → fermer) ; c'est ce qui remet les brouillons à zéro.
-  Sans `DialogTrigger`, Radix ne rend pas le focus au bouton d'ouverture : mémoriser
-  `document.activeElement` à l'ouverture et le refocaliser dans `onCloseAutoFocus` ; mettre le
-  focus sur la fenêtre (et non le 1er champ) dans `onOpenAutoFocus`, sinon le clavier s'ouvre
-  sur mobile. Modèle : `SettingsDialog.tsx`.
-- **Hauteur de ligne** : `text-sm`, `text-base`… imposent une hauteur de ligne (1,43 ; 1,5)
-  plus grande que le `normal` de la page. Dans les blocs denses (stats, tableaux), la
-  resserrer : `text-sm/tight`, `text-base/tight`, `leading-tight`.
-- **Liseré d'un seul côté** : `border-0 border-l-4` (+ couleur), ex. titre du panneau du tracé.
-- **Classes partagées** : `src/components/classes.ts` (`LABEL_CAPS` = petit libellé en
-  capitales, `SUB_LINE` = seconde ligne discrète, `MAP_CONTROL` = contrôle posé sur la carte,
-  `TIP` = contenu des infobulles de la carte, `FULL_SCREEN_MESSAGE` = écrans de chargement et
-  d'erreur, `SPINNER` = cercle de chargement devant un texte). Y ajouter toute combinaison qui
-  revient.
-- **Onglets principaux** (`App.tsx`) : Tabs sans `TabsContent`, `activationMode="manual"`
-  (les flèches ne changent pas de vue). Onglet désactivé avec `title` :
-  `disabled:pointer-events-auto` (sinon l'infobulle ne s'affiche pas).
-- **`NativeSelect`** : `className` va au conteneur ; `selectClassName` au `<select>` (ex.
-  `max-md:text-sm` dans le panneau de coloration, trop étroit pour du 16 px).
-- **Tableau à colonne figée** (`SummaryView.tsx`) : `border-separate border-spacing-0` (les
-  cellules `sticky` perdent leurs bordures en `border-collapse`), bordures sur les cellules et
-  non sur les lignes, cellule figée `sticky left-0 z-2 bg-card`. Un `Input` dans une ligne
-  flexible : `shrink-0` (son `min-w-0` le laisse sinon rétrécir et couper la valeur).
-  Tableau météo (`WeatherView.tsx`) : même principe ; états cumulables d'une case (heure
-  affichée, nuit, alerte) combinés par `cn()` dans l'ordre de priorité, la dernière classe
-  de fond l'emportant (`headState`).
-- **Vues plein écran** (Météo, Meilleur jour) : habillage commun dans `ViewShell.tsx`
-  (`ViewSection`, `ViewHeader`, `ViewPlaceholder`, `ViewFooter` = légende + notes) ; toute
-  nouvelle vue de ce type le reprend.
-- **Choix exclusif en boutons** (jours de la Météo) : ToggleGroup `type="single"`, variante
-  Cairn `chip` (`ui/toggle.tsx`) ; ignorer la valeur vide dans `onValueChange` (re-clic sur
-  l'élément actif). **Alert** : variantes `destructive` (retouchée : fond teinté, texte
-  normal) et `info` pour les alertes météo.
-- **Tiroir mobile** (`Sidebar.tsx`) : pas de Sheet ; `aside` avec `data-open`, glissement
-  par `max-md:-translate-x-full` / `max-md:data-[open=true]:translate-x-0`, ombre
-  `shadow-drawer`. Fond grisé et bouton « Cairn » dans `App.tsx` (`md:hidden`). L'outil de
-  captures repère le tiroir par `aside[aria-label="Tracés"]`.
-- **Checkbox** (`ui/checkbox.tsx`, retouchée comme `radio-group` : fond `bg-card`) :
-  `onCheckedChange={(v) => …(v === true)}` (la valeur peut être `'indeterminate'`).
-- **SVG du profil** : couleurs par utilitaires (`stroke-border`, `fill-muted-foreground`…),
+- **Ordre des classes** (pas de Prettier) : position, boîte, espacement, typographie,
+  couleurs, états, puis `max-md:` et `dark:` (seulement pour une vraie exception : les tokens
+  changent seuls).
+- **Extraire** dès qu'une combinaison revient 3 fois ou porte un sens. Partagés dans
+  `src/components/classes.ts` : `LABEL_CAPS`, `SUB_LINE`, `MAP_CONTROL` (contrôle posé sur la
+  carte), `TIP` (infobulles de la carte), `FULL_SCREEN_MESSAGE`, `SPINNER`.
+- **Icônes** : Lucide, importées une par une. Emojis et symboles de **données** (météo, ▲)
+  restent du texte. `IconButton` : ghost 28 px (32 px mobile), toujours un `aria-label`, icône
+  Lucide en enfant (16 px, déjà `aria-hidden`) ; suppression : `hover:text-destructive`.
+- **Superpositions** : `z-map-control` (1000), `z-map-tabs`, `z-backdrop`, `z-sidebar`,
+  `z-toast`, `z-dropzone`, `z-modal` (4000), `z-popover` (4100). **Jamais le `z-50` de
+  shadcn** : il passe sous les contrôles de Leaflet (800 à 1000) ; le remplacer dans le
+  fichier `ui/` (cf. `dialog.tsx`).
+- **Dépendances** : `radix-ui`, `lucide-react`, `cn`, `class-variance-authority`,
+  `tw-animate-css`, `@fontsource-variable/geist` ; `shadcn` (CLI) en devDependency. Chunk
+  `radix` à part dans `vite.config.ts` (y ajouter toute dépendance de ce type). Lint :
+  `react-refresh/only-export-components` coupée pour `ui/`.
+
+**Composants shadcn** : `src/components/ui/`, ajoutés **uniquement par le CLI** (`npx
+shadcn@latest add …` dans le conteneur ; retouches minimes, repérées par « Cairn » en
+commentaire). Les composants métier (`src/components/`) composent les `ui/` sans redéfinir
+leur style de base.
+- **Button** : `default` principal (vert, gras, survol `--primary-hover`) ; `outline` neutre ; `ghost` icône ; `link` +
+  taille `inline` = lien dans le texte ; `lg` = 40 px. Hauteur fixe, pas de retour à la ligne :
+  pour un libellé long, `h-auto min-h-8 py-1.5 whitespace-normal`.
+- **Badge** : variantes `muted` (compteur) et `warning`. **Alert** : `warning`, `destructive`
+  (fond teinté), `info` ; `role="note"` pour une simple information (sinon annoncée par les
+  lecteurs d'écran à chaque rendu).
+- **Listes déroulantes** : `<select>` natif stylé (`native-select.tsx`), **pas le Select de
+  Radix** (+15,7 kB gzip). `className` va au conteneur, `selectClassName` au `<select>`.
+- **Champs** (`Input`, `NativeSelect`, `Checkbox`) : fond `bg-card` (retouché : pas de
+  `bg-input/30`, `--input` est un contour). `Input` et `NativeSelect` : texte 16 px sur mobile
+  (pas de zoom iPhone). `Checkbox` : `onCheckedChange={(v) => …(v === true)}` (la valeur peut
+  être `'indeterminate'`).
+- **Dialog** : montée par le parent seulement quand elle est ouverte (`open` toujours vrai) ;
+  c'est ce qui remet les brouillons à zéro. Sans `DialogTrigger`, mémoriser
+  `document.activeElement` et le refocaliser dans `onCloseAutoFocus` ; focus sur la fenêtre
+  (pas le 1er champ) dans `onOpenAutoFocus`, sinon le clavier s'ouvre sur mobile. Modèle :
+  `SettingsDialog.tsx`.
+- **Tabs** : variante `pill` (panneau du tracé) ; contenus gardés montés : `forceMount` +
+  `data-[state=inactive]:hidden`. Onglets principaux (`App.tsx`) : sans `TabsContent`,
+  `activationMode="manual"` (les flèches ne changent pas de vue à chaque pas) ; onglet
+  désactivé avec `title` : `disabled:pointer-events-auto` (sinon pas d'infobulle).
+- **ToggleGroup** `type="single"`, variante `chip` (jours de la Météo) : ignorer la valeur
+  vide dans `onValueChange` (re-clic sur l'élément actif).
+- **Table** : sans survol si les lignes ne sont pas cliquables (`hover:bg-transparent`).
+  Tableau à colonne figée (`SummaryView`, `WeatherView`) : `border-separate border-spacing-0`
+  (en `border-collapse`, les cellules `sticky` perdent leurs bordures), bordures sur les
+  cellules, cellule figée `sticky left-0 z-2 bg-card` ; états cumulables d'une case combinés
+  par `cn()` dans l'ordre de priorité, la dernière classe de fond l'emportant (`headState`).
+  Un `Input` dans une ligne flexible : `shrink-0` (son `min-w-0` le laisse sinon couper la
+  valeur).
+
+**Composants de mise en page**
+- **Vues plein écran** (Météo, Meilleur jour) : habillage dans `ViewShell.tsx` (`ViewSection`,
+  `ViewHeader`, `ViewPlaceholder`, `ViewFooter`) ; toute nouvelle vue du même type le reprend.
+- **Tiroir mobile** (`Sidebar.tsx`) : pas de Sheet ; `aside` avec `data-open`, glissement par
+  `max-md:-translate-x-full` / `max-md:data-[open=true]:translate-x-0`, ombre `shadow-drawer` ;
+  fond grisé et bouton « Cairn » dans `App.tsx`. L'outil de captures le repère par
+  `aside[aria-label="Tracés"]`.
+- **Profil SVG** : couleurs par utilitaires (`stroke-border`, `fill-muted-foreground`…),
   épaisseurs et pointillés en attributs (`strokeWidth`, `strokeDasharray`).
-- **Onglets** (`ui/tabs.tsx`) : variante `pill` (fond carte, contour, onglet actif vert),
-  utilisée par le panneau du tracé. Contenus gardés montés : `forceMount` +
-  `data-[state=inactive]:hidden`. **Alert** : variante `warning` ; `role="note"` pour une
-  simple information (sinon annoncée à chaque rendu). **Table** : sans survol si les lignes ne
-  sont pas cliquables (`hover:bg-transparent`).
-- **Chunk `radix`** (`vite.config.ts`) : primitives Radix et leurs dépendances (focus, blocage
-  du défilement) à part, comme Leaflet. Y ajouter toute nouvelle dépendance de ce type.

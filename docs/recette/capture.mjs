@@ -1,4 +1,4 @@
-// Captures de recette de l'interface (spec docs/specs/migration-ui.md, §6).
+// Captures de recette de l'interface (née de la migration UI, docs/specs/migration-ui.md).
 //
 // Tourne dans un conteneur JETABLE (rien n'est installé dans le projet), contre le build servi
 // par `npm run preview`. Voir docs/recette/README.md pour la commande complète.
